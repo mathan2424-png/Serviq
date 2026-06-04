@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { FileText, Check, CreditCard, Landmark, DollarSign, Receipt, ArrowRight, Sparkles } from 'lucide-react'
+import { FileText, Check, CreditCard, Landmark, IndianRupee, Receipt, ArrowRight, Sparkles } from 'lucide-react'
 
 export default function BillingSystem({ 
   orders, 
@@ -340,7 +340,7 @@ export default function BillingSystem({
                       cursor: 'pointer'
                     }}
                   >
-                    <DollarSign style={{ width: '16px', height: '16px' }} />
+                    <IndianRupee style={{ width: '16px', height: '16px' }} />
                     Cash Drawer
                   </button>
                 </div>

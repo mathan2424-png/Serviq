@@ -32,10 +32,10 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
   // Filtered list
   const filteredStaff = staffMembers.filter(s => {
     const matchesRole = selectedRole === 'All Staff' || s.role === selectedRole
-    const matchesSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          s.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (s.position && s.position.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                          (s.phone && s.phone.toLowerCase().includes(searchQuery.toLowerCase()))
+    const matchesSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (s.position && s.position.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (s.phone && s.phone.toLowerCase().includes(searchQuery.toLowerCase()))
     return matchesRole && matchesSearch
   })
 
@@ -57,7 +57,7 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
     setEditingStaffId('new')
     setFormState({
       name: '',
-      role: 'kitchen',
+      role: selectedRole === 'All Staff' ? 'kitchen' : selectedRole,
       email: '',
       position: '',
       phone: '',
@@ -109,15 +109,13 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
   return (
     <>
       <div className="menu-workspace-grid animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '24px 30px' }}>
-        
+
         {/* Header/Breadcrumbs when in Edit or View sub-pages */}
         {editingStaffId ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-            <button 
+            <button
               onClick={() => setEditingStaffId(null)}
               style={{
-                background: 'none',
-                border: 'none',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -136,17 +134,17 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
             <div>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>Staff Registry</span>
               <h2 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
-                {editingStaffId === 'new' ? 'Register New Staff Terminal' : 'Update Terminal Credentials'}
+                {editingStaffId === 'new'
+                  ? (selectedRole === 'kitchen' ? 'Register New KDS Terminal' : selectedRole === 'waiter' ? 'Register New Waiter App' : 'Register New Staff Terminal')
+                  : 'Update Terminal Credentials'}
               </h2>
             </div>
           </div>
         ) : viewingStaff ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-            <button 
+            <button
               onClick={() => setViewingStaff(null)}
               style={{
-                background: 'none',
-                border: 'none',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -235,14 +233,20 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
             <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div className="form-group" style={{ margin: 0 }}>
                 <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>Simulated Role Type</label>
-                <select 
-                  value={formState.role} 
-                  onChange={(e) => setFormState({ ...formState, role: e.target.value })}
-                  style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', color: 'var(--text-main)', borderRadius: '8px', outline: 'none' }}
-                >
-                  <option value="kitchen">Kitchen Display KDS Terminal 🍳</option>
-                  <option value="waiter">Waiter Operations App 🏃</option>
-                </select>
+                {selectedRole === 'All Staff' ? (
+                  <select
+                    value={formState.role}
+                    onChange={(e) => setFormState({ ...formState, role: e.target.value })}
+                    style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', color: 'var(--text-main)', borderRadius: '8px', outline: 'none' }}
+                  >
+                    <option value="kitchen">Kitchen Display KDS Terminal 🍳</option>
+                    <option value="waiter">Waiter Operations App 🏃</option>
+                  </select>
+                ) : (
+                  <div style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border-color)', background: '#f8fafc', color: 'var(--text-main)', borderRadius: '8px', fontWeight: '600', boxSizing: 'border-box' }}>
+                    {formState.role === 'kitchen' ? 'Kitchen Display KDS Terminal 🍳' : 'Waiter Operations App 🏃'}
+                  </div>
+                )}
               </div>
 
               {formState.role === 'waiter' ? (
@@ -250,21 +254,21 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                     <div className="form-group" style={{ margin: 0 }}>
                       <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>Waiter Full Name</label>
-                      <input 
-                        type="text" 
-                        value={formState.name} 
+                      <input
+                        type="text"
+                        value={formState.name}
                         onChange={(e) => setFormState({ ...formState, name: e.target.value })}
                         placeholder="e.g. Waiter Amit"
                         required
                         style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', color: 'var(--text-main)', borderRadius: '8px', outline: 'none' }}
                       />
                     </div>
-                    
+
                     <div className="form-group" style={{ margin: 0 }}>
                       <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>Simulated Email/Username</label>
-                      <input 
-                        type="email" 
-                        value={formState.email} 
+                      <input
+                        type="email"
+                        value={formState.email}
                         onChange={(e) => setFormState({ ...formState, email: e.target.value })}
                         placeholder="waiter1@serviq.com"
                         required
@@ -276,9 +280,9 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                     <div className="form-group" style={{ margin: 0 }}>
                       <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>Phone Number</label>
-                      <input 
-                        type="tel" 
-                        value={formState.phone} 
+                      <input
+                        type="tel"
+                        value={formState.phone}
                         onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
                         placeholder="e.g. 9876543211"
                         required
@@ -293,9 +297,9 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                     <div className="form-group" style={{ margin: 0 }}>
                       <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>Kitchen Staff Full Name</label>
-                      <input 
-                        type="text" 
-                        value={formState.name} 
+                      <input
+                        type="text"
+                        value={formState.name}
                         onChange={(e) => setFormState({ ...formState, name: e.target.value })}
                         placeholder="e.g. Chef Rajesh"
                         required
@@ -305,9 +309,9 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
 
                     <div className="form-group" style={{ margin: 0 }}>
                       <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>Chef Position / Title</label>
-                      <input 
-                        type="text" 
-                        value={formState.position} 
+                      <input
+                        type="text"
+                        value={formState.position}
                         onChange={(e) => setFormState({ ...formState, position: e.target.value })}
                         placeholder="e.g. Head Chef, Sous Chef"
                         required
@@ -315,13 +319,13 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
                       />
                     </div>
                   </div>
-                  
+
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                     <div className="form-group" style={{ margin: 0 }}>
                       <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>KDS Terminal Login (Email)</label>
-                      <input 
-                        type="email" 
-                        value={formState.email} 
+                      <input
+                        type="email"
+                        value={formState.email}
                         onChange={(e) => setFormState({ ...formState, email: e.target.value })}
                         placeholder="chef@serviq.com"
                         required
@@ -331,9 +335,9 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
 
                     <div className="form-group" style={{ margin: 0 }}>
                       <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>Phone Number</label>
-                      <input 
-                        type="tel" 
-                        value={formState.phone} 
+                      <input
+                        type="tel"
+                        value={formState.phone}
                         onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
                         placeholder="e.g. 9876543210"
                         required
@@ -346,7 +350,9 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
 
               <div className="menu-form-actions" style={{ display: 'flex', flexDirection: 'row', gap: '16px', marginTop: '24px', maxWidth: '400px' }}>
                 <button type="submit" className="btn-black" style={{ flex: 1, padding: '12px', fontWeight: '700', borderRadius: '8px', cursor: 'pointer' }}>
-                  {editingStaffId === 'new' ? 'Register Terminal' : 'Save Credentials'}
+                  {editingStaffId === 'new'
+                    ? (selectedRole === 'kitchen' ? 'Register KDS Terminal' : selectedRole === 'waiter' ? 'Register Waiter App' : 'Register Terminal')
+                    : 'Save Credentials'}
                 </button>
                 <button type="button" className="btn-outline" onClick={() => setEditingStaffId(null)} style={{ flex: 1, padding: '12px', fontWeight: '700', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
               </div>
@@ -411,7 +417,7 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
               {/* Profile Details Right */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <h3 style={{ fontSize: '1rem', fontWeight: '800', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px', margin: 0 }}>Terminal Connection Profile</h3>
-                
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
                     <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600' }}>Role Classification</span>
@@ -442,19 +448,8 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
                 </div>
 
                 <div style={{ marginTop: '20px', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                  <button 
-                    className="btn-outline" 
-                    style={{ padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}
-                    onClick={() => {
-                      const currentViewing = viewingStaff;
-                      setViewingStaff(null);
-                      handleEditClick(currentViewing);
-                    }}
-                  >
-                    Edit Credentials
-                  </button>
-                  <button 
-                    className="btn-black" 
+                  <button
+                    className="btn-black"
                     style={{ padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}
                     onClick={() => setViewingStaff(null)}
                   >
@@ -468,33 +463,33 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
           /* Normal List View (Search bar and table) */
           <div className="menu-items-section" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
-              <div className="menu-search-bar" style={{ 
-                flex: 1, 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '8px', 
-                background: 'var(--bg-card)', 
-                border: '1px solid var(--border-color)', 
-                borderRadius: '10px', 
-                padding: '8px 14px' 
+              <div className="menu-search-bar" style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '10px',
+                padding: '8px 14px'
               }}>
                 <Search style={{ width: '16px', height: '16px', color: 'var(--text-muted)' }} />
-                <input 
-                  type="text" 
-                  placeholder="Search staff registry by name or email..." 
+                <input
+                  type="text"
+                  placeholder="Search staff registry by name or email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   style={{ background: 'none', border: 'none', color: 'var(--text-main)', fontSize: '0.85rem', width: '100%', outline: 'none' }}
                 />
               </div>
-              
-              <button 
-                className="btn-black" 
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', borderRadius: '10px', padding: '10px 16px', cursor: 'pointer' }} 
+
+              <button
+                className="btn-black"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', borderRadius: '10px', padding: '10px 16px', cursor: 'pointer' }}
                 onClick={handleAddNewClick}
               >
                 <Plus style={{ width: '16px', height: '16px' }} />
-                Register Staff Terminal
+                {selectedRole === 'kitchen' ? 'Register KDS Terminal' : selectedRole === 'waiter' ? 'Register Waiter App' : 'Register Staff Terminal'}
               </button>
             </div>
 
@@ -563,8 +558,8 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
                         </td>
                         <td style={{ padding: '14px 18px' }}>
                           <label className="switch-label" style={{ margin: 0, gap: '6px' }}>
-                            <input 
-                              type="checkbox" 
+                            <input
+                              type="checkbox"
                               className="switch-input"
                               checked={staff.status === 'Active'}
                               onChange={() => handleToggleStatus(staff)}
@@ -576,7 +571,7 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
                           </label>
                         </td>
                         <td style={{ padding: '14px 18px', textAlign: 'right' }}>
-                          <button 
+                          <button
                             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: 'var(--text-muted)', transition: 'color 0.2s' }}
                             onClick={() => setViewingStaff(staff)}
                             title="View Staff Details"
@@ -585,7 +580,7 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
                           >
                             <Eye style={{ width: '16px', height: '16px' }} />
                           </button>
-                          <button 
+                          <button
                             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: 'var(--text-muted)', transition: 'color 0.2s' }}
                             onClick={() => handleEditClick(staff)}
                             title="Edit Staff Terminal"
@@ -594,7 +589,7 @@ export default function StaffMaster({ staffMembers, onUpdateStaffMember, onDelet
                           >
                             <Edit2 style={{ width: '16px', height: '16px' }} />
                           </button>
-                          <button 
+                          <button
                             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: '#ef4444', transition: 'opacity 0.2s' }}
                             onClick={() => onDeleteStaffMember(staff.id)}
                             title="Delete Terminal Registration"

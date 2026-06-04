@@ -1,27 +1,100 @@
-import React, { useState } from 'react'
-import { Lock, Mail, Eye, EyeOff, ChefHat, LayoutDashboard, QrCode, Navigation, UtensilsCrossed, FolderLock } from 'lucide-react'
+import React, { useState, useRef, useEffect } from 'react'
+import { LayoutDashboard, FolderLock, Phone, Eye, EyeOff, Utensils, ChefHat, Pizza, Coffee, Soup } from 'lucide-react'
 
 export default function Login({ onLogin, darkMode, onToggleDarkMode, showToast }) {
-  const [email, setEmail] = useState('admin@serviq.com')
-  const [password, setPassword] = useState('password123')
-  const [showPassword, setShowPassword] = useState(false)
+  const [selectedRole, setSelectedRole] = useState('superadmin') // Default to superadmin as shown in image
+  const [phone, setPhone] = useState('superadmin') // Pre-filled default matching tab
+  const [pin, setPin] = useState(['', '', '', ''])
+  const [showPin, setShowPin] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedRole, setSelectedRole] = useState('admin') // 'admin', 'superadmin', 'kitchen', 'waiter', 'customer'
 
-  // Quick credentials mapping for the simulator ease-of-use
-  const quickAccounts = [
-    { role: 'admin', email: 'admin@serviq.com', label: 'Admin Terminal', icon: <LayoutDashboard style={{ width: '16px', height: '16px' }} /> },
-    { role: 'superadmin', email: 'superadmin@serviq.com', label: 'Super Admin Deck', icon: <FolderLock style={{ width: '16px', height: '16px' }} /> }
-  ]
+  const pinRefs = [useRef(), useRef(), useRef(), useRef()]
 
-  const handleQuickSelect = (acc) => {
-    setSelectedRole(acc.role)
-    setEmail(acc.email)
-    setPassword('password123')
+  // Sync phone default when switching tabs
+  useEffect(() => {
+    if (selectedRole === 'admin') {
+      setPhone('admin')
+    } else {
+      setPhone('superadmin')
+    }
+    // Focus the first PIN input when changing roles
+    if (pinRefs[0].current) {
+      pinRefs[0].current.focus()
+    }
+    setPin(['', '', '', ''])
+  }, [selectedRole])
+
+  const handlePinChange = (index, value) => {
+    // Only allow digits
+    const cleanValue = value.replace(/[^0-9]/g, '')
+    if (!cleanValue) {
+      const newPin = [...pin]
+      newPin[index] = ''
+      setPin(newPin)
+      return
+    }
+
+    const digit = cleanValue[cleanValue.length - 1] // Keep only the last character
+    const newPin = [...pin]
+    newPin[index] = digit
+    setPin(newPin)
+
+    // Auto-focus next input if not the last one
+    if (index < 3 && digit) {
+      pinRefs[index + 1].current.focus()
+    }
+  }
+
+  const handlePinKeyDown = (index, e) => {
+    // Handle backspace back-navigation
+    if (e.key === 'Backspace') {
+      if (!pin[index] && index > 0) {
+        const newPin = [...pin]
+        newPin[index - 1] = ''
+        setPin(newPin)
+        pinRefs[index - 1].current.focus()
+      } else {
+        const newPin = [...pin]
+        newPin[index] = ''
+        setPin(newPin)
+      }
+    }
+  }
+
+  const handlePinPaste = (e) => {
+    e.preventDefault()
+    const pastedData = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 4)
+    if (pastedData) {
+      const newPin = [...pin]
+      for (let i = 0; i < 4; i++) {
+        newPin[i] = pastedData[i] || ''
+      }
+      setPin(newPin)
+      // Focus the last filled or first empty
+      const focusIndex = Math.min(pastedData.length, 3)
+      if (pinRefs[focusIndex]?.current) {
+        pinRefs[focusIndex].current.focus()
+      }
+    }
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
+
+    const combinedPin = pin.join('')
+    if (combinedPin.length < 4) {
+      showToast('error', 'Please enter a 4-digit PIN')
+      return
+    }
+
+    if (combinedPin !== '1234') {
+      showToast('error', 'Invalid security PIN. (Use simulation PIN: 1234)')
+      // Reset PIN inputs and focus first
+      setPin(['', '', '', ''])
+      if (pinRefs[0].current) pinRefs[0].current.focus()
+      return
+    }
+
     setIsLoading(true)
 
     // Simulate authenticating for 900ms for a premium micro-interaction experience
@@ -32,288 +105,320 @@ export default function Login({ onLogin, darkMode, onToggleDarkMode, showToast }
   }
 
   return (
-    <div style={{
-      display: 'flex',
-      minHeight: '100vh',
-      background: 'var(--bg-app)',
-      transition: 'all var(--transition-normal)',
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
-      
-      {/* Decorative background visual shapes */}
-      <div style={{
-        position: 'absolute',
-        top: '-15%',
-        right: '-10%',
-        width: '50vw',
-        height: '50vw',
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, var(--primary-light) 0%, transparent 70%)',
-        opacity: 0.6,
-        zIndex: 1
-      }}></div>
-      <div style={{
-        position: 'absolute',
-        bottom: '-20%',
-        left: '-10%',
-        width: '60vw',
-        height: '60vw',
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, var(--primary-light) 0%, transparent 60%)',
-        opacity: 0.4,
-        zIndex: 1
-      }}></div>
+    <div className="login-container">
+      {/* Dynamic inline stylesheet to handle spinner and focus styling */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .login-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          font-family: var(--font-body);
+          position: relative;
+          overflow: hidden;
+          padding: 20px;
+        }
 
-      {/* Main container splits into decorative splash left, form right */}
-      <div style={{
-        display: 'flex',
-        flex: 1,
-        zIndex: 2,
-        maxWidth: '1200px',
-        margin: 'auto',
-        padding: '20px',
-        width: '100%',
-        height: '90vh',
-        minHeight: '600px'
-      }}>
+        .login-container::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.35)), url('/log%20in%20.png') no-repeat center center;
+          background-size: cover;
+          filter: blur(4px);
+          transform: scale(1.03); /* Prevent white edges from blur */
+          opacity: 0.95;
+          z-index: 1;
+        }
         
-        {/* Decorative Left Splash (Hidden on mobile viewports) */}
-        <div style={{
-          flex: 1.2,
-          background: 'linear-gradient(135deg, #1e1b4b 0%, #0f0728 100%)',
-          borderRadius: '24px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          padding: '40px',
-          color: '#fff',
-          boxShadow: 'var(--shadow-premium)',
-          position: 'relative',
-          overflow: 'hidden',
-          marginRight: '24px'
-        }} className="login-splash">
-          
-          {/* Logo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{
-              background: 'var(--primary)',
-              color: '#fff',
-              width: '38px',
-              height: '38px',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.25rem'
-            }}>
-              🍽️
-            </div>
-            <h3 style={{ fontSize: '1.4rem', fontWeight: '800', margin: 0, color: '#fff' }}>QRMenu</h3>
-          </div>
+        .bg-icon {
+          display: none;
+        }
+        
+        .login-card {
+          width: 100%;
+          max-width: 410px;
+          background: #ffffff;
+          border-radius: 24px;
+          padding: 34px 28px;
+          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+          position: relative;
+          z-index: 2;
+          animation: card-appear 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        
+        @keyframes card-appear {
+          from {
+            opacity: 0;
+            transform: translateY(12px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        
+        .pin-input-field:focus {
+          border-color: #d27242 !important;
+          box-shadow: 0 0 0 2px rgba(210, 114, 66, 0.15) !important;
+        }
+        
+        .phone-input-field:focus {
+          box-shadow: 0 0 0 2.5px rgba(224, 231, 255, 0.8) !important;
+        }
+      ` }} />
 
-          {/* Core content */}
-          <div>
-            <h1 style={{ fontSize: '2.5rem', fontWeight: '800', lineHeight: '1.25', color: '#fff', marginBottom: '16px' }}>
-              The complete restaurant <br/>
-              <span style={{ color: 'var(--primary)' }}>ordering lifecycle</span> in one click.
-            </h1>
-            <p style={{ opacity: 0.8, fontSize: '0.95rem', maxWidth: '420px', lineHeight: '1.6' }}>
-              Simulate customer QR scanning, mobile app ordering, KDS ticket cooking, waiter dispatches, and premium billing settlements in real-time.
-            </p>
-          </div>
+      {/* Faint Background Food & Dining Icons */}
+      <Utensils className="bg-icon" style={{ top: '15%', left: '8%', transform: 'rotate(-25deg)', width: '64px', height: '64px' }} />
+      <Soup className="bg-icon" style={{ top: '48%', left: '6%', transform: 'rotate(15deg)', width: '56px', height: '56px' }} />
+      <Coffee className="bg-icon" style={{ bottom: '15%', left: '12%', transform: 'rotate(-10deg)', width: '48px', height: '48px' }} />
+      <ChefHat className="bg-icon" style={{ top: '12%', right: '10%', transform: 'rotate(20deg)', width: '60px', height: '60px' }} />
+      <Pizza className="bg-icon" style={{ top: '50%', right: '7%', transform: 'rotate(-15deg)', width: '52px', height: '52px' }} />
+      <Soup className="bg-icon" style={{ bottom: '18%', right: '11%', transform: 'rotate(10deg)', width: '58px', height: '58px' }} />
 
-          {/* Footer info */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: 0.7, fontSize: '0.8rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
-            <span>Powered by Serviq Engineering</span>
-            <span>Version 1.2.0</span>
-          </div>
-
-          {/* Floating graphic overlay */}
+      {/* Main card */}
+      <div className="login-card">
+        {/* Brand/Logo Section */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
           <div style={{
-            position: 'absolute',
-            bottom: '-40px',
-            right: '-40px',
-            fontSize: '10rem',
-            opacity: 0.04,
-            transform: 'rotate(-25deg)',
-            pointerEvents: 'none'
+            background: '#d37244',
+            color: '#fff',
+            width: '36px',
+            height: '36px',
+            borderRadius: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 3px 8px rgba(211, 114, 68, 0.25)'
           }}>
-            🍽️
+            <Utensils style={{ width: '18px', height: '18px', color: '#fff' }} />
           </div>
+          <span style={{ fontSize: '1.5rem', fontWeight: '800', color: '#d37244', letterSpacing: '-0.5px' }}>Serviq</span>
         </div>
 
-        {/* Right Form Card */}
-        <div className="glass-card" style={{
-          flex: 1,
-          background: 'var(--bg-card)',
-          borderRadius: '24px',
-          border: '1px solid var(--border-color)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          padding: '48px',
-          boxShadow: 'var(--shadow-premium)',
-          backdropFilter: 'blur(20px)'
-        }}>
-          
-          <div>
-            <h2 style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>Terminal Entrance</h2>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '6px' }}>Select an operational account or sign in with credentials.</p>
-          </div>
+        {/* Title */}
+        <div style={{ textAlign: 'center', marginTop: '-4px' }}>
+          <h2 style={{ fontSize: '1.45rem', fontWeight: '800', color: '#1e293b', margin: 0 }}>Sign In</h2>
+          <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '6px', lineHeight: '1.3' }}>
+            Enter your credentials to access the dashboard
+          </p>
+        </div>
 
-          {/* Quick simulation accounts tab selector */}
-          <div style={{ margin: '24px 0' }}>
-            <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '8px', letterSpacing: '0.5px' }}>Quick Roles Simulation</span>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-              {quickAccounts.map(acc => (
-                <button
-                  type="button"
-                  key={acc.role}
-                  onClick={() => handleQuickSelect(acc)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '10px 12px',
-                    borderRadius: '10px',
-                    border: selectedRole === acc.role ? '2px solid var(--primary)' : '1px solid var(--border-color)',
-                    background: selectedRole === acc.role ? 'var(--primary-light)' : 'var(--bg-app)',
-                    color: selectedRole === acc.role ? 'var(--primary)' : 'var(--text-main)',
-                    fontSize: '0.75rem',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    textAlign: 'left'
-                  }}
-                >
-                  {acc.icon}
-                  <span>{acc.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            
-            {/* Email input */}
-            <div className="form-group" style={{ margin: 0 }}>
-              <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '6px', display: 'block' }}>Operational Email</label>
-              <div style={{ position: 'relative' }}>
-                <Mail style={{ width: '16px', height: '16px', position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                <input 
-                  type="email" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@restaurant.com"
-                  required
-                  style={{
-                    paddingLeft: '38px',
-                    width: '100%',
-                    paddingTop: '10px',
-                    paddingBottom: '10px',
-                    borderRadius: '10px',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--bg-app)',
-                    color: 'var(--text-main)',
-                    fontSize: '0.85rem'
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Password input */}
-            <div className="form-group" style={{ margin: 0 }}>
-              <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '6px', display: 'block' }}>Security Password</label>
-              <div style={{ position: 'relative' }}>
-                <Lock style={{ width: '16px', height: '16px', position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                <input 
-                  type={showPassword ? 'text' : 'password'} 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  style={{
-                    paddingLeft: '38px',
-                    paddingRight: '38px',
-                    width: '100%',
-                    paddingTop: '10px',
-                    paddingBottom: '10px',
-                    borderRadius: '10px',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--bg-app)',
-                    color: 'var(--text-main)',
-                    fontSize: '0.85rem'
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: '12px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--text-muted)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center'
-                  }}
-                >
-                  {showPassword ? <EyeOff style={{ width: '16px', height: '16px' }} /> : <Eye style={{ width: '16px', height: '16px' }} />}
-                </button>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginTop: '4px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                <input type="checkbox" defaultChecked style={{ accentColor: '#000' }} />
-                <span>Remember this terminal</span>
-              </label>
-              <a href="#" onClick={(e) => { e.preventDefault(); alert('In SimStudio, passwords are simulated as password123!') }} style={{ color: 'var(--primary)', fontWeight: '700', textDecoration: 'none' }}>Forgot?</a>
-            </div>
-
-            {/* Submit button */}
-            <button 
-              type="submit" 
-              className="btn-black" 
-              style={{ 
-                marginTop: '10px', 
-                padding: '12px', 
-                fontSize: '0.9rem', 
-                fontWeight: '700', 
-                borderRadius: '10px',
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Tab Selector */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            background: '#f1f5f9',
+            padding: '3px',
+            borderRadius: '11px'
+          }}>
+            <button
+              type="button"
+              onClick={() => setSelectedRole('admin')}
+              style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px'
+                gap: '6px',
+                padding: '9px 0',
+                borderRadius: '8px',
+                border: 'none',
+                background: selectedRole === 'admin' ? '#ffffff' : 'transparent',
+                color: selectedRole === 'admin' ? '#d37244' : '#64748b',
+                fontSize: '0.82rem',
+                fontWeight: '750',
+                cursor: 'pointer',
+                boxShadow: selectedRole === 'admin' ? '0 1.5px 4px rgba(0,0,0,0.05)' : 'none',
+                transition: 'all 0.25s'
               }}
-              disabled={isLoading}
             >
-              {isLoading ? (
-                <>
-                  <div style={{
-                    width: '18px',
-                    height: '18px',
-                    border: '2px solid rgba(255,255,255,0.3)',
-                    borderTopColor: '#fff',
-                    borderRadius: '50%',
-                    animation: 'spin 0.6s linear infinite'
-                  }}></div>
-                  <span>Securing Simulation...</span>
-                </>
-              ) : (
-                <span>Launch Operational Deck</span>
-              )}
+              <LayoutDashboard style={{ width: '14px', height: '14px' }} />
+              <span>Admin</span>
             </button>
-          </form>
+            <button
+              type="button"
+              onClick={() => setSelectedRole('superadmin')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                padding: '9px 0',
+                borderRadius: '8px',
+                border: 'none',
+                background: selectedRole === 'superadmin' ? '#ffffff' : 'transparent',
+                color: selectedRole === 'superadmin' ? '#d37244' : '#64748b',
+                fontSize: '0.82rem',
+                fontWeight: '750',
+                cursor: 'pointer',
+                boxShadow: selectedRole === 'superadmin' ? '0 1.5px 4px rgba(0,0,0,0.05)' : 'none',
+                transition: 'all 0.25s'
+              }}
+            >
+              <FolderLock style={{ width: '14px', height: '14px' }} />
+              <span>Super Admin</span>
+            </button>
+          </div>
 
+          {/* Phone Number Field */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '0.82rem', fontWeight: '700', color: '#1e293b' }}>Phone Number</label>
+            <div style={{ position: 'relative' }}>
+              <Phone style={{ width: '16px', height: '16px', position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#db2777' }} />
+              <input
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="phone-input-field"
+                required
+                style={{
+                  width: '100%',
+                  padding: '10px 12px 10px 38px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: '#eef2ff',
+                  color: '#1e293b',
+                  fontSize: '0.92rem',
+                  fontWeight: '600',
+                  outline: 'none',
+                  transition: 'box-shadow 0.2s'
+                }}
+              />
+            </div>
+          </div>
+
+          {/* PIN Input Grid */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '0.82rem', fontWeight: '700', color: '#1e293b' }}>PIN</label>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {/* Grid & Forgot PIN link grouped together */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }} onPaste={handlePinPaste}>
+                  {pin.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      ref={pinRefs[idx]}
+                      type={showPin ? 'text' : 'password'}
+                      value={digit}
+                      onChange={(e) => handlePinChange(idx, e.target.value)}
+                      onKeyDown={(e) => handlePinKeyDown(idx, e)}
+                      maxLength={1}
+                      className="pin-input-field"
+                      style={{
+                        width: '100%',
+                        height: '46px',
+                        borderRadius: '10px',
+                        border: '1.5px solid #d27242',
+                        background: '#ffffff',
+                        color: '#1e293b',
+                        fontSize: '1.3rem',
+                        fontWeight: '700',
+                        textAlign: 'center',
+                        outline: 'none',
+                        transition: 'all 0.2s'
+                      }}
+                    />
+                  ))}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2px' }}>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      showToast('info', 'For simulation mode, the default PIN is 1234')
+                    }}
+                    style={{
+                      color: '#d37244',
+                      fontWeight: '700',
+                      textDecoration: 'none',
+                      fontSize: '0.78rem'
+                    }}
+                  >
+                    Forgot PIN?
+                  </a>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowPin(!showPin)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#64748b',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '6px',
+                  alignSelf: 'flex-start',
+                  marginTop: '8px'
+                }}
+              >
+                {showPin ? <EyeOff style={{ width: '18px', height: '18px' }} /> : <Eye style={{ width: '18px', height: '18px' }} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            style={{
+              width: '100%',
+              background: '#c2410c',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '10px',
+              padding: '12px',
+              fontSize: '0.92rem',
+              fontWeight: '700',
+              cursor: 'pointer',
+              boxShadow: '0 3px 10px rgba(194, 65, 12, 0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'all 0.2s',
+              marginTop: '4px'
+            }}
+          >
+            {isLoading ? (
+              <>
+                <div style={{
+                  width: '16px',
+                  height: '16px',
+                  border: '2px solid rgba(255,255,255,0.3)',
+                  borderTopColor: '#fff',
+                  borderRadius: '50%',
+                  animation: 'spin 0.6s linear infinite'
+                }}></div>
+                <span>Signing In...</span>
+              </>
+            ) : (
+              <span>Sign In</span>
+            )}
+          </button>
+        </form>
+
+        {/* Footer info inside card */}
+        <div style={{ textAlign: 'center', fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
+          Simulation mode · <span style={{ fontWeight: '600' }}>PIN: 1234</span> · Powered by Serviq
         </div>
-
       </div>
-      
     </div>
   )
 }

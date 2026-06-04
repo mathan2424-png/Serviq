@@ -51,7 +51,7 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
           }
         }
       }
-      
+
       // Waiter Filter
       if (waiterFilter !== 'All') {
         if (!order.waiter || order.waiter.toLowerCase() !== waiterFilter.toLowerCase()) {
@@ -684,11 +684,9 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
       {/* Header/Breadcrumbs when in Edit or View sub-pages */}
       {editingOrder ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-          <button 
+          <button
             onClick={() => setEditingOrder(null)}
             style={{
-              background: 'none',
-              border: 'none',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -713,11 +711,9 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
         </div>
       ) : viewingOrder ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-          <button 
+          <button
             onClick={() => setViewingOrder(null)}
             style={{
-              background: 'none',
-              border: 'none',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -773,7 +769,7 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
                 >
                   <option value="">Unassigned</option>
                   <option value="Ravi M.">Ravi M.</option>
-                  <option value="Priya S.">Priya S.</option>
+                  <option value="Rahul S.">Rahul S.</option>
                   <option value="Arjun K.">Arjun K.</option>
                   <option value="Self Order">Self Order</option>
                 </select>
@@ -918,7 +914,7 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
                   <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--text-muted)' }}>{viewingOrder.id}</span>
                 </div>
               </div>
-              
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
                   <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600' }}>Table</span>
@@ -985,19 +981,8 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
               )}
 
               <div style={{ marginTop: 'auto', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                <button 
-                  className="btn-outline" 
-                  style={{ padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}
-                  onClick={() => {
-                    const currOrder = viewingOrder;
-                    setViewingOrder(null);
-                    setEditingOrder(JSON.parse(JSON.stringify(currOrder)));
-                  }}
-                >
-                  Edit Order
-                </button>
-                <button 
-                  className="btn-black" 
+                <button
+                  className="btn-black"
                   style={{ padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}
                   onClick={() => setViewingOrder(null)}
                 >
@@ -1082,7 +1067,7 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
                       const isDeliveredStatus = order.status.toLowerCase() === 'delivered'
                       const isReadyStatus = order.status.toLowerCase() === 'ready'
                       const isPreparingStatus = order.status.toLowerCase() === 'preparing'
-                      
+
                       let statusClass = 'status-pending'
                       if (isPreparingStatus) statusClass = 'status-preparing'
                       else if (isReadyStatus) statusClass = 'status-ready'
@@ -1138,7 +1123,7 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
                               onClick={() => setDeletingOrderId(order.id)}
                               title="Delete Order"
                             >
-                              <Trash2 style={{ width: '16px', height: '16px',color:'red' }} />
+                              <Trash2 style={{ width: '16px', height: '16px', color: 'red' }} />
                             </button>
                           </td>
                         </tr>

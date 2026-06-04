@@ -64,8 +64,8 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
   // Filtered menu items list
   const filteredItems = menuItems.filter(item => {
     const matchesCategory = selectedCategory === 'All Items' || item.category === selectedCategory
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          item.description.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesCategory && matchesSearch
   })
 
@@ -205,11 +205,9 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
       {/* Header/Breadcrumbs when in Add Category, Edit or View sub-pages */}
       {addingCategory ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', padding: '24px 30px 0' }}>
-          <button 
+          <button
             onClick={() => setAddingCategory(false)}
             style={{
-              background: 'none',
-              border: 'none',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -234,11 +232,9 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
         </div>
       ) : editingItem ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', padding: '24px 30px 0' }}>
-          <button 
+          <button
             onClick={() => setEditingItem(null)}
             style={{
-              background: 'none',
-              border: 'none',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -263,11 +259,9 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
         </div>
       ) : viewingItem ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', padding: '24px 30px 0' }}>
-          <button 
+          <button
             onClick={() => setViewingItem(null)}
             style={{
-              background: 'none',
-              border: 'none',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -308,19 +302,19 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div className="form-group">
                   <label>Category Name</label>
-                  <input 
-                    type="text" 
-                    value={categoryFormState.name} 
+                  <input
+                    type="text"
+                    value={categoryFormState.name}
                     onChange={(e) => setCategoryFormState({ ...categoryFormState, name: e.target.value })}
                     placeholder="e.g. Desserts"
                     required
                   />
                 </div>
-                
+
                 <div className="form-group">
                   <label>Status</label>
-                  <select 
-                    value={categoryFormState.status} 
+                  <select
+                    value={categoryFormState.status}
                     onChange={(e) => setCategoryFormState({ ...categoryFormState, status: e.target.value })}
                   >
                     <option value="Active">Active</option>
@@ -329,39 +323,18 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                <div className="form-group">
-                  <label>Created Date</label>
-                  <input 
-                    type="date" 
-                    value={categoryFormState.createdDate} 
-                    onChange={(e) => setCategoryFormState({ ...categoryFormState, createdDate: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Updated Date</label>
-                  <input 
-                    type="date" 
-                    value={categoryFormState.updatedDate} 
-                    onChange={(e) => setCategoryFormState({ ...categoryFormState, updatedDate: e.target.value })}
-                    required
-                  />
-                </div>
-              </div>
 
               <div className="form-group">
                 <label style={{ display: 'block', marginBottom: '8px' }}>Category Image</label>
-                
+
                 <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                   {/* Photo Preview Box */}
-                  <div style={{ 
-                    width: '64px', 
-                    height: '64px', 
-                    borderRadius: '8px', 
-                    border: '1px solid var(--border-color)', 
-                    background: '#f1f5f9', 
+                  <div style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-color)',
+                    background: '#f1f5f9',
                     overflow: 'hidden',
                     display: 'flex',
                     alignItems: 'center',
@@ -371,10 +344,10 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                     {categoryFormState.image ? (
                       <img src={categoryFormState.image} alt="Category Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-light)', fontWeight: '800', textAlign: 'center', lineHeight: '1.2' }}>No<br/>Photo</span>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-light)', fontWeight: '800', textAlign: 'center', lineHeight: '1.2' }}>No<br />Photo</span>
                     )}
                   </div>
-                  
+
                   {/* Upload Controls */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <label className="btn-outline" style={{
@@ -391,9 +364,9 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                       border: '1px solid var(--border-color)'
                     }}>
                       📁 Upload Local Photo
-                      <input 
-                        type="file" 
-                        accept="image/*" 
+                      <input
+                        type="file"
+                        accept="image/*"
                         onChange={(e) => {
                           const file = e.target.files[0]
                           if (file) {
@@ -404,14 +377,14 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                             }
                             reader.readAsDataURL(file)
                           }
-                        }} 
-                        style={{ display: 'none' }} 
+                        }}
+                        style={{ display: 'none' }}
                       />
                     </label>
-                    
+
                     {categoryFormState.image && (
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => setCategoryFormState({ ...categoryFormState, image: '' })}
                         style={{
                           background: 'none',
@@ -428,7 +401,7 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                     )}
                   </div>
                 </div>
-                
+
                 {/* Clickable Quick Presets Row */}
                 <div style={{ marginTop: '16px' }}>
                   <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', display: 'block', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Or Tap a Preset Food Photo</span>
@@ -438,7 +411,7 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                       { label: 'Dosa', url: 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=500&auto=format&fit=crop&q=60' },
                       { label: 'Dessert', url: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500&auto=format&fit=crop&q=60' },
                       { label: 'Chai/Soda', url: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&auto=format&fit=crop&q=60' },
-                      { label: 'Bread', url: 'https://images.unsplash.com/photo-1573145959956-e9fa7afc8828?w=500&auto=format&fit=crop&q=60' }
+                      { label: 'Bread', url: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=60' }
                     ].map((preset, index) => (
                       <button
                         key={index}
@@ -457,13 +430,14 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                           gap: '6px',
                           whiteSpace: 'nowrap',
                           transition: 'all 0.2s',
-                          boxShadow: categoryFormState.image === preset.url ? '0 2px 6px rgba(234, 88, 12, 0.15)' : 'none'
+                          boxShadow: categoryFormState.image === preset.url ? '0 2px 6px rgba(234, 88, 12, 0.15)' : 'none',
+                          flexShrink: 0
                         }}
                       >
-                        <img 
-                          src={preset.url} 
-                          alt={preset.label} 
-                          style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' }} 
+                        <img
+                          src={preset.url}
+                          alt={preset.label}
+                          style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' }}
                         />
                         <span style={{ color: categoryFormState.image === preset.url ? 'var(--primary)' : 'var(--text-main)' }}>{preset.label}</span>
                       </button>
@@ -493,19 +467,19 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div className="form-group">
                   <label>Item Name</label>
-                  <input 
-                    type="text" 
-                    value={formState.name} 
+                  <input
+                    type="text"
+                    value={formState.name}
                     onChange={(e) => setFormState({ ...formState, name: e.target.value })}
                     placeholder="e.g. Garlic Bread"
                     required
                   />
                 </div>
-                
+
                 <div className="form-group">
                   <label>Category</label>
-                  <select 
-                    value={formState.category} 
+                  <select
+                    value={formState.category}
                     onChange={(e) => setFormState({ ...formState, category: e.target.value })}
                   >
                     {categories.filter(cat => cat !== 'All Items').map(cat => (
@@ -518,10 +492,10 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div className="form-group">
                   <label>Price (₹)</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     min="0"
-                    value={formState.price} 
+                    value={formState.price}
                     onChange={(e) => setFormState({ ...formState, price: e.target.value })}
                     placeholder="320"
                     required
@@ -530,8 +504,8 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
 
                 <div className="form-group">
                   <label className="switch-label" style={{ marginTop: '26px' }}>
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       className="switch-input"
                       checked={formState.available}
                       onChange={(e) => setFormState({ ...formState, available: e.target.checked })}
@@ -546,8 +520,8 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
 
               <div className="form-group">
                 <label>Description</label>
-                <textarea 
-                  value={formState.description} 
+                <textarea
+                  value={formState.description}
                   onChange={(e) => setFormState({ ...formState, description: e.target.value })}
                   placeholder="Write description here..."
                   rows="3"
@@ -556,15 +530,15 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
 
               <div className="form-group">
                 <label style={{ display: 'block', marginBottom: '8px' }}>Dish Image</label>
-                
+
                 <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                   {/* Photo Preview Box */}
-                  <div style={{ 
-                    width: '64px', 
-                    height: '64px', 
-                    borderRadius: '8px', 
-                    border: '1px solid var(--border-color)', 
-                    background: '#f1f5f9', 
+                  <div style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-color)',
+                    background: '#f1f5f9',
                     overflow: 'hidden',
                     display: 'flex',
                     alignItems: 'center',
@@ -574,10 +548,10 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                     {formState.image ? (
                       <img src={formState.image} alt="Dish Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-light)', fontWeight: '800', textAlign: 'center', lineHeight: '1.2' }}>No<br/>Photo</span>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-light)', fontWeight: '800', textAlign: 'center', lineHeight: '1.2' }}>No<br />Photo</span>
                     )}
                   </div>
-                  
+
                   {/* Upload Controls */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <label className="btn-outline" style={{
@@ -594,9 +568,9 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                       border: '1px solid var(--border-color)'
                     }}>
                       📁 Upload Local Photo
-                      <input 
-                        type="file" 
-                        accept="image/*" 
+                      <input
+                        type="file"
+                        accept="image/*"
                         onChange={(e) => {
                           const file = e.target.files[0]
                           if (file) {
@@ -607,14 +581,14 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                             }
                             reader.readAsDataURL(file)
                           }
-                        }} 
-                        style={{ display: 'none' }} 
+                        }}
+                        style={{ display: 'none' }}
                       />
                     </label>
-                    
+
                     {formState.image && (
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => setFormState({ ...formState, image: '' })}
                         style={{
                           background: 'none',
@@ -631,7 +605,7 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                     )}
                   </div>
                 </div>
-                
+
                 {/* Clickable Quick Presets Row */}
                 <div style={{ marginTop: '16px' }}>
                   <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', display: 'block', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Or Tap a Preset Food Photo</span>
@@ -641,7 +615,7 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                       { label: 'Dosa', url: 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=500&auto=format&fit=crop&q=60' },
                       { label: 'Dessert', url: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500&auto=format&fit=crop&q=60' },
                       { label: 'Chai/Soda', url: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&auto=format&fit=crop&q=60' },
-                      { label: 'Bread', url: 'https://images.unsplash.com/photo-1573145959956-e9fa7afc8828?w=500&auto=format&fit=crop&q=60' }
+                      { label: 'Bread', url: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=60' }
                     ].map((preset, index) => (
                       <button
                         key={index}
@@ -660,13 +634,14 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                           gap: '6px',
                           whiteSpace: 'nowrap',
                           transition: 'all 0.2s',
-                          boxShadow: formState.image === preset.url ? '0 2px 6px rgba(234, 88, 12, 0.15)' : 'none'
+                          boxShadow: formState.image === preset.url ? '0 2px 6px rgba(234, 88, 12, 0.15)' : 'none',
+                          flexShrink: 0
                         }}
                       >
-                        <img 
-                          src={preset.url} 
-                          alt={preset.label} 
-                          style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' }} 
+                        <img
+                          src={preset.url}
+                          alt={preset.label}
+                          style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' }}
                         />
                         <span style={{ color: formState.image === preset.url ? 'var(--primary)' : 'var(--text-main)' }}>{preset.label}</span>
                       </button>
@@ -704,7 +679,7 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                     {viewingItem.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                   </div>
                 )}
-                
+
                 <div style={{
                   background: 'var(--bg-app)',
                   padding: '20px',
@@ -724,9 +699,9 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600' }}>Status</span>
-                    <span style={{ 
-                      fontSize: '0.75rem', 
-                      fontWeight: '800', 
+                    <span style={{
+                      fontSize: '0.75rem',
+                      fontWeight: '800',
                       color: viewingItem.available ? '#10b981' : '#ef4444',
                       background: viewingItem.available ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
                       padding: '2px 8px',
@@ -744,7 +719,7 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                   <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', margin: '0 0 16px 0' }}>
                     {viewingItem.name}
                   </h3>
-                  
+
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <span style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Description</span>
                     <p style={{ fontSize: '0.95rem', color: 'var(--text-main)', lineHeight: '1.6', margin: 0, background: 'var(--bg-app)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
@@ -754,19 +729,8 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                 </div>
 
                 <div style={{ marginTop: 'auto', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                  <button 
-                    className="btn-outline" 
-                    style={{ padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}
-                    onClick={() => {
-                      const currItem = viewingItem;
-                      setViewingItem(null);
-                      handleEditClick(currItem);
-                    }}
-                  >
-                    Edit Item
-                  </button>
-                  <button 
-                    className="btn-black" 
+                  <button
+                    className="btn-black"
                     style={{ padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}
                     onClick={() => setViewingItem(null)}
                   >
@@ -797,8 +761,8 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                 ))}
               </div>
 
-              <button 
-                className="btn-outline" 
+              <button
+                className="btn-outline"
                 style={{ fontSize: '0.8rem', padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', height: '42px', borderRadius: '10px' }}
                 onClick={() => {
                   setAddingCategory(true)
@@ -821,9 +785,9 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
                 <div className="menu-search-bar" style={{ flex: 1 }}>
                   <Search style={{ width: '16px', height: '16px', color: 'var(--text-muted)' }} />
-                  <input 
-                    type="text" 
-                    placeholder="Search menu items..." 
+                  <input
+                    type="text"
+                    placeholder="Search menu items..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -877,8 +841,8 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                           <td style={{ fontWeight: '600', color: 'var(--text-main)', fontSize: '0.9rem' }}>₹{item.price}</td>
                           <td>
                             <label className="switch-label" style={{ margin: 0, gap: '6px' }}>
-                              <input 
-                                type="checkbox" 
+                              <input
+                                type="checkbox"
                                 className="switch-input"
                                 checked={item.available}
                                 onChange={() => handleToggleAvailable(item)}
@@ -886,11 +850,10 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                               <div className="switch-track" style={{ width: '28px', height: '16px' }}>
                                 <div className="switch-thumb" style={{ width: '12px', height: '12px' }}></div>
                               </div>
-                              <span style={{ fontSize: '0.75rem', minWidth: '40px' }}>{item.available ? 'Avail' : 'Out'}</span>
                             </label>
                           </td>
                           <td style={{ textAlign: 'right' }}>
-                            <button 
+                            <button
                               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: 'var(--text-muted)', transition: 'color 0.2s' }}
                               onClick={() => setViewingItem(item)}
                               title="View Item Details"
@@ -899,7 +862,7 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                             >
                               <Eye style={{ width: '16px', height: '16px' }} />
                             </button>
-                            <button 
+                            <button
                               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: 'var(--text-muted)', transition: 'color 0.2s' }}
                               onClick={() => handleEditClick(item)}
                               title="Edit Item"
@@ -908,7 +871,7 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                             >
                               <Edit2 style={{ width: '16px', height: '16px' }} />
                             </button>
-                            <button 
+                            <button
                               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: '#ef4444', transition: 'opacity 0.2s' }}
                               onClick={() => setDeletingItem(item)}
                               title="Delete Item"
