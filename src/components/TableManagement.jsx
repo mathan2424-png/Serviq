@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { Plus, Edit2, Trash2, Eye, QrCode, ArrowLeft, Printer, List, Map } from 'lucide-react'
 
-export default function TableManagement({ 
-  tables, 
-  orders, 
-  onAddTable, 
-  onUpdateTable, 
-  onDeleteTable, 
-  showToast 
+export default function TableManagement({
+  tables,
+  orders,
+  onAddTable,
+  onUpdateTable,
+  onDeleteTable,
+  showToast
 }) {
   const [activeTab, setActiveTab] = useState('list') // 'list' or 'map'
   const [editingTableId, setEditingTableId] = useState(null) // 'new' or table.id
@@ -25,9 +25,9 @@ export default function TableManagement({
 
   // Find active order & waiter for a table
   const getActiveOrderInfo = (tableId) => {
-    const activeOrder = orders.find(o => 
-      (o.table === tableId || o.table === `Table ${tableId.replace('T-', '')}`) && 
-      o.status !== 'Billed' && 
+    const activeOrder = orders.find(o =>
+      (o.table === tableId || o.table === `Table ${tableId.replace('T-', '')}`) &&
+      o.status !== 'Billed' &&
       o.status !== 'Done' &&
       o.status !== 'Paid'
     )
@@ -134,7 +134,8 @@ export default function TableManagement({
   return (
     <>
       {/* Styles Block */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .tables-sub-header {
           display: flex;
           justify-content: space-between;
@@ -349,7 +350,7 @@ export default function TableManagement({
       ` }} />
 
       <div className="menu-workspace-grid" style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '24px 30px' }}>
-        
+
         {/* Navigation Breadcrumbs for Inline views */}
         {editingTableId ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
@@ -495,7 +496,7 @@ export default function TableManagement({
             boxSizing: 'border-box'
           }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '36px' }}>
-              
+
               {/* Left Column: Table Details */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: '800', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px', margin: 0 }}>Terminal Connection Profile</h3>
@@ -559,13 +560,13 @@ export default function TableManagement({
                     <div style={{ background: 'var(--primary)', color: '#fff', width: '28px', height: '28px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🍽️</div>
                     <span style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--primary)', letterSpacing: '-0.5px' }}>Serviq</span>
                   </div>
-                  
+
                   <div style={{ fontSize: '0.9rem', fontWeight: '800', color: '#1e293b', textAlign: 'center', marginTop: '4px' }}>
                     Scan to View Menu & Order
                   </div>
-                  
+
                   <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)' }}>
-                    <img 
+                    <img
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`http://localhost:5173/?table=${viewingTable.id}`)}`}
                       alt={`Table ${viewingTable.id} QR Code`}
                       style={{ width: '150px', height: '150px', display: 'block' }}
@@ -618,7 +619,7 @@ export default function TableManagement({
                 </button>
               </div>
 
-              <button 
+              <button
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -707,7 +708,7 @@ export default function TableManagement({
                   {tables.map(table => {
                     const orderInfo = getActiveOrderInfo(table.id)
                     const statusText = table.status === 'Free' ? 'Available' : table.status
-                    
+
                     let cardColor = {}
                     if (statusText === 'Available') {
                       cardColor = { background: '#f0fdf4', border: '1.5px solid #86efac', color: '#166534' }
@@ -718,7 +719,7 @@ export default function TableManagement({
                     }
 
                     return (
-                      <div 
+                      <div
                         key={table.id}
                         className="map-table-card"
                         style={cardColor}
@@ -726,14 +727,14 @@ export default function TableManagement({
                       >
                         <span className="map-table-id">{table.id}</span>
                         <span className="map-table-seats">{table.seats} Seats</span>
-                        <span style={{ 
-                          fontSize: '0.62rem', 
-                          fontWeight: '850', 
-                          background: 'rgba(255,255,255,0.7)', 
-                          padding: '2px 8px', 
+                        <span style={{
+                          fontSize: '0.62rem',
+                          fontWeight: '850',
+                          background: 'rgba(255,255,255,0.7)',
+                          padding: '2px 8px',
                           borderRadius: '10px',
                           marginTop: '6px',
-                          border: '0.5px solid currentColor' 
+                          border: '0.5px solid currentColor'
                         }}>
                           {statusText}
                         </span>
