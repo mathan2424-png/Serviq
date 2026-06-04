@@ -665,7 +665,6 @@ export default function App() {
       case 'tables': return 'Monitor and manage restaurant table status';
       case 'staff-master': return 'Manage KDS and Waiter terminals and logins';
       case 'settings': return 'Configure your restaurant dashboard';
-      case 'super-plans': return 'Create and configure subscription packages, limits, pricing, and branch models';
       default: return getSystemDateTime();
     }
   }
