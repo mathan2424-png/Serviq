@@ -20,7 +20,8 @@ import {
   Building,
   CreditCard,
   Activity,
-  LogOut
+  LogOut,
+  Grid
 } from 'lucide-react'
 import './App.css'
 
@@ -35,6 +36,7 @@ import BillingSystem from './components/BillingSystem'
 import Login from './components/Login'
 import StaffMaster from './components/StaffMaster'
 import SuperAdminDashboard from './components/SuperAdminDashboard'
+import TableManagement from './components/TableManagement'
 
 // Define default menu items matching wireframes
 const INITIAL_MENU = [
@@ -133,12 +135,12 @@ const INITIAL_MENU = [
 // Define initial tables matching tables section of the wireframe
 const INITIAL_TABLES = [
   { id: 'T-01', name: 'Table 01', status: 'Occupied', seats: 4 },
-  { id: 'T-02', name: 'Table 02', status: 'Occupied', seats: 2 },
-  { id: 'T-03', name: 'Table 03', status: 'Occupied', seats: 4 },
-  { id: 'T-04', name: 'Table 04', status: 'Free', seats: 6 }, // Free table in wireframe
-  { id: 'T-05', name: 'Table 05', status: 'Occupied', seats: 2 },
-  { id: 'T-06', name: 'Table 06', status: 'Free', seats: 4 },
-  { id: 'T-07', name: 'Table 07', status: 'Occupied', seats: 8 }
+  { id: 'T-02', name: 'Table 02', status: 'Free', seats: 2 },
+  { id: 'T-03', name: 'Table 03', status: 'Occupied', seats: 6 },
+  { id: 'T-04', name: 'Table 04', status: 'Cleaning', seats: 4 },
+  { id: 'T-05', name: 'Table 05', status: 'Free', seats: 8 },
+  { id: 'T-06', name: 'Table 06', status: 'Occupied', seats: 4 },
+  { id: 'T-07', name: 'Table 07', status: 'Free', seats: 2 }
 ]
 
 // Define initial staff terminals
@@ -307,7 +309,7 @@ const INITIAL_ORDERS = [
   {
     id: '#ORD-043',
     table: 'T-03',
-    waiter: 'Priya S.',
+    waiter: 'Rahul S.',
     items: [
       { name: 'Butter Chicken', quantity: 2, price: 260 },
       { name: 'Gulab Jamun', quantity: 1, price: 80 }
@@ -349,7 +351,7 @@ const INITIAL_ORDERS = [
   {
     id: '#ORD-040',
     table: 'T-02',
-    waiter: 'Priya S.',
+    waiter: 'Rahul S.',
     items: [
       { name: 'Paneer Tikka', quantity: 1, price: 140 },
       { name: 'Masala Chai', quantity: 1, price: 40 }
@@ -431,6 +433,25 @@ export default function App() {
     revenue: 12480, // Today's Revenue (₹12,480 in screenshot)
     totalOrdersCount: 38 // Total Orders (38 in screenshot)
   })
+
+  // Handle URL Table parameters dynamically (QR code scan simulation)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const tableParam = params.get('table')
+    if (tableParam) {
+      const matchingTable = tables.find(t => 
+        t.id.toLowerCase() === tableParam.toLowerCase() || 
+        t.name.toLowerCase() === tableParam.toLowerCase()
+      )
+      if (matchingTable) {
+        setRole('customer')
+        setCustomerTable(matchingTable.name)
+        showToast('success', `Welcome to ${matchingTable.name}! Direct ordering enabled.`)
+      } else {
+        showToast('error', `Table ${tableParam} not found in registry.`)
+      }
+    }
+  }, [tables])
 
   // Synchronize customer active order tracking dynamically based on selected table session
   useEffect(() => {
@@ -567,6 +588,26 @@ export default function App() {
     setNotifications([`Table ${tableId} completed billing and is now FREE`, ...notifications])
   }
 
+  // Table CRUD operations
+  const handleAddTable = (newTable) => {
+    setTables([...tables, newTable])
+  }
+
+  const handleUpdateTable = (id, updatedTable) => {
+    setTables(tables.map(t => t.id === id ? updatedTable : t))
+  }
+
+  const handleDeleteTable = (id) => {
+    showConfirm(
+      'Delete Table Profile',
+      'Are you sure you want to permanently delete this table profile registry? This action cannot be undone.',
+      () => {
+        setTables(tables.filter(t => t.id !== id))
+        showToast('success', 'Table profile registry deleted successfully!')
+      }
+    )
+  }
+
   // 4. Menu CRUD operations
   const handleUpdateMenuItem = (id, updatedItem) => {
     setMenuItems(menuItems.map(item => item.id === id ? updatedItem : item))
@@ -631,7 +672,7 @@ export default function App() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: role === 'login' ? 'auto' : '100vh', minHeight: '100vh', overflow: role === 'login' ? 'visible' : 'hidden' }}>
 
       {role === 'login' ? (
         <Login
@@ -642,7 +683,7 @@ export default function App() {
               setIsSuperAdmin(false)
             } else if (selectedRole === 'superadmin') {
               setRole('admin')
-              setAdminTab('super-details')
+              setAdminTab('super-revenue')
               setIsSuperAdmin(true)
             } else {
               setRole(selectedRole)
@@ -707,7 +748,7 @@ export default function App() {
           </div>
 
           {/* CORE SIMULATED INTERFACE CONTAINER */}
-          <div className="app-container">
+          <div className="app-container" style={{ height: 'auto', flex: 1 }}>
 
             {/* ROLE: ADMIN (WITH SIDEBAR & TAB CONTENT) */}
             {role === 'admin' && (
@@ -749,6 +790,12 @@ export default function App() {
                             onClick={() => setAdminTab('billing')}
                           >
                             <Calculator /> Billing
+                          </li>
+                          <li
+                            className={`sidebar-item ${adminTab === 'tables' ? 'active' : ''}`}
+                            onClick={() => setAdminTab('tables')}
+                          >
+                            <Grid style={{ width: '18px', height: '18px' }} /> Table Management
                           </li>
                           <li
                             className={`sidebar-item ${adminTab === 'staff-master' ? 'active' : ''}`}
@@ -818,7 +865,8 @@ export default function App() {
                   <div className="workspace-header">
                     <div className="header-title">
                       <h1 style={{ textTransform: 'capitalize' }}>
-                        {adminTab === 'super-details' ? 'Restaurant Management' : 
+                        {adminTab === 'super-revenue' ? 'Dashboard' :
+                         adminTab === 'super-details' ? 'Restaurant Management' : 
                          adminTab === 'super-plans' ? 'Subscription & Plans' : 
                          adminTab === 'super-billing' ? 'Revenue & Billing' :
                          adminTab.replace('-', ' ').replace('super ', '')}
@@ -873,6 +921,17 @@ export default function App() {
                       showToast={showToast}
                       initialTableId={billingSelectedTableId}
                       onClearInitialTableId={() => setBillingSelectedTableId(null)}
+                    />
+                  )}
+
+                  {adminTab === 'tables' && (
+                    <TableManagement
+                      tables={tables}
+                      orders={orders}
+                      onAddTable={handleAddTable}
+                      onUpdateTable={handleUpdateTable}
+                      onDeleteTable={handleDeleteTable}
+                      showToast={showToast}
                     />
                   )}
 

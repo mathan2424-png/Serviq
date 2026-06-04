@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { DollarSign, ClipboardList, Eye, Users, RefreshCw, TrendingUp, Activity, ArrowRight } from 'lucide-react'
+import { IndianRupee, ClipboardList, Eye, Users, RefreshCw, TrendingUp, Activity, ArrowRight } from 'lucide-react'
 
 export default function AdminDashboard({ 
   orders, 
@@ -104,7 +104,7 @@ export default function AdminDashboard({
               transform: 'scale(2.5)',
               zIndex: 1
             }}>
-              <DollarSign style={{ width: '48px', height: '48px' }} />
+              <IndianRupee style={{ width: '48px', height: '48px' }} />
             </div>
           </div>
 
@@ -145,7 +145,7 @@ export default function AdminDashboard({
             boxShadow: 'var(--shadow-sm)',
             gap: '8px'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
               <div className="stat-info">
                 <span style={{ fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.5px' }}>Active Tables</span>
                 <div className="stat-value" style={{ fontSize: '1.4rem', fontWeight: '800', margin: '4px 0 0 0', color: 'var(--text-main)', fontFamily: 'var(--font-headings)' }}>
@@ -158,7 +158,7 @@ export default function AdminDashboard({
             </div>
             {/* Visual Occupancy Progress Bar */}
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '4px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '4px', width: '100%' }}>
                 <span>Occupancy Rate</span>
                 <span>{occupancyPercentage}%</span>
               </div>

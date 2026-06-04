@@ -1,47 +1,100 @@
-import React, { useState, useRef } from 'react'
-import { Eye, EyeOff, LayoutDashboard, FolderLock } from 'lucide-react'
+import React, { useState, useRef, useEffect } from 'react'
+import { LayoutDashboard, FolderLock, Phone, Eye, EyeOff, Utensils, ChefHat, Pizza, Coffee, Soup } from 'lucide-react'
 
 export default function Login({ onLogin, darkMode, onToggleDarkMode, showToast }) {
-  const [phone, setPhone] = useState('')
+  const [selectedRole, setSelectedRole] = useState('superadmin') // Default to superadmin as shown in image
+  const [phone, setPhone] = useState('superadmin') // Pre-filled default matching tab
   const [pin, setPin] = useState(['', '', '', ''])
   const [showPin, setShowPin] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedRole, setSelectedRole] = useState('admin')
 
-  const pinRefs = [useRef(null), useRef(null), useRef(null), useRef(null)]
+  const pinRefs = [useRef(), useRef(), useRef(), useRef()]
 
-  const quickAccounts = [
-    { role: 'admin', label: 'Admin', icon: <LayoutDashboard style={{ width: '14px', height: '14px' }} /> },
-    { role: 'superadmin', label: 'Super Admin', icon: <FolderLock style={{ width: '14px', height: '14px' }} /> }
-  ]
+  // Sync phone default when switching tabs
+  useEffect(() => {
+    if (selectedRole === 'admin') {
+      setPhone('admin')
+    } else {
+      setPhone('superadmin')
+    }
+    // Focus the first PIN input when changing roles
+    if (pinRefs[0].current) {
+      pinRefs[0].current.focus()
+    }
+    setPin(['', '', '', ''])
+  }, [selectedRole])
 
   const handlePinChange = (index, value) => {
-    const cleaned = value.replace(/\D/g, '').slice(-1)
+    // Only allow digits
+    const cleanValue = value.replace(/[^0-9]/g, '')
+    if (!cleanValue) {
+      const newPin = [...pin]
+      newPin[index] = ''
+      setPin(newPin)
+      return
+    }
+
+    const digit = cleanValue[cleanValue.length - 1] // Keep only the last character
     const newPin = [...pin]
-    newPin[index] = cleaned
+    newPin[index] = digit
     setPin(newPin)
-    if (cleaned && index < 3) {
-      pinRefs[index + 1].current?.focus()
+
+    // Auto-focus next input if not the last one
+    if (index < 3 && digit) {
+      pinRefs[index + 1].current.focus()
     }
   }
 
   const handlePinKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !pin[index] && index > 0) {
-      pinRefs[index - 1].current?.focus()
+    // Handle backspace back-navigation
+    if (e.key === 'Backspace') {
+      if (!pin[index] && index > 0) {
+        const newPin = [...pin]
+        newPin[index - 1] = ''
+        setPin(newPin)
+        pinRefs[index - 1].current.focus()
+      } else {
+        const newPin = [...pin]
+        newPin[index] = ''
+        setPin(newPin)
+      }
     }
   }
 
   const handlePinPaste = (e) => {
-    const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4)
-    if (text.length === 4) {
-      setPin(text.split(''))
-      pinRefs[3].current?.focus()
-    }
     e.preventDefault()
+    const pastedData = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 4)
+    if (pastedData) {
+      const newPin = [...pin]
+      for (let i = 0; i < 4; i++) {
+        newPin[i] = pastedData[i] || ''
+      }
+      setPin(newPin)
+      // Focus the last filled or first empty
+      const focusIndex = Math.min(pastedData.length, 3)
+      if (pinRefs[focusIndex]?.current) {
+        pinRefs[focusIndex].current.focus()
+      }
+    }
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
+
+    const combinedPin = pin.join('')
+    if (combinedPin.length < 4) {
+      showToast('error', 'Please enter a 4-digit PIN')
+      return
+    }
+
+    if (combinedPin !== '1234') {
+      showToast('error', 'Invalid security PIN. (Use simulation PIN: 1234)')
+      // Reset PIN inputs and focus first
+      setPin(['', '', '', ''])
+      if (pinRefs[0].current) pinRefs[0].current.focus()
+      return
+    }
+
     setIsLoading(true)
     setTimeout(() => {
       setIsLoading(false)
@@ -50,427 +103,309 @@ export default function Login({ onLogin, darkMode, onToggleDarkMode, showToast }
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      position: 'relative',
-      overflow: 'hidden',
-      fontFamily: "'Inter', system-ui, sans-serif"
-    }}>
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes floatUp {
-          0% { transform: translateY(0px); }
-          50% { transform: translateY(-8px); }
-          100% { transform: translateY(0px); }
+    <div className="login-container">
+      {/* Dynamic inline stylesheet to handle spinner and focus styling */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        .login-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          font-family: var(--font-body);
+          position: relative;
+          overflow: hidden;
+          padding: 20px;
         }
 
-        .login-bg-layer {
+        .login-container::before {
+          content: "";
           position: absolute;
-          inset: 0;
-          background-image: url('/login-bg.png');
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.35)), url('/log%20in%20.png') no-repeat center center;
           background-size: cover;
-          background-position: center;
-          background-repeat: no-repeat;
-          filter: brightness(0.35) saturate(1.2);
-          z-index: 0;
-        }
-
-        .login-bg-overlay {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(135deg, #ea580c 0%, #c2410c 50%, #9a3412 100%);
-          opacity: 0.72;
+          filter: blur(4px);
+          transform: scale(1.03); /* Prevent white edges from blur */
+          opacity: 0.95;
           z-index: 1;
         }
-
+        
+        .bg-icon {
+          display: none;
+        }
+        
         .login-card {
-          position: relative;
-          z-index: 2;
+          width: 100%;
+          max-width: 410px;
           background: #ffffff;
           border-radius: 24px;
-          padding: 28px 36px 24px;
-          width: 100%;
-          max-width: 420px;
-          box-shadow: 0 32px 80px rgba(0,0,0,0.35), 0 8px 24px rgba(0,0,0,0.2);
-         
-          overflow: hidden;
-        }
-
-        .login-logo-wrap {
+          padding: 34px 28px;
+          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
           display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          margin-bottom: 14px;
-        }
-
-        .login-logo-icon {
-          width: 42px;
-          height: 42px;
-          background: linear-gradient(135deg, #ea580c, #c2410c);
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.3rem;
-          box-shadow: 0 4px 14px rgba(234, 88, 12, 0.4);
-        }
-
-        .login-logo-text {
-          font-size: 1.8rem;
-          font-weight: 800;
-          background: linear-gradient(135deg, #ea580c, #c2410c);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          letter-spacing: -0.5px;
-          font-family: 'Outfit', 'Inter', sans-serif;
-        }
-
-        .login-title {
-          text-align: center;
-          font-size: 1.5rem;
-          font-weight: 800;
-          color: #0f172a;
-          margin: 0 0 4px 0;
-          font-family: 'Outfit', 'Inter', sans-serif;
-        }
-
-        .login-subtitle {
-          text-align: center;
-          font-size: 0.82rem;
-          color: #64748b;
-          margin: 0 0 16px 0;
-          font-weight: 500;
-        }
-
-        .role-switcher {
-          display: flex;
-          background: #f1f5f9;
-          border-radius: 12px;
-          padding: 4px;
-          gap: 4px;
-          margin-bottom: 16px;
-        }
-
-        .role-btn {
-          flex: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-          padding: 9px 12px;
-          border-radius: 9px;
-          border: none;
-          font-size: 0.78rem;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.2s;
-          background: transparent;
-          color: #64748b;
-        }
-
-        .role-btn.active {
-          background: #ffffff;
-          color: #ea580c;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .login-label {
-          display: block;
-          font-size: 0.78rem;
-          font-weight: 700;
-          color: #374151;
-          margin-bottom: 7px;
-          letter-spacing: 0.3px;
-        }
-
-        .phone-input-wrap {
+          flex-direction: column;
+          gap: 20px;
           position: relative;
-          margin-bottom: 14px;
+          z-index: 2;
+          animation: card-appear 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-
-        .phone-icon {
-          position: absolute;
-          left: 14px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: #94a3b8;
-          font-size: 1rem;
-          pointer-events: none;
-        }
-
-        .phone-input {
-          width: 100%;
-          padding: 10px 14px 10px 42px;
-          border: 1.5px solid #e2e8f0;
-          border-radius: 12px;
-          font-size: 0.88rem;
-          color: #0f172a;
-          background: #f8fafc;
-          outline: none;
-          box-sizing: border-box;
-          font-weight: 500;
-          transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .phone-input:focus {
-          border-color: #ea580c;
-          box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
-          background: #fff;
-        }
-
-        .phone-input::placeholder {
-          color: #94a3b8;
-          font-weight: 400;
-        }
-
-        .pin-label-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 8px;
-        }
-
-        .pin-boxes {
-          display: flex;
-          gap: 10px;
-          margin-bottom: 6px;
-          width: 100%;
-        }
-
-        .pin-box {
-          flex: 1;
-          min-width: 0;
-          height: 46px;
-          border: 1.5px solid #e2e8f0;
-          border-radius: 12px;
-          background: #f8fafc;
-          text-align: center;
-          font-size: 1.25rem;
-          font-weight: 700;
-          color: #0f172a;
-          outline: none;
-          box-sizing: border-box;
-          transition: border-color 0.2s, box-shadow 0.2s;
-          caret-color: #ea580c;
-        }
-
-        .pin-box:focus {
-          border-color: #ea580c;
-          box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
-          background: #fff;
-        }
-
-        .pin-box.filled {
-          border-color: #ea580c;
-          background: rgba(234, 88, 12, 0.05);
-        }
-
-        .eye-toggle {
-          background: none;
-          border: none;
-          cursor: pointer;
-          color: #94a3b8;
-          padding: 4px;
-          display: flex;
-          align-items: center;
-          transition: color 0.2s;
-          border-radius: 6px;
-        }
-
-        .eye-toggle:hover {
-          color: #ea580c;
-        }
-
-        .forgot-pin {
-          display: block;
-          text-align: right;
-          font-size: 0.82rem;
-          font-weight: 700;
-          color: #ea580c;
-          text-decoration: none;
-          margin-bottom: 16px;
-          margin-top: 4px;
-          transition: opacity 0.2s;
-        }
-
-        .forgot-pin:hover {
-          opacity: 0.75;
-        }
-
-        .sign-in-btn {
-          width: 100%;
-          padding: 12px;
-          background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
-          color: #fff;
-          border: none;
-          border-radius: 12px;
-          font-size: 0.95rem;
-          font-weight: 800;
-          cursor: pointer;
-          transition: all 0.2s;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          letter-spacing: 0.3px;
-          box-shadow: 0 4px 16px rgba(234, 88, 12, 0.4);
-          font-family: 'Outfit', 'Inter', sans-serif;
-        }
-
-        .sign-in-btn:hover:not(:disabled) {
-          transform: translateY(-1px);
-          box-shadow: 0 6px 20px rgba(234, 88, 12, 0.5);
-        }
-
-        .sign-in-btn:active:not(:disabled) {
-          transform: translateY(0);
-        }
-
-        .sign-in-btn:disabled {
-          opacity: 0.8;
-          cursor: not-allowed;
-        }
-
-        .spin-icon {
-          width: 18px;
-          height: 18px;
-          border: 2.5px solid rgba(255,255,255,0.35);
-          border-top-color: #fff;
-          border-radius: 50%;
-          animation: spin 0.65s linear infinite;
-        }
-
-        .card-footer-note {
-          text-align: center;
-          margin-top: 12px;
-          font-size: 0.72rem;
-          color: #94a3b8;
-          font-weight: 500;
-        }
-
-        .card-footer-note strong {
-          color: #64748b;
-        }
-
-        /* Floating food emojis in background */
-        .bg-emoji {
-          position: absolute;
-          font-size: 2.5rem;
-          opacity: 0.12;
-          z-index: 1;
-          pointer-events: none;
-          animation: floatUp 4s ease-in-out infinite;
-        }
-      `}</style>
-
-      {/* Background layers */}
-      <div className="login-bg-layer" />
-      <div className="login-bg-overlay" />
-
-      {/* Floating decorative emojis */}
-      <span className="bg-emoji" style={{ top: '8%', left: '6%', animationDelay: '0s' }}>🍽️</span>
-      <span className="bg-emoji" style={{ top: '20%', right: '8%', animationDelay: '1.5s', fontSize: '2rem' }}>🍜</span>
-      <span className="bg-emoji" style={{ bottom: '15%', left: '10%', animationDelay: '0.8s', fontSize: '2rem' }}>🥘</span>
-      <span className="bg-emoji" style={{ bottom: '25%', right: '6%', animationDelay: '2s', fontSize: '3rem' }}>🍛</span>
-      <span className="bg-emoji" style={{ top: '50%', left: '3%', animationDelay: '1s', fontSize: '1.8rem' }}>🥗</span>
-      <span className="bg-emoji" style={{ top: '35%', right: '3%', animationDelay: '2.5s', fontSize: '1.6rem' }}>☕</span>
-
-      {/* Login Card */}
-      <div className="login-card">
         
-        {/* Logo */}
-        <div className="login-logo-wrap">
-          <div className="login-logo-icon">🍽️</div>
-          <span className="login-logo-text">Serviq</span>
+        @keyframes card-appear {
+          from {
+            opacity: 0;
+            transform: translateY(12px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        
+        .pin-input-field:focus {
+          border-color: #d27242 !important;
+          box-shadow: 0 0 0 2px rgba(210, 114, 66, 0.15) !important;
+        }
+        
+        .phone-input-field:focus {
+          box-shadow: 0 0 0 2.5px rgba(224, 231, 255, 0.8) !important;
+        }
+      ` }} />
+
+      {/* Faint Background Food & Dining Icons */}
+      <Utensils className="bg-icon" style={{ top: '15%', left: '8%', transform: 'rotate(-25deg)', width: '64px', height: '64px' }} />
+      <Soup className="bg-icon" style={{ top: '48%', left: '6%', transform: 'rotate(15deg)', width: '56px', height: '56px' }} />
+      <Coffee className="bg-icon" style={{ bottom: '15%', left: '12%', transform: 'rotate(-10deg)', width: '48px', height: '48px' }} />
+      <ChefHat className="bg-icon" style={{ top: '12%', right: '10%', transform: 'rotate(20deg)', width: '60px', height: '60px' }} />
+      <Pizza className="bg-icon" style={{ top: '50%', right: '7%', transform: 'rotate(-15deg)', width: '52px', height: '52px' }} />
+      <Soup className="bg-icon" style={{ bottom: '18%', right: '11%', transform: 'rotate(10deg)', width: '58px', height: '58px' }} />
+
+      {/* Main card */}
+      <div className="login-card">
+        {/* Brand/Logo Section */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <div style={{
+            background: '#d37244',
+            color: '#fff',
+            width: '36px',
+            height: '36px',
+            borderRadius: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 3px 8px rgba(211, 114, 68, 0.25)'
+          }}>
+            <Utensils style={{ width: '18px', height: '18px', color: '#fff' }} />
+          </div>
+          <span style={{ fontSize: '1.5rem', fontWeight: '800', color: '#d37244', letterSpacing: '-0.5px' }}>Serviq</span>
         </div>
 
         {/* Title */}
-        <h2 className="login-title">Sign In</h2>
-        <p className="login-subtitle">Enter your credentials to access the dashboard</p>
-
-        {/* Role Switcher */}
-        <div className="role-switcher">
-          {quickAccounts.map(acc => (
-            <button
-              key={acc.role}
-              type="button"
-              className={`role-btn ${selectedRole === acc.role ? 'active' : ''}`}
-              onClick={() => setSelectedRole(acc.role)}
-            >
-              {acc.icon}
-              {acc.label}
-            </button>
-          ))}
+        <div style={{ textAlign: 'center', marginTop: '-4px' }}>
+          <h2 style={{ fontSize: '1.45rem', fontWeight: '800', color: '#1e293b', margin: 0 }}>Sign In</h2>
+          <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '6px', lineHeight: '1.3' }}>
+            Enter your credentials to access the dashboard
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit}>
-
-          {/* Phone Number */}
-          <label className="login-label">Phone Number</label>
-          <div className="phone-input-wrap">
-            <span className="phone-icon">📞</span>
-            <input
-              type="tel"
-              className="phone-input"
-              placeholder="Enter Phone Number"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              maxLength={10}
-            />
-          </div>
-
-          {/* PIN */}
-          <div className="pin-label-row">
-            <label className="login-label" style={{ margin: 0 }}>PIN</label>
-            <button type="button" className="eye-toggle" onClick={() => setShowPin(!showPin)}>
-              {showPin
-                ? <EyeOff style={{ width: '18px', height: '18px' }} />
-                : <Eye style={{ width: '18px', height: '18px' }} />
-              }
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Tab Selector */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            background: '#f1f5f9',
+            padding: '3px',
+            borderRadius: '11px'
+          }}>
+            <button
+              type="button"
+              onClick={() => setSelectedRole('admin')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                padding: '9px 0',
+                borderRadius: '8px',
+                border: 'none',
+                background: selectedRole === 'admin' ? '#ffffff' : 'transparent',
+                color: selectedRole === 'admin' ? '#d37244' : '#64748b',
+                fontSize: '0.82rem',
+                fontWeight: '750',
+                cursor: 'pointer',
+                boxShadow: selectedRole === 'admin' ? '0 1.5px 4px rgba(0,0,0,0.05)' : 'none',
+                transition: 'all 0.25s'
+              }}
+            >
+              <LayoutDashboard style={{ width: '14px', height: '14px' }} />
+              <span>Admin</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedRole('superadmin')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                padding: '9px 0',
+                borderRadius: '8px',
+                border: 'none',
+                background: selectedRole === 'superadmin' ? '#ffffff' : 'transparent',
+                color: selectedRole === 'superadmin' ? '#d37244' : '#64748b',
+                fontSize: '0.82rem',
+                fontWeight: '750',
+                cursor: 'pointer',
+                boxShadow: selectedRole === 'superadmin' ? '0 1.5px 4px rgba(0,0,0,0.05)' : 'none',
+                transition: 'all 0.25s'
+              }}
+            >
+              <FolderLock style={{ width: '14px', height: '14px' }} />
+              <span>Super Admin</span>
             </button>
           </div>
 
-          <div className="pin-boxes">
-            {pin.map((digit, i) => (
+          {/* Phone Number Field */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '0.82rem', fontWeight: '700', color: '#1e293b' }}>Phone Number</label>
+            <div style={{ position: 'relative' }}>
+              <Phone style={{ width: '16px', height: '16px', position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#db2777' }} />
               <input
-                key={i}
-                ref={pinRefs[i]}
-                type={showPin ? 'text' : 'password'}
-                className={`pin-box ${digit ? 'filled' : ''}`}
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handlePinChange(i, e.target.value)}
-                onKeyDown={(e) => handlePinKeyDown(i, e)}
-                onPaste={i === 0 ? handlePinPaste : undefined}
-                inputMode="numeric"
-                pattern="[0-9]*"
-                autoComplete="off"
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="phone-input-field"
+                required
+                style={{
+                  width: '100%',
+                  padding: '10px 12px 10px 38px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: '#eef2ff',
+                  color: '#1e293b',
+                  fontSize: '0.92rem',
+                  fontWeight: '600',
+                  outline: 'none',
+                  transition: 'box-shadow 0.2s'
+                }}
               />
-            ))}
+            </div>
           </div>
 
-          <a
-            href="#"
-            className="forgot-pin"
-            onClick={(e) => {
-              e.preventDefault()
-              alert('Default PIN is 1234 for simulation mode.')
+          {/* PIN Input Grid */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '0.82rem', fontWeight: '700', color: '#1e293b' }}>PIN</label>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {/* Grid & Forgot PIN link grouped together */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }} onPaste={handlePinPaste}>
+                  {pin.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      ref={pinRefs[idx]}
+                      type={showPin ? 'text' : 'password'}
+                      value={digit}
+                      onChange={(e) => handlePinChange(idx, e.target.value)}
+                      onKeyDown={(e) => handlePinKeyDown(idx, e)}
+                      maxLength={1}
+                      className="pin-input-field"
+                      style={{
+                        width: '100%',
+                        height: '46px',
+                        borderRadius: '10px',
+                        border: '1.5px solid #d27242',
+                        background: '#ffffff',
+                        color: '#1e293b',
+                        fontSize: '1.3rem',
+                        fontWeight: '700',
+                        textAlign: 'center',
+                        outline: 'none',
+                        transition: 'all 0.2s'
+                      }}
+                    />
+                  ))}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2px' }}>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      showToast('info', 'For simulation mode, the default PIN is 1234')
+                    }}
+                    style={{
+                      color: '#d37244',
+                      fontWeight: '700',
+                      textDecoration: 'none',
+                      fontSize: '0.78rem'
+                    }}
+                  >
+                    Forgot PIN?
+                  </a>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowPin(!showPin)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#64748b',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '6px',
+                  alignSelf: 'flex-start',
+                  marginTop: '8px'
+                }}
+              >
+                {showPin ? <EyeOff style={{ width: '18px', height: '18px' }} /> : <Eye style={{ width: '18px', height: '18px' }} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            style={{
+              width: '100%',
+              background: '#c2410c',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '10px',
+              padding: '12px',
+              fontSize: '0.92rem',
+              fontWeight: '700',
+              cursor: 'pointer',
+              boxShadow: '0 3px 10px rgba(194, 65, 12, 0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'all 0.2s',
+              marginTop: '4px'
             }}
           >
-            Forgot PIN?
-          </a>
-
-          {/* Sign In Button */}
-          <button type="submit" className="sign-in-btn" disabled={isLoading}>
             {isLoading ? (
               <>
-                <div className="spin-icon" />
-                <span>Signing in...</span>
+                <div style={{
+                  width: '16px',
+                  height: '16px',
+                  border: '2px solid rgba(255,255,255,0.3)',
+                  borderTopColor: '#fff',
+                  borderRadius: '50%',
+                  animation: 'spin 0.6s linear infinite'
+                }}></div>
+                <span>Signing In...</span>
               </>
             ) : (
               <span>Sign In</span>
@@ -478,9 +413,10 @@ export default function Login({ onLogin, darkMode, onToggleDarkMode, showToast }
           </button>
         </form>
 
-        <p className="card-footer-note">
-          Simulation mode · <strong>PIN: 1234</strong> · Powered by Serviq
-        </p>
+        {/* Footer info inside card */}
+        <div style={{ textAlign: 'center', fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
+          Simulation mode · <span style={{ fontWeight: '600' }}>PIN: 1234</span> · Powered by Serviq
+        </div>
       </div>
     </div>
   )
