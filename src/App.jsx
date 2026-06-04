@@ -660,7 +660,6 @@ export default function App() {
   const getTabSubtext = () => {
     switch (adminTab) {
       case 'dashboard': return getSystemDateTime();
-      case 'incoming-orders': return 'Manage and process all live orders';
       case 'menu-management': return 'Add, edit, and manage your menu items';
       case 'billing': return 'Process payments and generate invoices';
       case 'tables': return 'Monitor and manage restaurant table status';
