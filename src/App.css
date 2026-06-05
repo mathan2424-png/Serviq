@@ -128,7 +128,7 @@
 .workspace-header {
   background-color: var(--bg-card);
   padding: 16px 30px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 3px solid #f95e10;
   display: flex;
   justify-content: space-between;
   align-items: center;

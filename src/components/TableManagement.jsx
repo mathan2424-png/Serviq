@@ -7,7 +7,8 @@ export default function TableManagement({
   onAddTable,
   onUpdateTable,
   onDeleteTable,
-  showToast
+  showToast,
+  staffMembers = []
 }) {
   const [activeTab, setActiveTab] = useState('list') // 'list' or 'map'
   const [editingTableId, setEditingTableId] = useState(null) // 'new' or table.id
@@ -17,7 +18,8 @@ export default function TableManagement({
     id: '',
     name: '',
     seats: 4,
-    status: 'Available'
+    status: 'Available',
+    waiter: ''
   })
 
   // Table Status options
@@ -42,7 +44,8 @@ export default function TableManagement({
       id: `T-0${tables.length + 1}`,
       name: `Table 0${tables.length + 1}`,
       seats: 4,
-      status: 'Available'
+      status: 'Available',
+      waiter: ''
     })
   }
 
@@ -54,7 +57,8 @@ export default function TableManagement({
       id: table.id,
       name: table.name,
       seats: table.seats,
-      status: table.status === 'Free' ? 'Available' : table.status
+      status: table.status === 'Free' ? 'Available' : table.status,
+      waiter: table.waiter || ''
     })
   }
 
@@ -84,7 +88,8 @@ export default function TableManagement({
         id: formState.id.trim(),
         name: formState.name.trim(),
         seats: parseInt(formState.seats) || 4,
-        status: dbStatus
+        status: dbStatus,
+        waiter: formState.waiter
       })
       showToast('success', `Table ${formState.name} registered successfully!`)
     } else {
@@ -94,7 +99,8 @@ export default function TableManagement({
         id: formState.id.trim(),
         name: formState.name.trim(),
         seats: parseInt(formState.seats) || 4,
-        status: dbStatus
+        status: dbStatus,
+        waiter: formState.waiter
       })
       showToast('success', `Table ${formState.name} updated successfully!`)
     }
@@ -476,6 +482,22 @@ export default function TableManagement({
                 </div>
               </div>
 
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <div className="form-group">
+                  <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>Assign Waiter</label>
+                  <select
+                    value={formState.waiter}
+                    onChange={(e) => setFormState({ ...formState, waiter: e.target.value })}
+                    style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-main)', borderRadius: '8px', outline: 'none' }}
+                  >
+                    <option value="">Unassigned</option>
+                    {staffMembers.filter(s => s.role === 'waiter').map(w => (
+                      <option key={w.id} value={w.name}>{w.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               <div className="menu-form-actions" style={{ display: 'flex', flexDirection: 'row', gap: '16px', marginTop: '24px', maxWidth: '400px' }}>
                 <button type="submit" className="btn-black" style={{ flex: 1, padding: '12px', fontWeight: '700', borderRadius: '8px', cursor: 'pointer' }}>
                   {editingTableId === 'new' ? 'Register Table' : 'Save Changes'}
@@ -669,7 +691,7 @@ export default function TableManagement({
                           <td style={{ fontWeight: '800', color: 'var(--text-main)' }}>{table.id}</td>
                           <td style={{ fontWeight: '700' }}>{table.seats} seats</td>
                           <td>{renderStatusBadge(table.status)}</td>
-                          <td style={{ fontWeight: '700' }}>{orderInfo ? orderInfo.waiter : '-'}</td>
+                          <td style={{ fontWeight: '700' }}>{orderInfo ? orderInfo.waiter : (table.waiter || '-')}</td>
                           <td style={{ fontFamily: 'monospace', fontWeight: '700', color: orderInfo ? 'var(--primary)' : 'var(--text-muted)' }}>{orderInfo ? orderInfo.id : '-'}</td>
                           <td style={{ textAlign: 'right' }}>
                             <button className="tables-action-btn" title="View Table details & QR Code" onClick={() => handleViewClick(table)}>
@@ -702,47 +724,57 @@ export default function TableManagement({
               }}>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
                   gap: '16px'
                 }}>
                   {tables.map(table => {
                     const orderInfo = getActiveOrderInfo(table.id)
                     const statusText = table.status === 'Free' ? 'Available' : table.status
-
-                    let cardColor = {}
-                    if (statusText === 'Available') {
-                      cardColor = { background: '#f0fdf4', border: '1.5px solid #86efac', color: '#166534' }
-                    } else if (statusText === 'Occupied') {
-                      cardColor = { background: '#fffbeb', border: '1.5px solid #fcd34d', color: '#92400e' }
-                    } else {
-                      cardColor = { background: '#fef2f2', border: '1.5px solid #fca5a5', color: '#991b1b' }
-                    }
+                    
+                    const statusColor = statusText === 'Available' ? '#10b981' : statusText === 'Occupied' ? '#f59e0b' : '#ef4444'
+                    const statusBg = statusText === 'Available' ? 'rgba(16, 185, 129, 0.1)' : statusText === 'Occupied' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)'
+                    const statusIcon = statusText === 'Available' ? '🍽️' : statusText === 'Occupied' ? '🔥' : '⏳'
+                    const assignedWaiter = orderInfo ? orderInfo.waiter : table.waiter
 
                     return (
                       <div
                         key={table.id}
-                        className="map-table-card"
-                        style={cardColor}
+                        className="glass-card map-table-card-premium"
+                        style={{
+                          padding: '20px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '14px',
+                          background: 'var(--bg-card)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '16px',
+                          cursor: 'pointer',
+                          transition: 'transform 0.2s, box-shadow 0.2s',
+                          boxShadow: 'var(--shadow-sm)'
+                        }}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-2px)'
+                          e.currentTarget.style.boxShadow = 'var(--shadow-md)'
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.transform = 'none'
+                          e.currentTarget.style.boxShadow = 'var(--shadow-sm)'
+                        }}
                         onClick={() => handleViewClick(table)}
                       >
-                        <span className="map-table-id">{table.id}</span>
-                        <span className="map-table-seats">{table.seats} Seats</span>
-                        <span style={{
-                          fontSize: '0.62rem',
-                          fontWeight: '850',
-                          background: 'rgba(255,255,255,0.7)',
-                          padding: '2px 8px',
-                          borderRadius: '10px',
-                          marginTop: '6px',
-                          border: '0.5px solid currentColor'
-                        }}>
-                          {statusText}
-                        </span>
-                        {orderInfo && (
-                          <span className="map-table-waiter" title={orderInfo.waiter}>
-                            👤 {orderInfo.waiter.split(' ')[0]}
+                        <div style={{ background: statusBg, color: statusColor, width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
+                          {statusIcon}
+                        </div>
+                        <div style={{ overflow: 'hidden' }}>
+                          <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                            {table.seats} Seats
                           </span>
-                        )}
+                          <h3 style={{ margin: '2px 0', fontSize: '1.4rem', fontWeight: '900', color: 'var(--text-main)' }}>{table.id}</h3>
+                          <span style={{ fontSize: '0.65rem', color: statusColor, fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: statusColor }}></div>
+                            {statusText} {assignedWaiter ? `• ${assignedWaiter.split(' ')[0]}` : ''}
+                          </span>
+                        </div>
                       </div>
                     )
                   })}

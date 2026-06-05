@@ -874,7 +874,7 @@ export default function SuperAdminDashboard({
             showAddModal ? (
               <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div style={{
-                  background: 'var(--bg-card)',
+                  background: '#fef2eb',
                   border: '1px solid var(--border-color)',
                   borderRadius: '16px',
                   padding: '32px',
@@ -1176,8 +1176,8 @@ export default function SuperAdminDashboard({
                       </button>
                     </div>
 
-                    <div className="dish-admin-list" style={{ overflowX: 'auto', background: 'var(--bg-app)', borderRadius: '12px', border: '1px solid var(--border-color)', position: 'relative' }}>
-                      <table className="menu-data-table">
+                    <div className="dish-admin-list" style={{ overflowX: 'auto', background: '#fef2eb', borderRadius: '12px', border: '1px solid var(--border-color)', position: 'relative' }}>
+                      <table className="menu-data-table" style={{ width: '100%', borderCollapse: 'collapse', background: '#fef2eb' }}>
                         <thead>
                           <tr>
                             <th style={{ position: 'sticky', top: 0, zIndex: 10, background: 'var(--bg-app)', borderBottom: '1px solid var(--border-color)', textAlign: 'left', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', width: '60px', whiteSpace: 'nowrap' }}>S.No</th>
@@ -1980,7 +1980,7 @@ export default function SuperAdminDashboard({
             showGenerateInvoiceModal ? (
               <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div style={{
-                  background: 'var(--bg-card)',
+                  background: '#fef2eb',
                   border: '1px solid var(--border-color)',
                   borderRadius: '16px',
                   padding: '32px',
@@ -3368,7 +3368,7 @@ export default function SuperAdminDashboard({
           <div
             className="animate-fade-in"
             style={{
-              background: '#ffffff',
+              background: '#fef2eb',
               borderRadius: '20px',
               padding: '36px 32px 28px',
               width: '90%',
@@ -3392,15 +3392,15 @@ export default function SuperAdminDashboard({
                   padding: '13px 0',
                   borderRadius: '12px',
                   border: '1.5px solid #e2e8f0',
-                  background: '#ffffff',
+                  background: '#fef2eb',
                   color: '#334155',
                   fontWeight: '700',
                   fontSize: '0.95rem',
                   cursor: 'pointer',
                   transition: 'background 0.18s'
                 }}
-                onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
-                onMouseOut={(e) => e.currentTarget.style.background = '#ffffff'}
+                onMouseOver={(e) => e.currentTarget.style.background = '#fef2eb'}
+                onMouseOut={(e) => e.currentTarget.style.background = '#fef2eb'}
               >
                 Cancel
               </button>

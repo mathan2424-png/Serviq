@@ -7,7 +7,7 @@
   --primary-light: hsl(var(--primary-hue), 95%, 96%);
   
   --bg-app: #faf8f6; /* Soft warm background to match orange-red */
-  --bg-card: #ffffff;
+  --bg-card: #fef2eb;
   --bg-sidebar: #0f172a; /* Slate 900 for premium contrast */
   --bg-sidebar-active: #1e293b;
   
@@ -106,6 +106,31 @@ h1, h2, h3, h4, h5, h6 {
 button, input, select, textarea {
   font-family: inherit;
   font-size: inherit;
+}
+
+/* Global Table Header Style - Premium Orange */
+th,
+.tables-table th,
+.menu-data-table th,
+.orders-data-table th {
+  background-color: #F95E10 !important;
+  color: #ffffff !important;
+  border-bottom: none !important;
+}
+
+/* Global Table Body Style - Light Peach */
+.tables-table,
+.menu-data-table,
+.orders-data-table,
+.glass-card,
+.dish-admin-list {
+  background-color: #fef2eb !important;
+}
+
+.tables-table td,
+.menu-data-table td,
+.orders-data-table td {
+  background-color: transparent !important;
 }
 
 /* App Container Layout */
