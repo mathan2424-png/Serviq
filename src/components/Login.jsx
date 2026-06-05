@@ -10,19 +10,12 @@ export default function Login({ onLogin, darkMode, onToggleDarkMode, showToast }
 
   const pinRefs = [useRef(), useRef(), useRef(), useRef()]
 
-  // Sync phone default when switching tabs
   useEffect(() => {
-    if (selectedRole === 'admin') {
-      setPhone('admin')
-    } else {
-      setPhone('superadmin')
-    }
-    // Focus the first PIN input when changing roles
+    // Focus the first PIN input on mount
     if (pinRefs[0].current) {
       pinRefs[0].current.focus()
     }
-    setPin(['', '', '', ''])
-  }, [selectedRole])
+  }, [])
 
   const handlePinChange = (index, value) => {
     // Only allow digits
@@ -215,61 +208,7 @@ export default function Login({ onLogin, darkMode, onToggleDarkMode, showToast }
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {/* Tab Selector */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            background: '#f1f5f9',
-            padding: '3px',
-            borderRadius: '11px'
-          }}>
-            <button
-              type="button"
-              onClick={() => setSelectedRole('admin')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                padding: '9px 0',
-                borderRadius: '8px',
-                border: 'none',
-                background: selectedRole === 'admin' ? '#ffffff' : 'transparent',
-                color: selectedRole === 'admin' ? '#d37244' : '#64748b',
-                fontSize: '0.82rem',
-                fontWeight: '750',
-                cursor: 'pointer',
-                boxShadow: selectedRole === 'admin' ? '0 1.5px 4px rgba(0,0,0,0.05)' : 'none',
-                transition: 'all 0.25s'
-              }}
-            >
-              <LayoutDashboard style={{ width: '14px', height: '14px' }} />
-              <span>Admin</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedRole('superadmin')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                padding: '9px 0',
-                borderRadius: '8px',
-                border: 'none',
-                background: selectedRole === 'superadmin' ? '#ffffff' : 'transparent',
-                color: selectedRole === 'superadmin' ? '#d37244' : '#64748b',
-                fontSize: '0.82rem',
-                fontWeight: '750',
-                cursor: 'pointer',
-                boxShadow: selectedRole === 'superadmin' ? '0 1.5px 4px rgba(0,0,0,0.05)' : 'none',
-                transition: 'all 0.25s'
-              }}
-            >
-              <FolderLock style={{ width: '14px', height: '14px' }} />
-              <span>Super Admin</span>
-            </button>
-          </div>
+          {/* Tab Selector Removed - Super Admin Only */}
 
           {/* Phone Number Field */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>

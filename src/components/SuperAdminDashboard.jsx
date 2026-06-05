@@ -401,7 +401,8 @@ export default function SuperAdminDashboard({
     state: '',
     country: '',
     logo: '',
-    banner: ''
+    banner: '',
+    qrCode: ''
   })
 
   const [systemLogs, setSystemLogs] = useState([
@@ -411,6 +412,18 @@ export default function SuperAdminDashboard({
     { id: 4, time: '11:02 AM', type: 'info', msg: 'Kitchen KDS Terminal connected successfully.' },
     { id: 5, time: '11:15 AM', type: 'success', msg: 'UPI dynamic QR endpoint initialized on Port 3001.' }
   ])
+
+  // Roles & Permissions state
+  const [systemRoles, setSystemRoles] = useState([
+    { id: 'role-1', name: 'Super Admin', desc: 'Complete control over all restaurants and billing.', perms: { billing: true, menu: true, staff: true, tables: true, orders: true, settings: true } },
+    { id: 'role-2', name: 'Branch Admin', desc: 'Manage specific restaurant branch settings and staff.', perms: { billing: true, menu: true, staff: true, tables: true, orders: true, settings: false } },
+    { id: 'role-3', name: 'Branch Manager', desc: 'Oversees day-to-day operations and staff.', perms: { billing: false, menu: false, staff: true, tables: true, orders: true, settings: false } },
+    { id: 'role-4', name: 'Cashier', desc: 'Handles billing and payment collections.', perms: { billing: true, menu: false, staff: false, tables: false, orders: false, settings: false } },
+    { id: 'role-5', name: 'Waiter', desc: 'Takes orders and serves tables.', perms: { billing: false, menu: false, staff: false, tables: true, orders: true, settings: false } },
+    { id: 'role-6', name: 'Kitchen Staff', desc: 'Prepares food and updates order status.', perms: { billing: false, menu: false, staff: false, tables: false, orders: true, settings: false } },
+  ])
+  const [editingRoleId, setEditingRoleId] = useState(null)
+  const [roleFormState, setRoleFormState] = useState({ name: '', desc: '', perms: { billing: false, menu: false, staff: false, tables: false, orders: false, settings: false } })
 
   // Local Form state change handler
   const handleInputChange = (e) => {
@@ -595,7 +608,8 @@ export default function SuperAdminDashboard({
       state: '',
       country: '',
       logo: '',
-      banner: ''
+      banner: '',
+      qrCode: ''
     })
   }
 
@@ -616,6 +630,34 @@ export default function SuperAdminDashboard({
           onUpdateRestaurantDetails(remaining[0])
         }
         showToast('error', `Branch "${targetRest.name}" successfully removed.`)
+      }
+    })
+  }
+
+  // Handle Role save and delete
+  const handleSaveRole = (e) => {
+    e.preventDefault()
+    if (editingRoleId === 'new') {
+      const nextIdNum = systemRoles.length > 0 ? Math.max(...systemRoles.map(r => parseInt(r.id.replace('role-', '')))) + 1 : 1
+      const newId = `role-${nextIdNum}`
+      setSystemRoles([...systemRoles, { ...roleFormState, id: newId }])
+      showToast('success', 'Custom Role created successfully!')
+    } else {
+      setSystemRoles(systemRoles.map(r => r.id === editingRoleId ? { ...roleFormState, id: editingRoleId } : r))
+      showToast('success', 'Role updated successfully!')
+    }
+    setEditingRoleId(null)
+  }
+
+  const handleDeleteRole = (id) => {
+    setConfirmModal({
+      title: "Delete Role",
+      message: "Are you sure you want to permanently delete this role?",
+      confirmText: "Confirm Delete",
+      confirmColor: "#ef4444",
+      onConfirm: () => {
+        setSystemRoles(systemRoles.filter(r => r.id !== id))
+        showToast('error', 'Role has been deleted.')
       }
     })
   }
@@ -967,6 +1009,17 @@ export default function SuperAdminDashboard({
                           style={{ width: '100%', padding: '8px 12px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', color: 'var(--text-main)', borderRadius: '6px', fontSize: '0.8rem' }}
                         />
                       </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '4px' }}>UPI Payment ID / QR Link</label>
+                      <input
+                        type="text"
+                        value={newRestState.qrCode || ''}
+                        onChange={(e) => setNewRestState({ ...newRestState, qrCode: e.target.value })}
+                        placeholder="e.g. serviq@upi or payment link"
+                        style={{ width: '100%', padding: '8px 12px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', color: 'var(--text-main)', borderRadius: '6px', fontSize: '0.8rem' }}
+                      />
                     </div>
 
                     <div className="form-group">
@@ -2672,6 +2725,165 @@ export default function SuperAdminDashboard({
                                 >
                                   <Trash2 style={{ width: '16px', height: '16px' }} />
                                 </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )
+          )}
+
+          {activeTab === 'roles' && (
+            editingRoleId ? (
+              <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '16px',
+                  padding: '32px',
+                  boxShadow: 'var(--shadow-sm)'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
+                    <div>
+                      <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', letterSpacing: '0.5px' }}>Access Control</span>
+                      <h3 style={{ margin: '4px 0 0 0', fontSize: '1.25rem', fontWeight: '900', color: 'var(--text-main)' }}>
+                        {editingRoleId === 'new' ? 'Create Custom Role' : 'Edit Role & Permissions'}
+                      </h3>
+                    </div>
+                    <button
+                      className="btn-outline"
+                      style={{ padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '700' }}
+                      onClick={() => setEditingRoleId(null)}
+                    >
+                      Back to Roles
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSaveRole} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    
+                    <div className="form-group">
+                      <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '4px' }}>Role Name</label>
+                      <input
+                        type="text"
+                        value={roleFormState.name}
+                        onChange={(e) => setRoleFormState({ ...roleFormState, name: e.target.value })}
+                        placeholder="e.g. Delivery Partner"
+                        required
+                        style={{ width: '100%', padding: '8px 12px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', color: 'var(--text-main)', borderRadius: '6px', fontSize: '0.8rem' }}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '4px' }}>Role Description</label>
+                      <input
+                        type="text"
+                        value={roleFormState.desc}
+                        onChange={(e) => setRoleFormState({ ...roleFormState, desc: e.target.value })}
+                        placeholder="e.g. Can manage deliveries and view orders."
+                        required
+                        style={{ width: '100%', padding: '8px 12px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', color: 'var(--text-main)', borderRadius: '6px', fontSize: '0.8rem' }}
+                      />
+                    </div>
+
+                    <div style={{ padding: '16px', background: 'var(--bg-app)', border: '1px solid var(--border-color)', borderRadius: '12px' }}>
+                      <h4 style={{ margin: '0 0 16px 0', fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: '800' }}>Access Permissions</h4>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+                        {['billing', 'menu', 'staff', 'tables', 'orders', 'settings'].map(permKey => (
+                          <label key={permKey} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: '600' }}>
+                            <input
+                              type="checkbox"
+                              checked={roleFormState.perms[permKey]}
+                              onChange={(e) => setRoleFormState({
+                                ...roleFormState,
+                                perms: { ...roleFormState.perms, [permKey]: e.target.checked }
+                              })}
+                              style={{ width: '16px', height: '16px', accentColor: 'var(--primary)' }}
+                            />
+                            <span style={{ textTransform: 'capitalize' }}>{permKey} Management</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
+                      <button type="submit" className="btn-black" style={{ flex: 1, padding: '10px', fontWeight: '700', borderRadius: '8px', cursor: 'pointer' }}>{editingRoleId === 'new' ? 'Create Role' : 'Save Changes'}</button>
+                      <button type="button" className="btn-outline" onClick={() => setEditingRoleId(null)} style={{ flex: 1, padding: '10px', fontWeight: '700', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            ) : (
+              <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', letterSpacing: '0.5px' }}>Security & Access</span>
+                      <h3 style={{ margin: '4px 0 0 0', fontSize: '1.2rem', fontWeight: '900', color: 'var(--text-main)' }}>Roles & Responsibilities</h3>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setEditingRoleId('new')
+                        setRoleFormState({ name: '', desc: '', perms: { billing: false, menu: false, staff: false, tables: false, orders: false, settings: false } })
+                      }}
+                      className="btn-black"
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}
+                    >
+                      <Plus style={{ width: '16px', height: '16px' }} /> Add Custom Role
+                    </button>
+                  </div>
+                  
+                  <div style={{ overflowX: 'auto', background: 'var(--bg-app)', borderRadius: '12px', border: '1px solid var(--border-color)', position: 'relative' }}>
+                    <table className="menu-data-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                      <thead>
+                        <tr>
+                          <th style={{ padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', borderBottom: '1px solid var(--border-color)' }}>Role Name</th>
+                          <th style={{ padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', borderBottom: '1px solid var(--border-color)' }}>Description</th>
+                          <th style={{ padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', borderBottom: '1px solid var(--border-color)' }}>Permissions</th>
+                          <th style={{ padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', borderBottom: '1px solid var(--border-color)', textAlign: 'right' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {systemRoles.map((role) => (
+                          <tr key={role.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                            <td style={{ padding: '14px 18px', fontWeight: '800', color: 'var(--text-main)' }}>{role.name}</td>
+                            <td style={{ padding: '14px 18px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>{role.desc}</td>
+                            <td style={{ padding: '14px 18px' }}>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                {Object.keys(role.perms).filter(k => role.perms[k]).map(perm => (
+                                  <span key={perm} style={{ padding: '4px 8px', background: 'var(--primary-light)', color: 'var(--primary)', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '700', textTransform: 'uppercase' }}>
+                                    {perm}
+                                  </span>
+                                ))}
+                                {Object.keys(role.perms).filter(k => role.perms[k]).length === 0 && (
+                                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No special permissions</span>
+                                )}
+                              </div>
+                            </td>
+                            <td style={{ padding: '14px 18px', textAlign: 'right' }}>
+                              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                                <button
+                                  onClick={() => {
+                                    setEditingRoleId(role.id)
+                                    setRoleFormState(role)
+                                  }}
+                                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: 'var(--text-muted)', transition: 'color 0.2s', display: 'flex', alignItems: 'center' }}
+                                  title="Edit Role"
+                                >
+                                  <Edit2 style={{ width: '16px', height: '16px' }} />
+                                </button>
+                                {role.id !== 'role-1' && (
+                                  <button
+                                    onClick={() => handleDeleteRole(role.id)}
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: '#ef4444', transition: 'opacity 0.2s', display: 'flex', alignItems: 'center' }}
+                                    title="Delete Role"
+                                  >
+                                    <Trash2 style={{ width: '16px', height: '16px' }} />
+                                  </button>
+                                )}
                               </div>
                             </td>
                           </tr>
