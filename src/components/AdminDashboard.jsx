@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { IndianRupee, ClipboardList, Eye, Users, RefreshCw, TrendingUp, Activity, ArrowRight } from 'lucide-react'
 
-export default function AdminDashboard({ 
-  orders, 
-  tables, 
-  onNavigate, 
+export default function AdminDashboard({
+  orders,
+  tables,
+  onNavigate,
   stats,
   showToast
 }) {
@@ -67,13 +67,13 @@ export default function AdminDashboard({
 
   return (
     <div className="dashboard-grid animate-fade-in" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px', padding: '24px 30px' }}>
-      
+
       {/* Left Main Section */}
       <div className="dashboard-left" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        
+
         {/* Statistics Cards Row */}
         <div className="stats-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
-          
+
           {/* Card 1: Today's Revenue */}
           <div className="stat-card" style={{
             background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
@@ -152,7 +152,7 @@ export default function AdminDashboard({
                   {activeTablesCount} / {totalTablesCount}
                 </div>
               </div>
-              <div style={{ background: '#f1f5f9', color: '#475569', padding: '10px', borderRadius: '12px' }}>
+              <div style={{ background: '#fef2eb', color: '#475569', padding: '10px', borderRadius: '12px' }}>
                 <Users style={{ width: '20px', height: '20px' }} />
               </div>
             </div>
@@ -194,20 +194,21 @@ export default function AdminDashboard({
 
         {/* Live Order Feed Table Section */}
         <div className="feed-card" style={{ border: '1px solid var(--border-color)', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', background: 'var(--bg-card)', overflow: 'hidden' }}>
-          <div className="card-header" style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-              <Activity style={{ width: '18px', height: '18px', color: 'var(--primary)' }} /> Live Order Feed
-            </h3>
-            <div className="live-indicator" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#10b981', fontWeight: '700', textTransform: 'uppercase', background: '#d1fae5', padding: '4px 10px', borderRadius: '20px' }}>
+          <div className="feed-header" style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F95E10', color: '#ffffff' }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900', letterSpacing: '-0.3px', color: '#ffffff' }}>Live Order Feed</h3>
+              <span style={{ fontSize: '0.8rem', opacity: 0.9, fontWeight: '500' }}>Real-time synchronization active</span>
+            </div>
+            <div className="live-indicator" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#10b981', fontWeight: '700', textTransform: 'uppercase', background: '#fef2eb', padding: '4px 10px', borderRadius: '20px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
               <div className="live-dot" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981' }}></div>
               Live Server
             </div>
           </div>
-          
-          <div className="table-wrapper" style={{ 
-            display: 'grid', 
+
+          <div className="table-wrapper" style={{
+            display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: '16px', 
+            gap: '16px',
             padding: '24px'
           }}>
             {liveFeedOrders.length === 0 ? (
@@ -216,9 +217,9 @@ export default function AdminDashboard({
               </div>
             ) : (
               liveFeedOrders.map((order) => (
-                <div 
-                  key={order.id} 
-                  style={{ 
+                <div
+                  key={order.id}
+                  style={{
                     width: '100%',
                     background: 'var(--bg-card)',
                     border: '1px solid var(--border-color)',
@@ -260,13 +261,13 @@ export default function AdminDashboard({
                     <span style={{ fontWeight: '800', color: 'var(--text-main)', fontSize: '0.95rem' }}>
                       {order.id}
                     </span>
-                    <span style={{ 
-                      fontSize: '0.75rem', 
-                      fontWeight: '700', 
-                      background: 'var(--primary-light)', 
-                      color: 'var(--primary)', 
-                      padding: '4px 10px', 
-                      borderRadius: '20px' 
+                    <span style={{
+                      fontSize: '0.75rem',
+                      fontWeight: '700',
+                      background: 'var(--primary-light)',
+                      color: 'var(--primary)',
+                      padding: '4px 10px',
+                      borderRadius: '20px'
                     }}>
                       {order.table}
                     </span>
@@ -297,7 +298,7 @@ export default function AdminDashboard({
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600' }}>
                       {order.time}
                     </span>
-                    <span 
+                    <span
                       style={{
                         display: 'inline-block',
                         padding: '6px 14px',
@@ -319,7 +320,7 @@ export default function AdminDashboard({
 
         {/* Charts Row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px' }}>
-          
+
           {/* Card 1: Sales By Category */}
           <div className="feed-card" style={{ border: '1px solid var(--border-color)', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', background: 'var(--bg-card)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '0.8px' }}>Sales by Category</span>

@@ -872,7 +872,15 @@ export default function App() {
                       {getTabSubtext() && <p>{getTabSubtext()}</p>}
                     </div>
 
-                    <div className="header-actions">
+                    <div className="header-actions" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                      <button 
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', border: '1.5px solid var(--border-color)', borderRadius: '24px', padding: '8px 16px', fontSize: '0.9rem', fontWeight: '700', color: '#1e293b', cursor: 'pointer', transition: 'background 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}
+                        onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
+                        onMouseOut={(e) => e.currentTarget.style.background = '#ffffff'}
+                        onClick={() => showToast('info', 'You have 1 unread notification.')}
+                      >
+                        <span style={{ fontSize: '1.1rem' }}>🔔</span> 1 notifications
+                      </button>
                       <button className="header-btn" onClick={() => showToast('info', 'Profile settings are managed through Settings tab.')}>
                         <UserCheck style={{ width: '16px', height: '16px' }} />
                         Admin Profile
@@ -930,6 +938,7 @@ export default function App() {
                       onUpdateTable={handleUpdateTable}
                       onDeleteTable={handleDeleteTable}
                       showToast={showToast}
+                      staffMembers={staffMembers}
                     />
                   )}
 
@@ -1059,49 +1068,113 @@ export default function App() {
                     />
                   )}
 
-
-
                   {adminTab === 'settings' && (
-                    <div style={{ padding: '24px 30px', width: '100%', boxSizing: 'border-box' }} className="animate-fade-in">
-                      <h3 style={{ marginBottom: '20px' }}>Dashboard Configuration</h3>
+                    <div style={{ padding: '30px 40px', width: '100%', boxSizing: 'border-box' }} className="animate-fade-in">
+                      <div style={{ marginBottom: '30px', borderBottom: '1px solid var(--border-color)', paddingBottom: '20px' }}>
+                        <h2 style={{ margin: '0 0 6px 0', fontSize: '1.75rem', fontWeight: '900', color: '#291507' }}>Restaurant Settings</h2>
+                        <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: '500' }}>Manage store branding, operations, tax policies, and dashboard appearance</p>
+                      </div>
 
-                      <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div>
-                            <h4 style={{ fontSize: '0.95rem' }}>Automated Service Charge</h4>
-                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Apply default 5% service charge to generated invoices.</p>
+                      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
+                        {/* LEFT COLUMN */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                          
+                          {/* Restaurant Details Card */}
+                          <div className="glass-card" style={{ padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-card)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+                              <span style={{ fontSize: '1.2rem' }}>🏪</span>
+                              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>Restaurant Details</h3>
+                            </div>
+                            
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Restaurant Name</label>
+                                <input type="text" defaultValue="Serviq" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
+                              </div>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Tagline / Subtitle</label>
+                                <input type="text" defaultValue="High Quality South Indian Vegetarian" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
+                              </div>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Support Email</label>
+                                <input type="email" defaultValue="admin@saravana.com" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', backgroundColor: '#f8fafc', outline: 'none' }} />
+                              </div>
+                            </div>
                           </div>
-                          <input type="checkbox" defaultChecked style={{ width: '18px', height: '18px', accentColor: '#000' }} />
-                        </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
-                          <div>
-                            <h4 style={{ fontSize: '0.95rem' }}>Auto-print Receipts</h4>
-                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Send incoming orders to billing printer automatically.</p>
+                          {/* Operations & Charges Card */}
+                          <div className="glass-card" style={{ padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-card)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+                              <span style={{ fontSize: '1.2rem' }}>⚙️</span>
+                              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>Operations & Charges</h3>
+                            </div>
+                            
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Dining Tables Count</label>
+                                <input type="number" defaultValue={0} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--primary)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
+                              </div>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Total Tax Rate (%)</label>
+                                <input type="number" defaultValue={0} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
+                              </div>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Service Charge (%)</label>
+                                <input type="number" defaultValue={0} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
+                              </div>
+                            </div>
                           </div>
-                          <input type="checkbox" style={{ width: '18px', height: '18px', accentColor: '#000' }} />
+
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
-                          <div>
-                            <h4 style={{ fontSize: '0.95rem' }}>UPI Dynamic QR Code</h4>
-                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Generate transaction-specific QR code for tables on UPI checkout.</p>
+                        {/* RIGHT COLUMN */}
+                        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                          <div className="glass-card" style={{ padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                            <h3 style={{ margin: '0 0 24px 0', fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>Store Profile Summary</h3>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                              <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '12px 0', borderBottom: '1px solid var(--border-color)' }}>
+                                <span style={{ fontWeight: '800', fontSize: '0.95rem', color: 'var(--text-main)' }}>Serviq</span>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '12px 0', borderBottom: '1px solid var(--border-color)' }}>
+                                <span style={{ fontWeight: '800', fontSize: '0.95rem', color: 'var(--text-main)' }}>0 Tables</span>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '12px 0', borderBottom: '1px solid var(--border-color)' }}>
+                                <span style={{ fontWeight: '800', fontSize: '0.95rem', color: 'var(--text-main)' }}>0% (GST)</span>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '12px 0', marginBottom: '24px' }}>
+                                <span style={{ fontWeight: '800', fontSize: '0.95rem', color: 'var(--text-main)' }}>0%</span>
+                              </div>
+                            </div>
+
+                            <div style={{ background: '#fff7ed', border: '1px solid #ffedd5', padding: '16px', borderRadius: '8px', color: '#ea580c', fontSize: '0.85rem', lineHeight: '1.5', fontWeight: '600' }}>
+                              💡 Saving these settings will dynamically update the customer menu simulator, billing receipts, and dining table counts.
+                            </div>
                           </div>
-                          <input type="checkbox" defaultChecked style={{ width: '18px', height: '18px', accentColor: '#000' }} />
                         </div>
 
-                        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
-                          <label style={{ fontSize: '0.8rem', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Selected Currency Symbol</label>
-                          <select style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', width: '100px' }}>
-                            <option value="INR">₹ (INR)</option>
-                            <option value="USD">$ (USD)</option>
-                            <option value="EUR">€ (EUR)</option>
-                          </select>
-                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '30px' }}>
+                        <button 
+                          style={{ padding: '12px 24px', borderRadius: '8px', border: '1.5px solid var(--border-color)', background: '#ffffff', color: 'var(--text-main)', fontWeight: '700', cursor: 'pointer', fontSize: '0.95rem', transition: 'background 0.2s' }}
+                          onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
+                          onMouseOut={(e) => e.currentTarget.style.background = '#ffffff'}
+                        >
+                          Reset Defaults
+                        </button>
+                        <button 
+                          style={{ padding: '12px 24px', borderRadius: '8px', border: 'none', background: '#F95E10', color: '#ffffff', fontWeight: '700', cursor: 'pointer', fontSize: '0.95rem', boxShadow: '0 4px 10px rgba(249, 94, 16, 0.2)', transition: 'transform 0.1s, box-shadow 0.1s' }}
+                          onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 12px rgba(249, 94, 16, 0.25)' }}
+                          onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 10px rgba(249, 94, 16, 0.2)' }}
+                          onClick={() => showToast('success', 'Restaurant settings saved successfully!')}
+                        >
+                          Save Settings
+                        </button>
                       </div>
                     </div>
                   )}
-
                 </div>
               </>
             )}

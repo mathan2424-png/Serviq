@@ -762,22 +762,6 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
               </div>
 
               <div className="modal-field-group">
-                <label>Waiter Profile</label>
-                <select
-                  value={editingOrder.waiter || ''}
-                  onChange={(e) => setEditingOrder({ ...editingOrder, waiter: e.target.value })}
-                >
-                  <option value="">Unassigned</option>
-                  <option value="Ravi M.">Ravi M.</option>
-                  <option value="Rahul S.">Rahul S.</option>
-                  <option value="Arjun K.">Arjun K.</option>
-                  <option value="Self Order">Self Order</option>
-                </select>
-              </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              <div className="modal-field-group">
                 <label>Order Status</label>
                 <select
                   value={editingOrder.status}
@@ -920,10 +904,7 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
                   <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600' }}>Table</span>
                   <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: '700' }}>{viewingOrder.table}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600' }}>Waiter</span>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: '700' }}>{viewingOrder.waiter || 'Unassigned'}</span>
-                </div>
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
                   <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600' }}>Time</span>
                   <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: '700' }}>{viewingOrder.time}</span>
@@ -1011,17 +992,7 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
               ))}
             </div>
 
-            {/* Dropdown 2: All Waiters */}
-            <select
-              value={waiterFilter}
-              onChange={(e) => setWaiterFilter(e.target.value)}
-              className="custom-select-filter"
-            >
-              <option value="All">All Waiters</option>
-              {uniqueWaiters.filter(w => w !== 'All').map(waiter => (
-                <option key={waiter} value={waiter}>{waiter}</option>
-              ))}
-            </select>
+
 
             {/* Date Picker showing 05/28/2026 by default */}
             <div className="custom-date-filter">
@@ -1051,7 +1022,7 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
                       <th style={{ width: '60px' }}>S.No.</th>
                       <th>Order #</th>
                       <th>Table</th>
-                      <th>Waiter</th>
+
                       <th>Items</th>
                       <th>Total</th>
                       <th>Status</th>
@@ -1082,7 +1053,7 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
                           <td className="sno-cell">{index + 1}</td>
                           <td className="order-id-cell">{order.id}</td>
                           <td className="table-name-cell">{order.table}</td>
-                          <td className="waiter-name-cell">{order.waiter || 'Unassigned'}</td>
+
                           <td className="items-cell" title={order.items.map(i => `${i.name} x${i.quantity}`).join(', ')}>
                             {formatItemsText(order.items)}
                           </td>
