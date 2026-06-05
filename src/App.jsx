@@ -21,7 +21,8 @@ import {
   CreditCard,
   Activity,
   LogOut,
-  Grid
+  Grid,
+  ShieldCheck
 } from 'lucide-react'
 import './App.css'
 
@@ -439,8 +440,8 @@ export default function App() {
     const params = new URLSearchParams(window.location.search)
     const tableParam = params.get('table')
     if (tableParam) {
-      const matchingTable = tables.find(t => 
-        t.id.toLowerCase() === tableParam.toLowerCase() || 
+      const matchingTable = tables.find(t =>
+        t.id.toLowerCase() === tableParam.toLowerCase() ||
         t.name.toLowerCase() === tableParam.toLowerCase()
       )
       if (matchingTable) {
@@ -496,10 +497,10 @@ export default function App() {
   const handlePlaceOrder = (cartItems, note) => {
     const nextOrderNum = orders.length > 0
       ? Math.max(...orders.map(o => {
-          const cleanId = o.id.replace('#ORD-', '').replace('#', '')
-          const parsed = parseInt(cleanId)
-          return isNaN(parsed) ? 0 : parsed
-        })) + 1
+        const cleanId = o.id.replace('#ORD-', '').replace('#', '')
+        const parsed = parseInt(cleanId)
+        return isNaN(parsed) ? 0 : parsed
+      })) + 1
       : 46
 
     const formattedId = `#ORD-${nextOrderNum < 10 ? '00' + nextOrderNum : nextOrderNum < 100 ? '0' + nextOrderNum : nextOrderNum}`
@@ -810,35 +811,41 @@ export default function App() {
                           <li style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '8px 0', listStyleType: 'none' }}></li>
                           <span style={{ fontSize: '0.65rem', fontWeight: '800', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', display: 'block', paddingLeft: '16px', marginBottom: '6px', letterSpacing: '0.5px' }}>Super Deck</span>
                           <li
-                             className={`sidebar-item ${adminTab === 'super-revenue' ? 'active' : ''}`}
-                             onClick={() => setAdminTab('super-revenue')}
-                           >
-                             <LayoutDashboard style={{ width: '18px', height: '18px' }} /> Dashboard
-                           </li>
-                           <li
-                             className={`sidebar-item ${adminTab === 'super-details' ? 'active' : ''}`}
-                             onClick={() => setAdminTab('super-details')}
-                           >
+                            className={`sidebar-item ${adminTab === 'super-revenue' ? 'active' : ''}`}
+                            onClick={() => setAdminTab('super-revenue')}
+                          >
+                            <LayoutDashboard style={{ width: '18px', height: '18px' }} /> Dashboard
+                          </li>
+                          <li
+                            className={`sidebar-item ${adminTab === 'super-details' ? 'active' : ''}`}
+                            onClick={() => setAdminTab('super-details')}
+                          >
                             <Building style={{ width: '18px', height: '18px' }} /> Restaurants
-                           </li>
-                           <li
-                             className={`sidebar-item ${adminTab === 'super-admins' ? 'active' : ''}`}
-                             onClick={() => setAdminTab('super-admins')}
-                           >
-                             <Users style={{ width: '18px', height: '18px' }} /> Admins
-                           </li>
-                           <li
-                             className={`sidebar-item ${adminTab === 'super-plans' ? 'active' : ''}`}
-                             onClick={() => setAdminTab('super-plans')}
-                           >
-                             <Layers style={{ width: '18px', height: '18px' }} /> Subscription & Plans
-                           </li>
-                           <li
-                             className={`sidebar-item ${adminTab === 'super-billing' ? 'active' : ''}`}
-                             onClick={() => setAdminTab('super-billing')}
-                           >
-                             <CreditCard style={{ width: '18px', height: '18px' }} /> Revenue & Billing
-                           </li>
+                          </li>
+                          <li
+                            className={`sidebar-item ${adminTab === 'super-admins' ? 'active' : ''}`}
+                            onClick={() => setAdminTab('super-admins')}
+                          >
+                            <Users style={{ width: '18px', height: '18px' }} /> Admins
+                          </li>
+                          <li
+                            className={`sidebar-item ${adminTab === 'super-roles' ? 'active' : ''}`}
+                            onClick={() => setAdminTab('super-roles')}
+                          >
+                            <ShieldCheck style={{ width: '18px', height: '18px' }} /> Roles & Responsibilities
+                          </li>
+                          <li
+                            className={`sidebar-item ${adminTab === 'super-plans' ? 'active' : ''}`}
+                            onClick={() => setAdminTab('super-plans')}
+                          >
+                            <Layers style={{ width: '18px', height: '18px' }} /> Subscription & Plans
+                          </li>
+                          <li
+                            className={`sidebar-item ${adminTab === 'super-billing' ? 'active' : ''}`}
+                            onClick={() => setAdminTab('super-billing')}
+                          >
+                            <CreditCard style={{ width: '18px', height: '18px' }} /> Revenue & Billing
+                          </li>
                         </>
                       )}
 
@@ -864,16 +871,17 @@ export default function App() {
                     <div className="header-title">
                       <h1 style={{ textTransform: 'capitalize' }}>
                         {adminTab === 'super-revenue' ? 'Dashboard' :
-                         adminTab === 'super-details' ? 'Restaurant Management' : 
-                         adminTab === 'super-plans' ? 'Subscription & Plans' : 
-                         adminTab === 'super-billing' ? 'Revenue & Billing' :
-                         adminTab.replace('-', ' ').replace('super ', '')}
+                          adminTab === 'super-details' ? 'Restaurant Management' :
+                            adminTab === 'super-roles' ? 'Roles & Responsibilities' :
+                              adminTab === 'super-plans' ? 'Subscription & Plans' :
+                                adminTab === 'super-billing' ? 'Revenue & Billing' :
+                                  adminTab.replace('-', ' ').replace('super ', '')}
                       </h1>
                       {getTabSubtext() && <p>{getTabSubtext()}</p>}
                     </div>
 
                     <div className="header-actions" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                      <button 
+                      <button
                         style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', border: '1.5px solid var(--border-color)', borderRadius: '24px', padding: '8px 16px', fontSize: '0.9rem', fontWeight: '700', color: '#1e293b', cursor: 'pointer', transition: 'background 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}
                         onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
                         onMouseOut={(e) => e.currentTarget.style.background = '#ffffff'}
@@ -1044,6 +1052,29 @@ export default function App() {
                     />
                   )}
 
+                  {adminTab === 'super-roles' && (
+                    <SuperAdminDashboard
+                      restaurants={restaurants}
+                      activeRestaurantId={activeRestaurantId}
+                      onSetActiveRestaurantId={setActiveRestaurantId}
+                      onUpdateRestaurants={setRestaurants}
+                      restaurantDetails={restaurantDetails}
+                      onUpdateRestaurantDetails={handleUpdateRestaurantDetails}
+                      orders={orders}
+                      tables={tables}
+                      menuItems={menuItems}
+                      staffMembers={staffMembers}
+                      stats={getComputedStats()}
+                      showToast={showToast}
+                      onUpdateTables={setTables}
+                      onUpdateOrders={setOrders}
+                      activeTab="roles"
+                      isMerged={true}
+                      restaurantAdmins={restaurantAdmins}
+                      onUpdateRestaurantAdmins={setRestaurantAdmins}
+                    />
+                  )}
+
 
                   {adminTab === 'super-plans' && (
                     <SuperAdminDashboard
@@ -1078,14 +1109,14 @@ export default function App() {
                       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
                         {/* LEFT COLUMN */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                          
+
                           {/* Restaurant Details Card */}
                           <div className="glass-card" style={{ padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-card)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
                               <span style={{ fontSize: '1.2rem' }}>🏪</span>
                               <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>Restaurant Details</h3>
                             </div>
-                            
+
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                               <div>
                                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Restaurant Name</label>
@@ -1108,7 +1139,7 @@ export default function App() {
                               <span style={{ fontSize: '1.2rem' }}>⚙️</span>
                               <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>Operations & Charges</h3>
                             </div>
-                            
+
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
                               <div>
                                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Dining Tables Count</label>
@@ -1131,7 +1162,7 @@ export default function App() {
                         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                           <div className="glass-card" style={{ padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', height: '100%', display: 'flex', flexDirection: 'column' }}>
                             <h3 style={{ margin: '0 0 24px 0', fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>Store Profile Summary</h3>
-                            
+
                             <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                               <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '12px 0', borderBottom: '1px solid var(--border-color)' }}>
                                 <span style={{ fontWeight: '800', fontSize: '0.95rem', color: 'var(--text-main)' }}>Serviq</span>
@@ -1157,14 +1188,14 @@ export default function App() {
 
                       {/* Action Buttons */}
                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '30px' }}>
-                        <button 
+                        <button
                           style={{ padding: '12px 24px', borderRadius: '8px', border: '1.5px solid var(--border-color)', background: '#ffffff', color: 'var(--text-main)', fontWeight: '700', cursor: 'pointer', fontSize: '0.95rem', transition: 'background 0.2s' }}
                           onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
                           onMouseOut={(e) => e.currentTarget.style.background = '#ffffff'}
                         >
                           Reset Defaults
                         </button>
-                        <button 
+                        <button
                           style={{ padding: '12px 24px', borderRadius: '8px', border: 'none', background: '#F95E10', color: '#ffffff', fontWeight: '700', cursor: 'pointer', fontSize: '0.95rem', boxShadow: '0 4px 10px rgba(249, 94, 16, 0.2)', transition: 'transform 0.1s, box-shadow 0.1s' }}
                           onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 12px rgba(249, 94, 16, 0.25)' }}
                           onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 10px rgba(249, 94, 16, 0.2)' }}
