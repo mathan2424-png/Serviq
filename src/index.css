@@ -7,7 +7,7 @@
   --primary-light: hsl(var(--primary-hue), 95%, 96%);
   
   --bg-app: #faf8f6; /* Soft warm background to match orange-red */
-  --bg-card: #fef2eb;
+  --bg-card: #ffffff;
   --bg-sidebar: #0f172a; /* Slate 900 for premium contrast */
   --bg-sidebar-active: #1e293b;
   
@@ -118,13 +118,13 @@ th,
   border-bottom: none !important;
 }
 
-/* Global Table Body Style - Light Peach */
+/* Global Table Body Style - White */
 .tables-table,
 .menu-data-table,
 .orders-data-table,
 .glass-card,
 .dish-admin-list {
-  background-color: #fef2eb !important;
+  background-color: #ffffff !important;
 }
 
 .tables-table td,
@@ -142,7 +142,7 @@ th,
 
 /* Simulator Bar */
 .simulator-bar {
-  background: linear-gradient(135deg, #1e1b4b 0%, #0f0728 100%);
+  background: #0f172a;
   color: #fff;
   padding: 10px 20px;
   display: flex;

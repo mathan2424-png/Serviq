@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Settings,
   ChevronRight,
+  ChevronDown,
   Bell,
   Sun,
   Moon,
@@ -22,7 +23,12 @@ import {
   Activity,
   LogOut,
   Grid,
-  ShieldCheck
+  ShieldCheck,
+  Lock,
+  User,
+  CheckCircle2,
+  XCircle,
+  Info
 } from 'lucide-react'
 import './App.css'
 
@@ -30,12 +36,8 @@ import './App.css'
 import AdminDashboard from './components/AdminDashboard'
 import IncomingOrders from './components/IncomingOrders'
 import MenuManagement from './components/MenuManagement'
-import CustomerApp from './components/CustomerApp'
-import KitchenDisplay from './components/KitchenDisplay'
-import WaiterApp from './components/WaiterApp'
 import BillingSystem from './components/BillingSystem'
 import Login from './components/Login'
-import StaffMaster from './components/StaffMaster'
 import SuperAdminDashboard from './components/SuperAdminDashboard'
 import TableManagement from './components/TableManagement'
 
@@ -161,7 +163,7 @@ const INITIAL_ADMINS = [
 const INITIAL_RESTAURANTS = [
   {
     id: 'R-01',
-    name: 'Serviq Grand Bistro',
+    name: 'Serviq',
     legalName: 'Serviq Hospitality Pvt. Ltd.',
     ownerName: 'Rajesh Kumar',
     mobileNumber: '+91 98765 43210',
@@ -265,7 +267,7 @@ const INITIAL_RESTAURANTS = [
   },
   {
     id: 'R-05',
-    name: 'Serviq Bakery & Sweets',
+    name: 'Serviq',
     legalName: 'Serviq Patisseries Ltd.',
     ownerName: 'Siddharth Rao',
     mobileNumber: '+91 98765 44444',
@@ -371,6 +373,9 @@ export default function App() {
   const [adminTab, setAdminTab] = useState('dashboard') // 'dashboard', 'incoming-orders', 'menu-management', 'billing', 'tables', 'settings'
   const [darkMode, setDarkMode] = useState(false)
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
+  const [adminProfileDropdownOpen, setAdminProfileDropdownOpen] = useState(false)
+  const [usersDropdownOpen, setUsersDropdownOpen] = useState(false)
+  const adminProfileRef = React.useRef(null)
   const [notifications, setNotifications] = useState([
     'New Order #847 placed on Table 03',
     'Special Request: allergy notes on Table 01 order',
@@ -378,6 +383,29 @@ export default function App() {
   ])
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false)
   const [billingSelectedTableId, setBillingSelectedTableId] = useState(null)
+
+  // Live clock state
+  const [currentDateTime, setCurrentDateTime] = useState('')
+
+  useEffect(() => {
+    const formatDateTime = () => {
+      const now = new Date()
+      const day = String(now.getDate()).padStart(2, '0')
+      const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December']
+      const month = monthNames[now.getMonth()]
+      const year = now.getFullYear()
+      let hours = now.getHours()
+      const minutes = String(now.getMinutes()).padStart(2, '0')
+      const seconds = String(now.getSeconds()).padStart(2, '0')
+      const ampm = hours >= 12 ? 'PM' : 'AM'
+      hours = hours % 12 || 12
+      const hoursStr = String(hours).padStart(2, '0')
+      return `${day}-${month}-${year} ${hoursStr}:${minutes}:${seconds} ${ampm}`
+    }
+    setCurrentDateTime(formatDateTime())
+    const timer = setInterval(() => setCurrentDateTime(formatDateTime()), 1000)
+    return () => clearInterval(timer)
+  }, [])
 
 
   // Custom interactive notifications and alert modals
@@ -474,6 +502,28 @@ export default function App() {
       }
     }
   }, [orders, customerTable, activeCustomerOrder])
+
+  // Synchronize users dropdown open state when active tab changes
+  useEffect(() => {
+    if (adminTab === 'super-admins' || adminTab === 'super-roles' || adminTab === 'super-users-list') {
+      setUsersDropdownOpen(true)
+    }
+  }, [adminTab])
+
+  // Close admin profile dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (adminProfileRef.current && !adminProfileRef.current.contains(event.target)) {
+        setAdminProfileDropdownOpen(false)
+      }
+    }
+    if (adminProfileDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [adminProfileDropdownOpen])
 
   // Automatically compute statistical values
   const getComputedStats = () => {
@@ -703,46 +753,83 @@ export default function App() {
           {/* SIMULATOR ROLE CONTROLLER BAR */}
           <div className="simulator-bar">
             <div className="simulator-title">
-              <UtensilsCrossed style={{ color: 'var(--primary)' }} />
-              <span>QRMenu</span>
+              <img src="/serviqlogo.png" alt="Serviq Logo" style={{ height: '48px', objectFit: 'contain' }} />
             </div>
 
 
 
             {/* Theme and tools */}
             <div className="simulator-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button
-                className="theme-toggle-btn"
-                onClick={() => {
-                  setRole('login')
-                  setCustomerTable(null)
-                  setActiveCustomerOrder(null)
-                  setIsSuperAdmin(false)
-                  setAdminTab('dashboard')
-                }}
-                title={role === 'customer' ? "Exit Guest Mode" : "Log Out"}
-                style={{
-                  background: role === 'customer' ? 'rgba(239, 68, 68, 0.12)' : 'rgba(239, 68, 68, 0.1)',
-                  color: '#ef4444',
-                  border: '1px solid rgba(239, 68, 68, 0.2)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: role === 'customer' ? '6px 14px' : '8px 12px',
-                  borderRadius: '20px',
-                  fontWeight: '700',
-                  fontSize: '0.8rem',
-                  gap: '6px'
-                }}
-              >
-                {role === 'customer' ? '🚪 Exit Guest Mode' : (
-                  <>
-                    <LogOut style={{ width: '16px', height: '16px' }} />
-                    <span>Log Out</span>
-                  </>
-                )}
-              </button>
+              {role === 'customer' ? (
+                <button
+                  className="theme-toggle-btn"
+                  onClick={() => {
+                    setRole('login')
+                    setCustomerTable(null)
+                    setActiveCustomerOrder(null)
+                    setIsSuperAdmin(false)
+                    setAdminTab('dashboard')
+                  }}
+                  title="Exit Guest Mode"
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.12)',
+                    color: '#ef4444',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '6px 14px',
+                    borderRadius: '20px',
+                    fontWeight: '700',
+                    fontSize: '0.8rem',
+                    gap: '6px'
+                  }}
+                >
+                  <LogOut style={{ width: '14px', height: '14px' }} /> Exit Guest Mode
+                </button>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {/* Live Date & Time */}
+                  {isSuperAdmin && currentDateTime && (
+                    <span style={{
+                      fontSize: '0.82rem',
+                      fontWeight: '700',
+                      color: 'hsla(0, 0%, 100%, 1.00)',
+                      letterSpacing: '0.01em',
+                      fontFamily: 'monospace',
+                      background: 'rgba(30, 58, 138, 0.07)',
+                      padding: '5px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(30, 58, 138, 0.13)',
+                      userSelect: 'none',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {currentDateTime}
+                    </span>
+                  )}
+                  <button className="header-profile-btn" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Notifications">
+                    <Bell style={{ width: '18px', height: '18px' }} />
+                    <span style={{ position: 'absolute', top: '4px', right: '4px', width: '8px', height: '8px', background: '#ef4444', borderRadius: '50%', border: '2px solid var(--bg-app)' }}></span>
+                  </button>
+
+                  <div ref={adminProfileRef} style={{ position: 'relative' }}>
+                    <button className="header-profile-btn" onClick={() => setAdminProfileDropdownOpen(!adminProfileDropdownOpen)} title="Admin Profile">
+                      <UserCheck style={{ width: '18px', height: '18px' }} />
+                    </button>
+                    {adminProfileDropdownOpen && (
+                      <div className="animate-fade-in" style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', boxShadow: 'var(--shadow-md)', zIndex: 100, minWidth: '160px', overflow: 'hidden', padding: '4px' }}>
+                        <div onClick={() => { setAdminTab('settings'); setAdminProfileDropdownOpen(false); }} style={{ padding: '10px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-main)', borderRadius: '6px' }} onMouseOver={(e) => e.currentTarget.style.background = 'var(--bg-hover)'} onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}>
+                          <UserCheck style={{ width: '14px', height: '14px' }} /> Profile
+                        </div>
+                        <div onClick={() => { setRole('login'); setCustomerTable(null); setActiveCustomerOrder(null); setIsSuperAdmin(false); setAdminTab('dashboard'); setAdminProfileDropdownOpen(false); }} style={{ padding: '10px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#ef4444', borderRadius: '6px' }} onMouseOver={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'} onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}>
+                          <LogOut style={{ width: '14px', height: '14px' }} /> Log Out
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -755,13 +842,15 @@ export default function App() {
                 {/* Sidebar */}
                 <div className="sidebar">
                   <div>
-                    <div className="sidebar-header">
-                      <div className="sidebar-logo-icon">🍽️</div>
-                      <div className="sidebar-logo-text">
-                        <h3>QRMenu</h3>
-                        <span>Standard Plan</span>
+                    {!isSuperAdmin && (
+                      <div className="sidebar-header">
+                        <div className="sidebar-logo-icon"><UtensilsCrossed style={{ width: '20px', height: '20px' }} /></div>
+                        <div className="sidebar-logo-text">
+                          <h3>QRMenu</h3>
+                          <span>Standard Plan</span>
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     <ul className="sidebar-nav">
                       {!isSuperAdmin && (
@@ -808,8 +897,7 @@ export default function App() {
                       {/* Super Admin ONLY Unified Menus */}
                       {isSuperAdmin && (
                         <>
-                          <li style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '8px 0', listStyleType: 'none' }}></li>
-                          <span style={{ fontSize: '0.65rem', fontWeight: '800', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', display: 'block', paddingLeft: '16px', marginBottom: '6px', letterSpacing: '0.5px' }}>Super Deck</span>
+
                           <li
                             className={`sidebar-item ${adminTab === 'super-revenue' ? 'active' : ''}`}
                             onClick={() => setAdminTab('super-revenue')}
@@ -823,16 +911,73 @@ export default function App() {
                             <Building style={{ width: '18px', height: '18px' }} /> Restaurants
                           </li>
                           <li
-                            className={`sidebar-item ${adminTab === 'super-admins' ? 'active' : ''}`}
-                            onClick={() => setAdminTab('super-admins')}
+                            className={`sidebar-item ${adminTab === 'super-platform-admins' ? 'active' : ''}`}
+                            onClick={() => setAdminTab('super-platform-admins')}
                           >
-                            <Users style={{ width: '18px', height: '18px' }} /> Admins
+                            <ShieldCheck style={{ width: '18px', height: '18px' }} /> Admins
                           </li>
-                          <li
-                            className={`sidebar-item ${adminTab === 'super-roles' ? 'active' : ''}`}
-                            onClick={() => setAdminTab('super-roles')}
-                          >
-                            <ShieldCheck style={{ width: '18px', height: '18px' }} /> Roles & Responsibilities
+                          {/* Admin Management Dropdown Menu */}
+                          <li style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+                            <div
+                              className="sidebar-item"
+                              onClick={() => setUsersDropdownOpen(!usersDropdownOpen)}
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                color: (adminTab === 'super-users-list' || adminTab === 'super-roles') ? '#ffffff' : '#94a3b8',
+                                background: (adminTab === 'super-users-list' || adminTab === 'super-roles') ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <Users style={{ width: '18px', height: '18px' }} />
+                                <span>Users</span>
+                              </div>
+                              <ChevronDown
+                                style={{
+                                  width: '14px',
+                                  height: '14px',
+                                  transition: 'transform 0.2s',
+                                  transform: usersDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+                                }}
+                              />
+                            </div>
+
+                            {usersDropdownOpen && (
+                              <div style={{
+                                paddingLeft: '16px',
+                                marginTop: '4px',
+                                marginBottom: '4px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '4px',
+                                borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
+                                marginLeft: '24px'
+                              }}>
+                                <div
+                                  className={`sidebar-item ${adminTab === 'super-roles' ? 'active' : ''}`}
+                                  onClick={() => setAdminTab('super-roles')}
+                                  style={{
+                                    padding: '8px 12px',
+                                    fontSize: '0.85rem',
+                                    fontWeight: adminTab === 'super-roles' ? '600' : '500'
+                                  }}
+                                >
+                                  Roles & Permissions
+                                </div>
+                                <div
+                                  className={`sidebar-item ${adminTab === 'super-users-list' ? 'active' : ''}`}
+                                  onClick={() => setAdminTab('super-users-list')}
+                                  style={{
+                                    padding: '8px 12px',
+                                    fontSize: '0.85rem',
+                                    fontWeight: adminTab === 'super-users-list' ? '600' : '500'
+                                  }}
+                                >
+                                  Users
+                                </div>
+                              </div>
+                            )}
                           </li>
                           <li
                             className={`sidebar-item ${adminTab === 'super-plans' ? 'active' : ''}`}
@@ -871,28 +1016,19 @@ export default function App() {
                     <div className="header-title">
                       <h1 style={{ textTransform: 'capitalize' }}>
                         {adminTab === 'super-revenue' ? 'Dashboard' :
-                          adminTab === 'super-details' ? 'Restaurant Management' :
-                            adminTab === 'super-roles' ? 'Roles & Responsibilities' :
-                              adminTab === 'super-plans' ? 'Subscription & Plans' :
-                                adminTab === 'super-billing' ? 'Revenue & Billing' :
-                                  adminTab.replace('-', ' ').replace('super ', '')}
+                          adminTab === 'super-details' ? 'Restaurants' :
+                            adminTab === 'super-platform-admins' ? 'Admins' :
+                              adminTab === 'super-roles' ? 'Roles & Permissions' :
+                                adminTab === 'super-plans' ? 'Subscription & Plans' :
+                                  adminTab === 'super-billing' ? 'Revenue & Billing' :
+                                    adminTab === 'super-users-list' ? 'Users' :
+                                      adminTab.replace('-', ' ').replace('super ', '')}
                       </h1>
                       {getTabSubtext() && <p>{getTabSubtext()}</p>}
                     </div>
 
                     <div className="header-actions" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                      <button
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', border: '1.5px solid var(--border-color)', borderRadius: '24px', padding: '8px 16px', fontSize: '0.9rem', fontWeight: '700', color: '#1e293b', cursor: 'pointer', transition: 'background 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}
-                        onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
-                        onMouseOut={(e) => e.currentTarget.style.background = '#ffffff'}
-                        onClick={() => showToast('info', 'You have 1 unread notification.')}
-                      >
-                        <span style={{ fontSize: '1.1rem' }}>🔔</span> 1 notifications
-                      </button>
-                      <button className="header-btn" onClick={() => showToast('info', 'Profile settings are managed through Settings tab.')}>
-                        <UserCheck style={{ width: '16px', height: '16px' }} />
-                        Admin Profile
-                      </button>
+                      {/* Admin Profile moved to simulator bar */}
                     </div>
                   </div>
 
@@ -1029,7 +1165,7 @@ export default function App() {
                     />
                   )}
 
-                  {adminTab === 'super-admins' && (
+                  {adminTab === 'super-platform-admins' && (
                     <SuperAdminDashboard
                       restaurants={restaurants}
                       activeRestaurantId={activeRestaurantId}
@@ -1045,7 +1181,30 @@ export default function App() {
                       showToast={showToast}
                       onUpdateTables={setTables}
                       onUpdateOrders={setOrders}
-                      activeTab="admins"
+                      activeTab="platform-admins"
+                      isMerged={true}
+                      restaurantAdmins={restaurantAdmins}
+                      onUpdateRestaurantAdmins={setRestaurantAdmins}
+                    />
+                  )}
+
+                  {adminTab === 'super-users-list' && (
+                    <SuperAdminDashboard
+                      restaurants={restaurants}
+                      activeRestaurantId={activeRestaurantId}
+                      onSetActiveRestaurantId={setActiveRestaurantId}
+                      onUpdateRestaurants={setRestaurants}
+                      restaurantDetails={restaurantDetails}
+                      onUpdateRestaurantDetails={handleUpdateRestaurantDetails}
+                      orders={orders}
+                      tables={tables}
+                      menuItems={menuItems}
+                      staffMembers={staffMembers}
+                      stats={getComputedStats()}
+                      showToast={showToast}
+                      onUpdateTables={setTables}
+                      onUpdateOrders={setOrders}
+                      activeTab="users"
                       isMerged={true}
                       restaurantAdmins={restaurantAdmins}
                       onUpdateRestaurantAdmins={setRestaurantAdmins}
@@ -1102,105 +1261,95 @@ export default function App() {
                   {adminTab === 'settings' && (
                     <div style={{ padding: '30px 40px', width: '100%', boxSizing: 'border-box' }} className="animate-fade-in">
                       <div style={{ marginBottom: '30px', borderBottom: '1px solid var(--border-color)', paddingBottom: '20px' }}>
-                        <h2 style={{ margin: '0 0 6px 0', fontSize: '1.75rem', fontWeight: '900', color: '#291507' }}>Restaurant Settings</h2>
-                        <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: '500' }}>Manage store branding, operations, tax policies, and dashboard appearance</p>
+                        <h2 style={{ margin: '0 0 6px 0', fontSize: '1.75rem', fontWeight: '900', color: 'var(--text-main)' }}>Profile Settings</h2>
+                        <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: '500' }}>Manage your personal profile, security credentials, and preferences</p>
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
                         {/* LEFT COLUMN */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-                          {/* Restaurant Details Card */}
+                          {/* Profile Information Card */}
                           <div className="glass-card" style={{ padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-card)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
-                              <span style={{ fontSize: '1.2rem' }}>🏪</span>
-                              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>Restaurant Details</h3>
+                              <User style={{ width: '20px', height: '20px', color: 'var(--primary)' }} />
+                              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>Profile Information</h3>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
+                              {/* Left side: Profile Picture Area */}
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', minWidth: '160px' }}>
+                                <div style={{ width: '140px', height: '140px', border: '1px solid var(--border-color)', borderRadius: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8fafc' }}>
+                                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                  </svg>
+                                </div>
+                                <button type="button" style={{ width: '120px', padding: '10px 0', border: '1.5px solid #3b82f6', color: '#3b82f6', background: 'transparent', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '0.95rem' }}>Choose</button>
+                              </div>
+
+                              {/* Right side: Form Fields Grid */}
+                              <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                                <div>
+                                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Full Name <span style={{ color: '#ef4444' }}>*</span></label>
+                                  <input type="text" defaultValue="Admin User" placeholder="Enter Full Name" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
+                                </div>
+                                <div>
+                                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Email Address <span style={{ color: '#ef4444' }}>*</span></label>
+                                  <input type="email" defaultValue="admin@serveiq.com" placeholder="Enter Email Address" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
+                                </div>
+                                <div>
+                                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Username <span style={{ color: '#ef4444' }}>*</span></label>
+                                  <input type="text" defaultValue="superadmin" placeholder="Enter Username" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
+                                </div>
+                                <div>
+                                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Mobile Number <span style={{ color: '#ef4444' }}>*</span></label>
+                                  <input type="text" defaultValue="+91 9876543210" placeholder="Enter Phone Number" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
+                                </div>
+                                <div style={{ gridColumn: '1 / -1' }}>
+                                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Designation</label>
+                                  <input type="text" value="Super Admin" readOnly style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', backgroundColor: 'var(--bg-app)', color: 'var(--text-muted)', fontWeight: '600', outline: 'none' }} />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Login & Security Card */}
+                          <div className="glass-card" style={{ padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-card)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+                              <Lock style={{ width: '20px', height: '20px', color: 'var(--primary)' }} />
+                              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>Login & Security</h3>
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                              <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Restaurant Name</label>
-                                <input type="text" defaultValue="Serviq" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
+                              <div style={{ gridColumn: '1 / -1' }}>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Current Password</label>
+                                <input type="password" placeholder="Enter current password" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none', background: 'var(--bg-app)', color: 'var(--text-main)' }} />
                               </div>
                               <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Tagline / Subtitle</label>
-                                <input type="text" defaultValue="High Quality South Indian Vegetarian" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>New Password</label>
+                                <input type="password" placeholder="Enter new password" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none', background: 'var(--bg-app)', color: 'var(--text-main)' }} />
                               </div>
                               <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Support Email</label>
-                                <input type="email" defaultValue="admin@saravana.com" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', backgroundColor: '#f8fafc', outline: 'none' }} />
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Confirm Password</label>
+                                <input type="password" placeholder="Confirm new password" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none', background: 'var(--bg-app)', color: 'var(--text-main)' }} />
                               </div>
-                            </div>
-                          </div>
 
-                          {/* Operations & Charges Card */}
-                          <div className="glass-card" style={{ padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-card)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
-                              <span style={{ fontSize: '1.2rem' }}>⚙️</span>
-                              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>Operations & Charges</h3>
-                            </div>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
-                              <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Dining Tables Count</label>
-                                <input type="number" defaultValue={0} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--primary)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
-                              </div>
-                              <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Total Tax Rate (%)</label>
-                                <input type="number" defaultValue={0} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
-                              </div>
-                              <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Service Charge (%)</label>
-                                <input type="number" defaultValue={0} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
-                              </div>
                             </div>
                           </div>
 
                         </div>
 
-                        {/* RIGHT COLUMN */}
-                        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                          <div className="glass-card" style={{ padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                            <h3 style={{ margin: '0 0 24px 0', fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>Store Profile Summary</h3>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                              <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '12px 0', borderBottom: '1px solid var(--border-color)' }}>
-                                <span style={{ fontWeight: '800', fontSize: '0.95rem', color: 'var(--text-main)' }}>Serviq</span>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '12px 0', borderBottom: '1px solid var(--border-color)' }}>
-                                <span style={{ fontWeight: '800', fontSize: '0.95rem', color: 'var(--text-main)' }}>0 Tables</span>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '12px 0', borderBottom: '1px solid var(--border-color)' }}>
-                                <span style={{ fontWeight: '800', fontSize: '0.95rem', color: 'var(--text-main)' }}>0% (GST)</span>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '12px 0', marginBottom: '24px' }}>
-                                <span style={{ fontWeight: '800', fontSize: '0.95rem', color: 'var(--text-main)' }}>0%</span>
-                              </div>
-                            </div>
-
-                            <div style={{ background: '#fff7ed', border: '1px solid #ffedd5', padding: '16px', borderRadius: '8px', color: '#ea580c', fontSize: '0.85rem', lineHeight: '1.5', fontWeight: '600' }}>
-                              💡 Saving these settings will dynamically update the customer menu simulator, billing receipts, and dining table counts.
-                            </div>
-                          </div>
-                        </div>
 
                       </div>
 
                       {/* Action Buttons */}
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '30px' }}>
-                        <button
-                          style={{ padding: '12px 24px', borderRadius: '8px', border: '1.5px solid var(--border-color)', background: '#ffffff', color: 'var(--text-main)', fontWeight: '700', cursor: 'pointer', fontSize: '0.95rem', transition: 'background 0.2s' }}
-                          onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
-                          onMouseOut={(e) => e.currentTarget.style.background = '#ffffff'}
-                        >
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px', paddingTop: '24px', borderTop: '1px solid var(--border-color)' }}>
+                        <button type="button" className="btn-outline">
                           Reset Defaults
                         </button>
-                        <button
-                          style={{ padding: '12px 24px', borderRadius: '8px', border: 'none', background: '#F95E10', color: '#ffffff', fontWeight: '700', cursor: 'pointer', fontSize: '0.95rem', boxShadow: '0 4px 10px rgba(249, 94, 16, 0.2)', transition: 'transform 0.1s, box-shadow 0.1s' }}
-                          onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 12px rgba(249, 94, 16, 0.25)' }}
-                          onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 10px rgba(249, 94, 16, 0.2)' }}
-                          onClick={() => showToast('success', 'Restaurant settings saved successfully!')}
-                        >
+                        <button type="button" className="btn-black" onClick={() => showToast('success', 'Restaurant settings saved successfully!')}>
                           Save Settings
                         </button>
                       </div>
@@ -1210,32 +1359,9 @@ export default function App() {
               </>
             )}
 
-            {/* ROLE: CUSTOMER APP */}
-            {role === 'customer' && (
-              <CustomerApp
-                menuItems={menuItems}
-                activeTable={customerTable}
-                onSetActiveTable={setCustomerTable}
-                onPlaceOrder={handlePlaceOrder}
-                activeCustomerOrder={activeCustomerOrder}
-              />
-            )}
+            {/* ROLE: CUSTOMER APP - removed */}
 
-            {/* ROLE: KITCHEN DISPLAY */}
-            {role === 'kitchen' && (
-              <KitchenDisplay
-                orders={orders}
-                onUpdateStatus={handleUpdateOrderStatus}
-              />
-            )}
-
-            {/* ROLE: WAITER APP */}
-            {role === 'waiter' && (
-              <WaiterApp
-                orders={orders}
-                onUpdateStatus={handleUpdateOrderStatus}
-              />
-            )}
+            {/* ROLE: WAITER APP - removed */}
 
           </div>
 
@@ -1272,7 +1398,7 @@ export default function App() {
                   animation: 'slideInRight 0.3s ease forwards'
                 }}
               >
-                <span>{toast.type === 'success' ? '✅' : toast.type === 'error' ? '❌' : 'ℹ️'}</span>
+                {toast.type === 'success' ? <CheckCircle2 style={{ width: '16px', height: '16px', flexShrink: 0 }} /> : toast.type === 'error' ? <XCircle style={{ width: '16px', height: '16px', flexShrink: 0 }} /> : <Info style={{ width: '16px', height: '16px', flexShrink: 0 }} />}
                 <span>{toast.message}</span>
               </div>
             ))}

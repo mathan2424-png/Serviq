@@ -152,7 +152,7 @@ export default function AdminDashboard({
                   {activeTablesCount} / {totalTablesCount}
                 </div>
               </div>
-              <div style={{ background: '#fef2eb', color: '#475569', padding: '10px', borderRadius: '12px' }}>
+              <div style={{ background: '#ffffff', color: '#475569', padding: '10px', borderRadius: '12px' }}>
                 <Users style={{ width: '20px', height: '20px' }} />
               </div>
             </div>
@@ -199,7 +199,7 @@ export default function AdminDashboard({
               <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900', letterSpacing: '-0.3px', color: '#ffffff' }}>Live Order Feed</h3>
               <span style={{ fontSize: '0.8rem', opacity: 0.9, fontWeight: '500' }}>Real-time synchronization active</span>
             </div>
-            <div className="live-indicator" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#10b981', fontWeight: '700', textTransform: 'uppercase', background: '#fef2eb', padding: '4px 10px', borderRadius: '20px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+            <div className="live-indicator" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#10b981', fontWeight: '700', textTransform: 'uppercase', background: '#ffffff', padding: '4px 10px', borderRadius: '20px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
               <div className="live-dot" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981' }}></div>
               Live Server
             </div>

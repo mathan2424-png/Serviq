@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Plus, Edit2, Trash2, Eye, QrCode, ArrowLeft, Printer, List, Map } from 'lucide-react'
+import { Plus, Edit2, Trash2, Eye, QrCode, ArrowLeft, Printer, List, Map, AlertTriangle, UtensilsCrossed, Flame, Timer, CheckCircle } from 'lucide-react'
 
 export default function TableManagement({
   tables,
@@ -21,6 +21,7 @@ export default function TableManagement({
     status: 'Available',
     waiter: ''
   })
+  const [formErrors, setFormErrors] = useState({})
 
   // Table Status options
   const statusOptions = ['Available', 'Occupied', 'Cleaning']
@@ -40,6 +41,7 @@ export default function TableManagement({
   const handleAddNewClick = () => {
     setEditingTableId('new')
     setViewingTable(null)
+    setFormErrors({})
     setFormState({
       id: `T-0${tables.length + 1}`,
       name: `Table 0${tables.length + 1}`,
@@ -53,6 +55,7 @@ export default function TableManagement({
   const handleEditClick = (table) => {
     setEditingTableId(table.id)
     setViewingTable(null)
+    setFormErrors({})
     setFormState({
       id: table.id,
       name: table.name,
@@ -71,10 +74,19 @@ export default function TableManagement({
   // Save table form
   const handleSaveTable = (e) => {
     e.preventDefault()
-    if (!formState.id.trim() || !formState.name.trim()) {
-      showToast('error', 'Table ID and Name are required.')
+    
+    const errors = {}
+    if (!formState.id || !formState.id.trim()) errors.id = 'Table ID is Required'
+    if (!formState.name || !formState.name.trim()) errors.name = 'Display Name is Required'
+    if (!formState.seats || formState.seats < 1) errors.seats = 'Valid Seats Count is Required'
+    
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors)
+      showToast('error', 'Please fill in all required fields.')
       return
     }
+    
+    setFormErrors({})
 
     const dbStatus = formState.status === 'Available' ? 'Free' : formState.status
 
@@ -426,46 +438,64 @@ export default function TableManagement({
             width: '100%',
             boxSizing: 'border-box'
           }}>
-            <form onSubmit={handleSaveTable} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <form onSubmit={handleSaveTable} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div className="form-group">
-                  <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>Table ID</label>
-                  <input
-                    type="text"
-                    value={formState.id}
-                    onChange={(e) => setFormState({ ...formState, id: e.target.value })}
-                    disabled={editingTableId !== 'new'}
-                    placeholder="e.g. T-08"
-                    required
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border-color)', background: editingTableId !== 'new' ? '#f8fafc' : 'var(--bg-card)', color: 'var(--text-main)', borderRadius: '8px', outline: 'none' }}
-                  />
+                  <label style={{ fontSize: '0.75rem', fontWeight: '700', color: formErrors.id ? '#dc2626' : 'var(--text-main)', display: 'block', marginBottom: '6px' }}>Table ID</label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      value={formState.id}
+                      onChange={(e) => {
+                        setFormState({ ...formState, id: e.target.value })
+                        if (formErrors.id) setFormErrors({ ...formErrors, id: null })
+                      }}
+                      disabled={editingTableId !== 'new'}
+                      placeholder="e.g. T-08"
+                      style={{ width: '100%', padding: '10px 12px', paddingRight: formErrors.id ? '36px' : '12px', border: formErrors.id ? '1px solid #dc2626' : '1px solid var(--border-color)', background: editingTableId !== 'new' ? '#f8fafc' : 'var(--bg-card)', color: formErrors.id ? '#dc2626' : 'var(--text-main)', borderRadius: '8px', outline: 'none' }}
+                    />
+                    {formErrors.id && <AlertTriangle style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#dc2626', width: '16px', height: '16px' }} />}
+                  </div>
+                  {formErrors.id && <span style={{ color: '#dc2626', fontSize: '0.7rem', marginTop: '4px', display: 'block' }}>{formErrors.id}</span>}
                 </div>
 
                 <div className="form-group">
-                  <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>Display Name</label>
-                  <input
-                    type="text"
-                    value={formState.name}
-                    onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                    placeholder="e.g. Table 08"
-                    required
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-main)', borderRadius: '8px', outline: 'none' }}
-                  />
+                  <label style={{ fontSize: '0.75rem', fontWeight: '700', color: formErrors.name ? '#dc2626' : 'var(--text-main)', display: 'block', marginBottom: '6px' }}>Display Name</label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      value={formState.name}
+                      onChange={(e) => {
+                        setFormState({ ...formState, name: e.target.value })
+                        if (formErrors.name) setFormErrors({ ...formErrors, name: null })
+                      }}
+                      placeholder="e.g. Table 08"
+                      style={{ width: '100%', padding: '10px 12px', paddingRight: formErrors.name ? '36px' : '12px', border: formErrors.name ? '1px solid #dc2626' : '1px solid var(--border-color)', background: 'var(--bg-card)', color: formErrors.name ? '#dc2626' : 'var(--text-main)', borderRadius: '8px', outline: 'none' }}
+                    />
+                    {formErrors.name && <AlertTriangle style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#dc2626', width: '16px', height: '16px' }} />}
+                  </div>
+                  {formErrors.name && <span style={{ color: '#dc2626', fontSize: '0.7rem', marginTop: '4px', display: 'block' }}>{formErrors.name}</span>}
                 </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div className="form-group">
-                  <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>Seats Count</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="20"
-                    value={formState.seats}
-                    onChange={(e) => setFormState({ ...formState, seats: e.target.value })}
-                    required
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-main)', borderRadius: '8px', outline: 'none' }}
-                  />
+                  <label style={{ fontSize: '0.75rem', fontWeight: '700', color: formErrors.seats ? '#dc2626' : 'var(--text-main)', display: 'block', marginBottom: '6px' }}>Seats Count</label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="number"
+                      min="1"
+                      max="20"
+                      value={formState.seats}
+                      onChange={(e) => {
+                        setFormState({ ...formState, seats: e.target.value })
+                        if (formErrors.seats) setFormErrors({ ...formErrors, seats: null })
+                      }}
+                      style={{ width: '100%', padding: '10px 12px', paddingRight: formErrors.seats ? '36px' : '12px', border: formErrors.seats ? '1px solid #dc2626' : '1px solid var(--border-color)', background: 'var(--bg-card)', color: formErrors.seats ? '#dc2626' : 'var(--text-main)', borderRadius: '8px', outline: 'none' }}
+                    />
+                    {formErrors.seats && <AlertTriangle style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#dc2626', width: '16px', height: '16px' }} />}
+                  </div>
+                  {formErrors.seats && <span style={{ color: '#dc2626', fontSize: '0.7rem', marginTop: '4px', display: 'block' }}>{formErrors.seats}</span>}
                 </div>
 
                 <div className="form-group">
@@ -499,10 +529,10 @@ export default function TableManagement({
               </div>
 
               <div className="menu-form-actions" style={{ display: 'flex', flexDirection: 'row', gap: '16px', marginTop: '24px', maxWidth: '400px' }}>
-                <button type="submit" className="btn-black" style={{ flex: 1, padding: '12px', fontWeight: '700', borderRadius: '8px', cursor: 'pointer' }}>
+                <button type="submit" className="btn-black" style={{ flex: 1, padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#000000', color: '#ffffff', border: 'none' }}>
                   {editingTableId === 'new' ? 'Register Table' : 'Save Changes'}
                 </button>
-                <button type="button" className="btn-outline" onClick={() => setEditingTableId(null)} style={{ flex: 1, padding: '12px', fontWeight: '700', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
+                <button type="button" className="btn-outline" onClick={() => setEditingTableId(null)} style={{ flex: 1, padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1' }}>Cancel</button>
               </div>
             </form>
           </div>
@@ -579,7 +609,7 @@ export default function TableManagement({
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <div className="qr-print-box" id="printable-qr-code">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', borderBottom: '1.5px solid var(--border-color)', width: '100%', paddingBottom: '12px' }}>
-                    <div style={{ background: 'var(--primary)', color: '#fff', width: '28px', height: '28px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🍽️</div>
+                    <div style={{ background: 'var(--primary)', color: '#fff', width: '28px', height: '28px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><UtensilsCrossed style={{ width: '16px', height: '16px' }} /></div>
                     <span style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--primary)', letterSpacing: '-0.5px' }}>Serviq</span>
                   </div>
 
@@ -733,7 +763,7 @@ export default function TableManagement({
                     
                     const statusColor = statusText === 'Available' ? '#10b981' : statusText === 'Occupied' ? '#f59e0b' : '#ef4444'
                     const statusBg = statusText === 'Available' ? 'rgba(16, 185, 129, 0.1)' : statusText === 'Occupied' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)'
-                    const statusIcon = statusText === 'Available' ? '🍽️' : statusText === 'Occupied' ? '🔥' : '⏳'
+                    const statusIconEl = statusText === 'Available' ? <CheckCircle style={{ width: '20px', height: '20px' }} /> : statusText === 'Occupied' ? <Flame style={{ width: '20px', height: '20px' }} /> : <Timer style={{ width: '20px', height: '20px' }} />
                     const assignedWaiter = orderInfo ? orderInfo.waiter : table.waiter
 
                     return (
@@ -763,7 +793,7 @@ export default function TableManagement({
                         onClick={() => handleViewClick(table)}
                       >
                         <div style={{ background: statusBg, color: statusColor, width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
-                          {statusIcon}
+                          {statusIconEl}
                         </div>
                         <div style={{ overflow: 'hidden' }}>
                           <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
