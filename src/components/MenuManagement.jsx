@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Plus, Search, Edit2, Trash2, X, Eye, ArrowLeft } from 'lucide-react'
+import { Plus, Search, Edit2, Trash2, X, Eye, ArrowLeft, AlertTriangle, Upload } from 'lucide-react'
 
 export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMenuItem, onAddMenuItem, showToast }) {
   const [selectedCategory, setSelectedCategory] = useState('All Items')
@@ -7,6 +7,8 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
   const [editingItem, setEditingItem] = useState(null) // holds item currently being edited or 'new' for adding new
   const [viewingItem, setViewingItem] = useState(null)
   const [deletingItem, setDeletingItem] = useState(null) // holds item pending delete confirmation
+  const [formErrors, setFormErrors] = useState({})
+  const [categoryFormErrors, setCategoryFormErrors] = useState({})
   const [formState, setFormState] = useState({
     name: '',
     category: 'Mains',
@@ -29,10 +31,16 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
 
   const handleSaveCategory = (e) => {
     e.preventDefault()
-    if (!categoryFormState.name.trim()) {
-      showToast('error', 'Category name cannot be empty.')
+    
+    const errors = {}
+    if (!categoryFormState.name || !categoryFormState.name.trim()) errors.name = 'Category Name is Required'
+    
+    if (Object.keys(errors).length > 0) {
+      setCategoryFormErrors(errors)
+      showToast('error', 'Please fill out all required fields.')
       return
     }
+    setCategoryFormErrors({})
 
     const formattedName = categoryFormState.name.trim()
     const capitalizedName = formattedName.charAt(0).toUpperCase() + formattedName.slice(1)
@@ -48,6 +56,7 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
     setCategories([...categories, capitalizedName])
     showToast('success', `Category "${capitalizedName}" added successfully!`)
     setAddingCategory(false)
+    setCategoryFormErrors({})
     setCategoryFormState({
       name: '',
       image: '',
@@ -72,6 +81,7 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
   // Set form state when edit button is clicked
   const handleEditClick = (item) => {
     setEditingItem(item.id)
+    setFormErrors({})
     setFormState({
       name: item.name,
       category: item.category,
@@ -86,6 +96,7 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
   const handleAddNewClick = () => {
     const defaultCat = categories.length > 1 ? categories[1] : 'Mains'
     setEditingItem('new')
+    setFormErrors({})
     setFormState({
       name: '',
       category: defaultCat,
@@ -105,20 +116,25 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
   // Save changes (update existing or create new)
   const handleSave = (e) => {
     e.preventDefault()
-    if (!formState.name || !formState.price) {
-      showToast('error', 'Please fill out the Name and Price fields.')
-      return
+    
+    const errors = {}
+    if (!formState.name || !formState.name.trim()) errors.name = 'Item Name is Required'
+    
+    let priceNum;
+    if (!formState.price) {
+      errors.price = 'Price is Required'
+    } else {
+      priceNum = parseFloat(formState.price)
+      if (isNaN(priceNum)) errors.price = 'Price must be a valid number'
+      else if (priceNum < 0) errors.price = 'Price cannot be negative'
     }
 
-    const priceNum = parseFloat(formState.price)
-    if (isNaN(priceNum)) {
-      showToast('error', 'Price must be a valid number.')
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors)
+      showToast('error', 'Please fill out all required fields correctly.')
       return
     }
-    if (priceNum < 0) {
-      showToast('error', 'Price cannot be negative.')
-      return
-    }
+    setFormErrors({})
 
     if (editingItem === 'new') {
       onAddMenuItem({
@@ -298,17 +314,24 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
             width: '100%',
             boxSizing: 'border-box'
           }}>
-            <form onSubmit={handleSaveCategory}>
+            <form onSubmit={handleSaveCategory} noValidate>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div className="form-group">
-                  <label>Category Name</label>
-                  <input
-                    type="text"
-                    value={categoryFormState.name}
-                    onChange={(e) => setCategoryFormState({ ...categoryFormState, name: e.target.value })}
-                    placeholder="e.g. Desserts"
-                    required
-                  />
+                  <label style={{ color: categoryFormErrors.name ? '#dc2626' : 'inherit' }}>Category Name</label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      value={categoryFormState.name}
+                      onChange={(e) => {
+                        setCategoryFormState({ ...categoryFormState, name: e.target.value })
+                        if (categoryFormErrors.name) setCategoryFormErrors({ ...categoryFormErrors, name: null })
+                      }}
+                      placeholder="e.g. Desserts"
+                      style={{ border: categoryFormErrors.name ? '1px solid #dc2626' : undefined, paddingRight: categoryFormErrors.name ? '36px' : undefined, width: '100%', boxSizing: 'border-box' }}
+                    />
+                    {categoryFormErrors.name && <AlertTriangle style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#dc2626', width: '16px', height: '16px' }} />}
+                  </div>
+                  {categoryFormErrors.name && <span style={{ color: '#dc2626', fontSize: '0.7rem', marginTop: '4px', display: 'block' }}>{categoryFormErrors.name}</span>}
                 </div>
 
                 <div className="form-group">
@@ -363,7 +386,7 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                       background: 'var(--bg-card)',
                       border: '1px solid var(--border-color)'
                     }}>
-                      📁 Upload Local Photo
+                      <Upload style={{ width: '14px', height: '14px' }} /> Upload Local Photo
                       <input
                         type="file"
                         accept="image/*"
@@ -447,8 +470,8 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
               </div>
 
               <div className="menu-form-actions" style={{ maxWidth: '400px', display: 'flex', gap: '12px', marginTop: '24px' }}>
-                <button type="submit" className="btn-black" style={{ flex: 1 }}>Add Category</button>
-                <button type="button" className="btn-outline" style={{ flex: 1 }} onClick={() => setAddingCategory(false)}>Cancel</button>
+                <button type="submit" className="btn-black" style={{ flex: 1, padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#000000', color: '#ffffff', border: 'none' }}>Add Category</button>
+                <button type="button" className="btn-outline" style={{ flex: 1, padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1' }} onClick={() => setAddingCategory(false)}>Cancel</button>
               </div>
             </form>
           </div>
@@ -463,17 +486,24 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
             width: '100%',
             boxSizing: 'border-box'
           }}>
-            <form onSubmit={handleSave}>
+            <form onSubmit={handleSave} noValidate>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div className="form-group">
-                  <label>Item Name</label>
-                  <input
-                    type="text"
-                    value={formState.name}
-                    onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                    placeholder="e.g. Garlic Bread"
-                    required
-                  />
+                  <label style={{ color: formErrors.name ? '#dc2626' : 'inherit' }}>Item Name</label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      value={formState.name}
+                      onChange={(e) => {
+                        setFormState({ ...formState, name: e.target.value })
+                        if (formErrors.name) setFormErrors({ ...formErrors, name: null })
+                      }}
+                      placeholder="e.g. Garlic Bread"
+                      style={{ border: formErrors.name ? '1px solid #dc2626' : undefined, paddingRight: formErrors.name ? '36px' : undefined, width: '100%', boxSizing: 'border-box' }}
+                    />
+                    {formErrors.name && <AlertTriangle style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#dc2626', width: '16px', height: '16px' }} />}
+                  </div>
+                  {formErrors.name && <span style={{ color: '#dc2626', fontSize: '0.7rem', marginTop: '4px', display: 'block' }}>{formErrors.name}</span>}
                 </div>
 
                 <div className="form-group">
@@ -491,15 +521,22 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div className="form-group">
-                  <label>Price (₹)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formState.price}
-                    onChange={(e) => setFormState({ ...formState, price: e.target.value })}
-                    placeholder="320"
-                    required
-                  />
+                  <label style={{ color: formErrors.price ? '#dc2626' : 'inherit' }}>Price (₹)</label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="number"
+                      min="0"
+                      value={formState.price}
+                      onChange={(e) => {
+                        setFormState({ ...formState, price: e.target.value })
+                        if (formErrors.price) setFormErrors({ ...formErrors, price: null })
+                      }}
+                      placeholder="320"
+                      style={{ border: formErrors.price ? '1px solid #dc2626' : undefined, paddingRight: formErrors.price ? '36px' : undefined, width: '100%', boxSizing: 'border-box' }}
+                    />
+                    {formErrors.price && <AlertTriangle style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#dc2626', width: '16px', height: '16px' }} />}
+                  </div>
+                  {formErrors.price && <span style={{ color: '#dc2626', fontSize: '0.7rem', marginTop: '4px', display: 'block' }}>{formErrors.price}</span>}
                 </div>
 
                 <div className="form-group">
@@ -567,7 +604,7 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                       background: 'var(--bg-card)',
                       border: '1px solid var(--border-color)'
                     }}>
-                      📁 Upload Local Photo
+                      <Upload style={{ width: '14px', height: '14px' }} /> Upload Local Photo
                       <input
                         type="file"
                         accept="image/*"
@@ -651,8 +688,8 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
               </div>
 
               <div className="menu-form-actions" style={{ maxWidth: '400px', display: 'flex', gap: '12px', marginTop: '24px' }}>
-                <button type="submit" className="btn-black" style={{ flex: 1 }}>Save Changes</button>
-                <button type="button" className="btn-outline" style={{ flex: 1 }} onClick={() => setEditingItem(null)}>Cancel</button>
+                <button type="submit" className="btn-black" style={{ flex: 1, padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#000000', color: '#ffffff', border: 'none' }}>Save Changes</button>
+                <button type="button" className="btn-outline" style={{ flex: 1, padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1' }} onClick={() => setEditingItem(null)}>Cancel</button>
               </div>
             </form>
           </div>
@@ -766,6 +803,7 @@ export default function MenuManagement({ menuItems, onUpdateMenuItem, onDeleteMe
                 style={{ fontSize: '0.8rem', padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', height: '42px', borderRadius: '10px' }}
                 onClick={() => {
                   setAddingCategory(true)
+                  setCategoryFormErrors({})
                   setCategoryFormState({
                     name: '',
                     image: '',

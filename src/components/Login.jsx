@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { LayoutDashboard, FolderLock, Phone, Eye, EyeOff, Utensils, ChefHat, Pizza, Coffee, Soup } from 'lucide-react'
+import { LayoutDashboard, FolderLock, Phone, Eye, EyeOff, Utensils, ChefHat, Pizza, Coffee, Soup, AlertTriangle } from 'lucide-react'
 
 export default function Login({ onLogin, darkMode, onToggleDarkMode, showToast }) {
   const [selectedRole, setSelectedRole] = useState('superadmin') // Default to superadmin as shown in image
-  const [phone, setPhone] = useState('superadmin') // Pre-filled default matching tab
+  const [phone, setPhone] = useState('') // Empty by default
   const [pin, setPin] = useState(['', '', '', ''])
   const [showPin, setShowPin] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [formErrors, setFormErrors] = useState({})
 
   const pinRefs = [useRef(), useRef(), useRef(), useRef()]
 
@@ -36,6 +37,7 @@ export default function Login({ onLogin, darkMode, onToggleDarkMode, showToast }
     if (index < 3 && digit) {
       pinRefs[index + 1].current.focus()
     }
+    if (formErrors.pin) setFormErrors({ ...formErrors, pin: null })
   }
 
   const handlePinKeyDown = (index, e) => {
@@ -74,11 +76,17 @@ export default function Login({ onLogin, darkMode, onToggleDarkMode, showToast }
   const handleSubmit = (e) => {
     e.preventDefault()
 
+    const errors = {}
+    if (!phone || !phone.trim()) errors.phone = 'Phone Number is Required'
+
     const combinedPin = pin.join('')
-    if (combinedPin.length < 4) {
-      showToast('error', 'Please enter a 4-digit PIN')
+    if (combinedPin.length < 4) errors.pin = 'Please enter a 4-digit PIN'
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors)
       return
     }
+    setFormErrors({})
 
     if (combinedPin !== '1234') {
       showToast('error', 'Invalid security PIN. (Use simulation PIN: 1234)')
@@ -207,34 +215,43 @@ export default function Login({ onLogin, darkMode, onToggleDarkMode, showToast }
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form onSubmit={handleSubmit} noValidate autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Tab Selector Removed - Super Admin Only */}
 
           {/* Phone Number Field */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontSize: '0.82rem', fontWeight: '700', color: '#1e293b' }}>Phone Number</label>
+            <label style={{ fontSize: '0.82rem', fontWeight: '700', color: formErrors.phone ? '#dc2626' : '#1e293b' }}>Phone Number</label>
             <div style={{ position: 'relative' }}>
-              <Phone style={{ width: '16px', height: '16px', position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#db2777' }} />
+              <Phone style={{ width: '16px', height: '16px', position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: formErrors.phone ? '#dc2626' : '#db2777' }} />
               <input
                 type="text"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => {
+                  setPhone(e.target.value)
+                  if (formErrors.phone) setFormErrors({ ...formErrors, phone: null })
+                }}
                 className="phone-input-field"
-                required
+                autoComplete="off"
+                name="phone-no-autofill"
+                placeholder="Enter phone number"
                 style={{
                   width: '100%',
                   padding: '10px 12px 10px 38px',
+                  paddingRight: formErrors.phone ? '36px' : '12px',
                   borderRadius: '10px',
-                  border: 'none',
+                  border: formErrors.phone ? '1px solid #dc2626' : 'none',
                   background: '#eef2ff',
-                  color: '#1e293b',
+                  color: formErrors.phone ? '#dc2626' : '#1e293b',
                   fontSize: '0.92rem',
                   fontWeight: '600',
                   outline: 'none',
-                  transition: 'box-shadow 0.2s'
+                  transition: 'box-shadow 0.2s',
+                  boxSizing: 'border-box'
                 }}
               />
+              {formErrors.phone && <AlertTriangle style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: '#dc2626', width: '16px', height: '16px' }} />}
             </div>
+            {formErrors.phone && <span style={{ color: '#dc2626', fontSize: '0.7rem', marginTop: '2px', display: 'block' }}>{formErrors.phone}</span>}
           </div>
 
           {/* PIN Input Grid */}
@@ -259,9 +276,9 @@ export default function Login({ onLogin, darkMode, onToggleDarkMode, showToast }
                         width: '100%',
                         height: '46px',
                         borderRadius: '10px',
-                        border: '1.5px solid #d27242',
+                        border: formErrors.pin ? '1.5px solid #dc2626' : '1.5px solid #d27242',
                         background: '#ffffff',
-                        color: '#1e293b',
+                        color: formErrors.pin ? '#dc2626' : '#1e293b',
                         fontSize: '1.3rem',
                         fontWeight: '700',
                         textAlign: 'center',
@@ -271,6 +288,7 @@ export default function Login({ onLogin, darkMode, onToggleDarkMode, showToast }
                     />
                   ))}
                 </div>
+                {formErrors.pin && <span style={{ color: '#dc2626', fontSize: '0.7rem', marginTop: '4px', display: 'block' }}>{formErrors.pin}</span>}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2px' }}>
                   <a
                     href="#"
@@ -354,7 +372,7 @@ export default function Login({ onLogin, darkMode, onToggleDarkMode, showToast }
 
         {/* Footer info inside card */}
         <div style={{ textAlign: 'center', fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
-          Simulation mode · <span style={{ fontWeight: '600' }}>PIN: 1234</span> · Powered by Serviq
+          Powered by Serviq
         </div>
       </div>
     </div>

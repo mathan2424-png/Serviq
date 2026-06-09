@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { Eye, Pencil, X, Calendar, Plus, Trash2, Clock, AlertTriangle, Check, CreditCard, User, Utensils, ArrowLeft } from 'lucide-react'
+import { Eye, Pencil, X, Calendar, Plus, Trash2, Clock, AlertTriangle, Check, CreditCard, User, Utensils, ArrowLeft, ClipboardList } from 'lucide-react'
 
 export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, onUpdateOrder, showToast }) {
   // Filters State
@@ -11,6 +11,7 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
   const [viewingOrder, setViewingOrder] = useState(null)
   const [editingOrder, setEditingOrder] = useState(null)
   const [deletingOrderId, setDeletingOrderId] = useState(null)
+  const [formErrors, setFormErrors] = useState({})
 
   // Popular items menu for adding/editing items
   const POPULAR_ITEMS = [
@@ -86,10 +87,16 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
     e.preventDefault()
     if (!editingOrder) return
 
-    if (!editingOrder.table.trim()) {
-      showToast('error', 'Table name cannot be empty')
+    const errors = {}
+    if (!editingOrder.table || !editingOrder.table.trim()) errors.table = 'Table Number is Required'
+    if (!editingOrder.time || !editingOrder.time.trim()) errors.time = 'Order Time is Required'
+    
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors)
       return
     }
+    setFormErrors({})
+
     if (editingOrder.items.length === 0) {
       showToast('error', 'Order must have at least one item')
       return
@@ -749,16 +756,24 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
           boxShadow: 'var(--shadow-md)',
           width: '100%'
         }}>
-          <form onSubmit={handleSaveEdit}>
+          <form onSubmit={handleSaveEdit} noValidate>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
               <div className="modal-field-group">
-                <label>Table Number / ID</label>
-                <input
-                  type="text"
-                  value={editingOrder.table}
-                  onChange={(e) => setEditingOrder({ ...editingOrder, table: e.target.value })}
-                  placeholder="e.g. T-01"
-                />
+                <label style={{ color: formErrors.table ? '#dc2626' : 'inherit' }}>Table Number / ID</label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="text"
+                    value={editingOrder.table}
+                    onChange={(e) => {
+                      setEditingOrder({ ...editingOrder, table: e.target.value })
+                      if (formErrors.table) setFormErrors({ ...formErrors, table: null })
+                    }}
+                    placeholder="e.g. T-01"
+                    style={{ border: formErrors.table ? '1px solid #dc2626' : undefined, paddingRight: formErrors.table ? '36px' : undefined }}
+                  />
+                  {formErrors.table && <AlertTriangle style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#dc2626', width: '16px', height: '16px' }} />}
+                </div>
+                {formErrors.table && <span style={{ color: '#dc2626', fontSize: '0.7rem', marginTop: '4px', display: 'block' }}>{formErrors.table}</span>}
               </div>
 
               <div className="modal-field-group">
@@ -789,13 +804,21 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
               <div className="modal-field-group">
-                <label>Order Time</label>
-                <input
-                  type="text"
-                  value={editingOrder.time}
-                  onChange={(e) => setEditingOrder({ ...editingOrder, time: e.target.value })}
-                  placeholder="e.g. 12:34"
-                />
+                <label style={{ color: formErrors.time ? '#dc2626' : 'inherit' }}>Order Time</label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="text"
+                    value={editingOrder.time}
+                    onChange={(e) => {
+                      setEditingOrder({ ...editingOrder, time: e.target.value })
+                      if (formErrors.time) setFormErrors({ ...formErrors, time: null })
+                    }}
+                    placeholder="e.g. 12:34"
+                    style={{ border: formErrors.time ? '1px solid #dc2626' : undefined, paddingRight: formErrors.time ? '36px' : undefined }}
+                  />
+                  {formErrors.time && <AlertTriangle style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#dc2626', width: '16px', height: '16px' }} />}
+                </div>
+                {formErrors.time && <span style={{ color: '#dc2626', fontSize: '0.7rem', marginTop: '4px', display: 'block' }}>{formErrors.time}</span>}
               </div>
               <div />
             </div>
@@ -860,10 +883,10 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
             </div>
 
             <div className="modal-action-footer" style={{ maxWidth: '400px', display: 'flex', gap: '12px' }}>
-              <button type="button" className="modal-btn-cancel" onClick={() => setEditingOrder(null)}>
+              <button type="button" className="btn-outline" onClick={() => setEditingOrder(null)} style={{ flex: 1, padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1' }}>
                 Cancel
               </button>
-              <button type="submit" className="modal-btn-save">
+              <button type="submit" className="btn-black" style={{ flex: 1, padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#000000', color: '#ffffff', border: 'none' }}>
                 Save Changes
               </button>
             </div>
@@ -892,7 +915,7 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
               height: 'fit-content'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '1.5rem' }}>📋</span>
+                <ClipboardList style={{ width: '24px', height: '24px', color: 'var(--text-main)', flexShrink: 0 }} />
                 <div>
                   <h4 style={{ fontSize: '1.1rem', fontWeight: '800', margin: 0 }}>Order Summary</h4>
                   <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--text-muted)' }}>{viewingOrder.id}</span>
@@ -1082,7 +1105,10 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
                             {/* EDIT BUTTON */}
                             <button
                               className="action-btn"
-                              onClick={() => setEditingOrder(JSON.parse(JSON.stringify(order)))} // Deep copy
+                              onClick={() => {
+                                setFormErrors({})
+                                setEditingOrder(JSON.parse(JSON.stringify(order)))
+                              }} // Deep copy
                               title="Edit Order"
                             >
                               <Pencil style={{ width: '14px', height: '14px' }} />
@@ -1121,14 +1147,15 @@ export default function IncomingOrders({ orders, onUpdateStatus, onDeleteOrder, 
 
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
-                className="modal-btn-cancel"
+                className="btn-outline"
                 onClick={() => setDeletingOrderId(null)}
+                style={{ flex: 1, padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1' }}
               >
                 Cancel
               </button>
               <button
-                className="modal-btn-save"
-                style={{ backgroundColor: '#ef4444' }}
+                className="btn-black"
+                style={{ flex: 1, padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', backgroundColor: '#ef4444', color: '#ffffff', border: 'none' }}
                 onClick={() => {
                   onDeleteOrder(deletingOrderId)
                   setDeletingOrderId(null)

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { FileText, Check, CreditCard, Landmark, IndianRupee, Receipt, ArrowRight, Sparkles } from 'lucide-react'
+import { FileText, Check, CreditCard, Landmark, IndianRupee, Receipt, ArrowRight, Sparkles, AlertTriangle } from 'lucide-react'
 
 export default function BillingSystem({ 
   orders, 
@@ -443,7 +443,7 @@ export default function BillingSystem({
                       </div>
                     </div>
                     {parsedCash > 0 && parsedCash < grandTotal && (
-                      <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: '600' }}>⚠️ Amount is short by {formatCurrency(grandTotal - parsedCash)}</span>
+                      <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}><AlertTriangle style={{ width: '12px', height: '12px' }} /> Amount is short by {formatCurrency(grandTotal - parsedCash)}</span>
                     )}
                   </div>
                 )}
