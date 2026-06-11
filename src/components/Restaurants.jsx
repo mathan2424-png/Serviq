@@ -12,7 +12,8 @@ import {
   Eye,
   Edit2,
   Trash2,
-  Plus
+  Plus,
+  Shield
 } from 'lucide-react'
 
 // ─── Reusable validated input component ───
@@ -317,249 +318,312 @@ export default function Restaurants({
               </button>
             </div>
 
-            <form onSubmit={handleCreateRestaurant} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <ValidatedInput
-                  label="Tenant"
-                  type="text"
-                  value={newRestState.name}
-                  onChange={(e) => setNewRestState({ ...newRestState, name: e.target.value })}
-                  placeholder="e.g. serveiq_main"
-                  required
-                  error={formErrors.name}
-                  setError={(val) => setFormErrors({ ...formErrors, name: val })}
-                />
-                <ValidatedInput
-                  label="Business Name"
-                  type="text"
-                  value={newRestState.legalName}
-                  onChange={(e) => setNewRestState({ ...newRestState, legalName: e.target.value })}
-                  placeholder="e.g. Serviq Hospitality Pvt. Ltd."
-                  required
-                  error={formErrors.legalName}
-                  setError={(val) => setFormErrors({ ...formErrors, legalName: val })}
-                />
+            <form onSubmit={handleCreateRestaurant} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Card 1: Restaurant Information */}
+              <div style={{
+                background: 'var(--bg-app)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '12px',
+                padding: '20px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px'
+              }}>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  <Building style={{ width: '15px', height: '15px', color: '#F95E10' }} />
+                  Restaurant Information
+                </h4>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <ValidatedInput
+                    label="Tenant"
+                    type="text"
+                    value={newRestState.name}
+                    onChange={(e) => setNewRestState({ ...newRestState, name: e.target.value })}
+                    placeholder="e.g. serveiq_main"
+                    required
+                    error={formErrors.name}
+                    setError={(val) => setFormErrors({ ...formErrors, name: val })}
+                  />
+                  <ValidatedInput
+                    label="Business Name"
+                    type="text"
+                    value={newRestState.legalName}
+                    onChange={(e) => setNewRestState({ ...newRestState, legalName: e.target.value })}
+                    placeholder="e.g. Serviq Hospitality Pvt. Ltd."
+                    required
+                    error={formErrors.legalName}
+                    setError={(val) => setFormErrors({ ...formErrors, legalName: val })}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <ValidatedInput
+                    label="Owner Name"
+                    type="text"
+                    value={newRestState.ownerName}
+                    onChange={(e) => setNewRestState({ ...newRestState, ownerName: e.target.value })}
+                    placeholder="e.g. Rajesh Kumar"
+                    required
+                    error={formErrors.ownerName}
+                    setError={(val) => setFormErrors({ ...formErrors, ownerName: val })}
+                  />
+                  <ValidatedInput
+                    label="Mobile Number"
+                    type="text"
+                    value={newRestState.mobileNumber}
+                    onChange={(e) => setNewRestState({ ...newRestState, mobileNumber: e.target.value, phone: e.target.value })}
+                    placeholder="e.g. +91 98765 43210"
+                    required
+                    error={formErrors.mobileNumber}
+                    setError={(val) => setFormErrors({ ...formErrors, mobileNumber: val })}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <ValidatedInput
+                    label="Email"
+                    type="email"
+                    value={newRestState.email}
+                    onChange={(e) => setNewRestState({ ...newRestState, email: e.target.value })}
+                    placeholder="e.g. contact@serviqbistro.com"
+                    required
+                    error={formErrors.email}
+                    setError={(val) => setFormErrors({ ...formErrors, email: val })}
+                  />
+                  <ValidatedInput
+                    label="Website Domain"
+                    type="text"
+                    value={newRestState.website}
+                    onChange={(e) => setNewRestState({ ...newRestState, website: e.target.value })}
+                    placeholder="e.g. https://serviqbistro.com"
+                    error={formErrors.website}
+                    setError={(val) => setFormErrors({ ...formErrors, website: val })}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <ValidatedInput
+                    label="Opening Time"
+                    type="text"
+                    value={newRestState.openingTime}
+                    onChange={(e) => setNewRestState({ ...newRestState, openingTime: e.target.value })}
+                    placeholder="e.g. 11:00 AM"
+                    required
+                    error={formErrors.openingTime}
+                    setError={(val) => setFormErrors({ ...formErrors, openingTime: val })}
+                  />
+                  <ValidatedInput
+                    label="Closing Time"
+                    type="text"
+                    value={newRestState.closingTime}
+                    onChange={(e) => setNewRestState({ ...newRestState, closingTime: e.target.value })}
+                    placeholder="e.g. 11:00 PM"
+                    required
+                    error={formErrors.closingTime}
+                    setError={(val) => setFormErrors({ ...formErrors, closingTime: val })}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                  <ValidatedInput
+                    label="Tax Rate (%)"
+                    type="number"
+                    value={newRestState.taxRate}
+                    onChange={(e) => setNewRestState({ ...newRestState, taxRate: parseFloat(e.target.value) || 0 })}
+                    min="0" max="30" step="0.5" required
+                    error={formErrors.taxRate}
+                    setError={(val) => setFormErrors({ ...formErrors, taxRate: val })}
+                  />
+                  <ValidatedInput
+                    label="Service Fee (%)"
+                    type="number"
+                    value={newRestState.serviceCharge}
+                    onChange={(e) => setNewRestState({ ...newRestState, serviceCharge: parseFloat(e.target.value) || 0 })}
+                    min="0" max="20" step="0.5" required
+                    error={formErrors.serviceCharge}
+                    setError={(val) => setFormErrors({ ...formErrors, serviceCharge: val })}
+                  />
+                  <ValidatedSelect
+                    label="Initial Status"
+                    value={newRestState.status}
+                    onChange={(e) => setNewRestState({ ...newRestState, status: e.target.value })}
+                    error={formErrors.status}
+                    setError={(val) => setFormErrors({ ...formErrors, status: val })}
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Suspended">Suspended</option>
+                    <option value="Inactive">Inactive</option>
+                  </ValidatedSelect>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <ValidatedInput
+                    label="Restaurant Logo URL"
+                    type="text"
+                    value={newRestState.logo}
+                    onChange={(e) => setNewRestState({ ...newRestState, logo: e.target.value })}
+                    placeholder="https://images.unsplash.com/... (Logo)"
+                    error={formErrors.logo}
+                    setError={(val) => setFormErrors({ ...formErrors, logo: val })}
+                  />
+                  <ValidatedInput
+                    label="Restaurant Banner URL"
+                    type="text"
+                    value={newRestState.banner}
+                    onChange={(e) => setNewRestState({ ...newRestState, banner: e.target.value })}
+                    placeholder="https://images.unsplash.com/... (Banner)"
+                    error={formErrors.banner}
+                    setError={(val) => setFormErrors({ ...formErrors, banner: val })}
+                  />
+                </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              {/* Card 2: Address Information */}
+              <div style={{
+                background: 'var(--bg-app)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '12px',
+                padding: '20px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px'
+              }}>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  <MapPin style={{ width: '15px', height: '15px', color: '#F95E10' }} />
+                  Address Information
+                </h4>
+
                 <ValidatedInput
-                  label="Owner Name"
+                  label="Registered Location Address"
                   type="text"
-                  value={newRestState.ownerName}
-                  onChange={(e) => setNewRestState({ ...newRestState, ownerName: e.target.value })}
-                  placeholder="e.g. Rajesh Kumar"
+                  value={newRestState.address}
+                  onChange={(e) => setNewRestState({ ...newRestState, address: e.target.value })}
+                  placeholder="e.g. 12, Khader Nawaz Khan Road, Nungambakkam"
                   required
-                  error={formErrors.ownerName}
-                  setError={(val) => setFormErrors({ ...formErrors, ownerName: val })}
+                  error={formErrors.address}
+                  setError={(val) => setFormErrors({ ...formErrors, address: val })}
                 />
-                <ValidatedInput
-                  label="Mobile Number"
-                  type="text"
-                  value={newRestState.mobileNumber}
-                  onChange={(e) => setNewRestState({ ...newRestState, mobileNumber: e.target.value, phone: e.target.value })}
-                  placeholder="e.g. +91 98765 43210"
-                  required
-                  error={formErrors.mobileNumber}
-                  setError={(val) => setFormErrors({ ...formErrors, mobileNumber: val })}
-                />
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                  <ValidatedInput
+                    label="City"
+                    type="text"
+                    value={newRestState.city}
+                    onChange={(e) => setNewRestState({ ...newRestState, city: e.target.value, branch: `${e.target.value}` })}
+                    placeholder="e.g. Chennai"
+                    required
+                    error={formErrors.city}
+                    setError={(val) => setFormErrors({ ...formErrors, city: val })}
+                  />
+                  <ValidatedInput
+                    label="State"
+                    type="text"
+                    value={newRestState.state}
+                    onChange={(e) => setNewRestState({ ...newRestState, state: e.target.value })}
+                    placeholder="e.g. Tamil Nadu"
+                    required
+                    error={formErrors.state}
+                    setError={(val) => setFormErrors({ ...formErrors, state: val })}
+                  />
+                  <ValidatedInput
+                    label="Country"
+                    type="text"
+                    value={newRestState.country}
+                    onChange={(e) => setNewRestState({ ...newRestState, country: e.target.value })}
+                    placeholder="e.g. India"
+                    required
+                    error={formErrors.country}
+                    setError={(val) => setFormErrors({ ...formErrors, country: val })}
+                  />
+                </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <ValidatedInput
-                  label="Email"
-                  type="email"
-                  value={newRestState.email}
-                  onChange={(e) => setNewRestState({ ...newRestState, email: e.target.value })}
-                  placeholder="e.g. contact@serviqbistro.com"
-                  required
-                  error={formErrors.email}
-                  setError={(val) => setFormErrors({ ...formErrors, email: val })}
-                />
-                <ValidatedInput
-                  label="Website Domain"
-                  type="text"
-                  value={newRestState.website}
-                  onChange={(e) => setNewRestState({ ...newRestState, website: e.target.value })}
-                  placeholder="e.g. https://serviqbistro.com"
-                  error={formErrors.website}
-                  setError={(val) => setFormErrors({ ...formErrors, website: val })}
-                />
+              {/* Card 3: Compliance Information */}
+              <div style={{
+                background: 'var(--bg-app)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '12px',
+                padding: '20px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px'
+              }}>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  <Shield style={{ width: '15px', height: '15px', color: '#F95E10' }} />
+                  Compliance Information
+                </h4>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                  <ValidatedInput
+                    label="FSSAI License Number"
+                    type="text"
+                    value={newRestState.license}
+                    onChange={(e) => setNewRestState({ ...newRestState, license: e.target.value })}
+                    placeholder="FSSAI-12345678901234"
+                    required
+                    error={formErrors.license}
+                    setError={(val) => setFormErrors({ ...formErrors, license: val })}
+                  />
+                  <ValidatedInput
+                    label="GSTIN Number"
+                    type="text"
+                    value={newRestState.gstin}
+                    onChange={(e) => setNewRestState({ ...newRestState, gstin: e.target.value })}
+                    placeholder="33AAAAA1111A1Z1"
+                    required
+                    error={formErrors.gstin}
+                    setError={(val) => setFormErrors({ ...formErrors, gstin: val })}
+                  />
+                  <ValidatedInput
+                    label="PAN Number"
+                    type="text"
+                    value={newRestState.pan}
+                    onChange={(e) => setNewRestState({ ...newRestState, pan: e.target.value })}
+                    placeholder="ABCDE1234F"
+                    required
+                    error={formErrors.pan}
+                    setError={(val) => setFormErrors({ ...formErrors, pan: val })}
+                  />
+                </div>
               </div>
 
-              <ValidatedInput
-                label="Registered Location Address"
-                type="text"
-                value={newRestState.address}
-                onChange={(e) => setNewRestState({ ...newRestState, address: e.target.value })}
-                placeholder="e.g. 12, Khader Nawaz Khan Road, Nungambakkam"
-                required
-                error={formErrors.address}
-                setError={(val) => setFormErrors({ ...formErrors, address: val })}
-              />
+              {/* Card 4: Subscription Information */}
+              <div style={{
+                background: 'var(--bg-app)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '12px',
+                padding: '20px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px'
+              }}>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  <Gem style={{ width: '15px', height: '15px', color: '#F95E10' }} />
+                  Subscription Information
+                </h4>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-                <ValidatedInput
-                  label="City"
-                  type="text"
-                  value={newRestState.city}
-                  onChange={(e) => setNewRestState({ ...newRestState, city: e.target.value, branch: `${e.target.value}` })}
-                  placeholder="e.g. Chennai"
-                  required
-                  error={formErrors.city}
-                  setError={(val) => setFormErrors({ ...formErrors, city: val })}
-                />
-                <ValidatedInput
-                  label="State"
-                  type="text"
-                  value={newRestState.state}
-                  onChange={(e) => setNewRestState({ ...newRestState, state: e.target.value })}
-                  placeholder="e.g. Tamil Nadu"
-                  required
-                  error={formErrors.state}
-                  setError={(val) => setFormErrors({ ...formErrors, state: val })}
-                />
-                <ValidatedInput
-                  label="Country"
-                  type="text"
-                  value={newRestState.country}
-                  onChange={(e) => setNewRestState({ ...newRestState, country: e.target.value })}
-                  placeholder="e.g. India"
-                  required
-                  error={formErrors.country}
-                  setError={(val) => setFormErrors({ ...formErrors, country: val })}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-                <ValidatedInput
-                  label="FSSAI License Number"
-                  type="text"
-                  value={newRestState.license}
-                  onChange={(e) => setNewRestState({ ...newRestState, license: e.target.value })}
-                  placeholder="FSSAI-12345678901234"
-                  required
-                  error={formErrors.license}
-                  setError={(val) => setFormErrors({ ...formErrors, license: val })}
-                />
-                <ValidatedInput
-                  label="GSTIN Number"
-                  type="text"
-                  value={newRestState.gstin}
-                  onChange={(e) => setNewRestState({ ...newRestState, gstin: e.target.value })}
-                  placeholder="33AAAAA1111A1Z1"
-                  required
-                  error={formErrors.gstin}
-                  setError={(val) => setFormErrors({ ...formErrors, gstin: val })}
-                />
-                <ValidatedInput
-                  label="PAN Number"
-                  type="text"
-                  value={newRestState.pan}
-                  onChange={(e) => setNewRestState({ ...newRestState, pan: e.target.value })}
-                  placeholder="ABCDE1234F"
-                  required
-                  error={formErrors.pan}
-                  setError={(val) => setFormErrors({ ...formErrors, pan: val })}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <ValidatedInput
-                  label="Opening Time"
-                  type="text"
-                  value={newRestState.openingTime}
-                  onChange={(e) => setNewRestState({ ...newRestState, openingTime: e.target.value })}
-                  placeholder="e.g. 11:00 AM"
-                  required
-                  error={formErrors.openingTime}
-                  setError={(val) => setFormErrors({ ...formErrors, openingTime: val })}
-                />
-                <ValidatedInput
-                  label="Closing Time"
-                  type="text"
-                  value={newRestState.closingTime}
-                  onChange={(e) => setNewRestState({ ...newRestState, closingTime: e.target.value })}
-                  placeholder="e.g. 11:00 PM"
-                  required
-                  error={formErrors.closingTime}
-                  setError={(val) => setFormErrors({ ...formErrors, closingTime: val })}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-                <ValidatedInput
-                  label="Tax Rate (%)"
-                  type="number"
-                  value={newRestState.taxRate}
-                  onChange={(e) => setNewRestState({ ...newRestState, taxRate: parseFloat(e.target.value) || 0 })}
-                  min="0" max="30" step="0.5" required
-                  error={formErrors.taxRate}
-                  setError={(val) => setFormErrors({ ...formErrors, taxRate: val })}
-                />
-                <ValidatedInput
-                  label="Service Fee (%)"
-                  type="number"
-                  value={newRestState.serviceCharge}
-                  onChange={(e) => setNewRestState({ ...newRestState, serviceCharge: parseFloat(e.target.value) || 0 })}
-                  min="0" max="20" step="0.5" required
-                  error={formErrors.serviceCharge}
-                  setError={(val) => setFormErrors({ ...formErrors, serviceCharge: val })}
-                />
-                <ValidatedSelect
-                  label="Initial Status"
-                  value={newRestState.status}
-                  onChange={(e) => setNewRestState({ ...newRestState, status: e.target.value })}
-                  error={formErrors.status}
-                  setError={(val) => setFormErrors({ ...formErrors, status: val })}
-                >
-                  <option value="Active">Active</option>
-                  <option value="Suspended">Suspended</option>
-                  <option value="Inactive">Inactive</option>
-                </ValidatedSelect>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <ValidatedSelect
-                  label="Subscription Plan"
-                  value={newRestState.subscriptionPlan || 'Standard'}
-                  onChange={(e) => setNewRestState({ ...newRestState, subscriptionPlan: e.target.value })}
-                  error={formErrors.subscriptionPlan}
-                  setError={(val) => setFormErrors({ ...formErrors, subscriptionPlan: val })}
-                >
-                  <option value="Standard">Standard Plan</option>
-                  <option value="Premium">Premium Plan</option>
-                  <option value="Enterprise">Enterprise Plan</option>
-                </ValidatedSelect>
-                <ValidatedInput
-                  label="Created Date"
-                  type="date"
-                  value={newRestState.createdDate || ''}
-                  onChange={(e) => setNewRestState({ ...newRestState, createdDate: e.target.value })}
-                  required
-                  error={formErrors.createdDate}
-                  setError={(val) => setFormErrors({ ...formErrors, createdDate: val })}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <ValidatedInput
-                  label="Restaurant Logo URL"
-                  type="text"
-                  value={newRestState.logo}
-                  onChange={(e) => setNewRestState({ ...newRestState, logo: e.target.value })}
-                  placeholder="https://images.unsplash.com/... (Logo)"
-                  error={formErrors.logo}
-                  setError={(val) => setFormErrors({ ...formErrors, logo: val })}
-                />
-                <ValidatedInput
-                  label="Restaurant Banner URL"
-                  type="text"
-                  value={newRestState.banner}
-                  onChange={(e) => setNewRestState({ ...newRestState, banner: e.target.value })}
-                  placeholder="https://images.unsplash.com/... (Banner)"
-                  error={formErrors.banner}
-                  setError={(val) => setFormErrors({ ...formErrors, banner: val })}
-                />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <ValidatedSelect
+                    label="Subscription Plan"
+                    value={newRestState.subscriptionPlan || 'Standard'}
+                    onChange={(e) => setNewRestState({ ...newRestState, subscriptionPlan: e.target.value })}
+                    error={formErrors.subscriptionPlan}
+                    setError={(val) => setFormErrors({ ...formErrors, subscriptionPlan: val })}
+                  >
+                    <option value="Standard">Standard Plan</option>
+                    <option value="Premium">Premium Plan</option>
+                  </ValidatedSelect>
+                  <ValidatedInput
+                    label="Created Date"
+                    type="date"
+                    value={newRestState.createdDate || ''}
+                    onChange={(e) => setNewRestState({ ...newRestState, createdDate: e.target.value })}
+                    required
+                    error={formErrors.createdDate}
+                    setError={(val) => setFormErrors({ ...formErrors, createdDate: val })}
+                  />
+                </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>
@@ -648,9 +712,9 @@ export default function Restaurants({
                               fontWeight: '800',
                               padding: '4px 10px',
                               borderRadius: '6px',
-                              background: rest.subscriptionPlan?.includes('Enterprise') ? 'rgba(124, 58, 237, 0.1)' : rest.subscriptionPlan?.includes('Premium') ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                              color: rest.subscriptionPlan?.includes('Enterprise') ? '#7c3aed' : rest.subscriptionPlan?.includes('Premium') ? '#3b82f6' : '#10b981',
-                              border: rest.subscriptionPlan?.includes('Enterprise') ? '1px solid rgba(124, 58, 237, 0.2)' : rest.subscriptionPlan?.includes('Premium') ? '1px solid rgba(59, 130, 246, 0.2)' : '1px solid rgba(16, 185, 129, 0.2)',
+                              background: rest.subscriptionPlan?.includes('Premium') ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                              color: rest.subscriptionPlan?.includes('Premium') ? '#3b82f6' : '#10b981',
+                              border: rest.subscriptionPlan?.includes('Premium') ? '1px solid rgba(59, 130, 246, 0.2)' : '1px solid rgba(16, 185, 129, 0.2)',
                               display: 'inline-block'
                             }}>
                               {rest.subscriptionPlan || 'Standard Plan'}
@@ -1204,8 +1268,8 @@ export default function Restaurants({
                   fontWeight: '800',
                   padding: '3px 8px',
                   borderRadius: '4px',
-                  background: viewingSubscriptionRest.subscriptionPlan?.includes('Enterprise') ? 'rgba(124, 58, 237, 0.1)' : viewingSubscriptionRest.subscriptionPlan?.includes('Premium') ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                  color: viewingSubscriptionRest.subscriptionPlan?.includes('Enterprise') ? '#7c3aed' : viewingSubscriptionRest.subscriptionPlan?.includes('Premium') ? '#3b82f6' : '#10b981'
+                  background: viewingSubscriptionRest.subscriptionPlan?.includes('Premium') ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                  color: viewingSubscriptionRest.subscriptionPlan?.includes('Premium') ? '#3b82f6' : '#10b981'
                 }}>
                   {viewingSubscriptionRest.subscriptionPlan || 'Standard Plan'}
                 </span>

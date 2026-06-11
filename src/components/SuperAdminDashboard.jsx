@@ -17,6 +17,7 @@ import {
   Award,
   Users,
   ShieldCheck,
+  Shield,
   TrendingDown,
   Clock,
   Layers,
@@ -171,14 +172,14 @@ export default function SuperAdminDashboard({
     { id: 'plan-basic', name: 'Basic Plan', description: 'Essential tools for small eateries, QR menu ordering and simple table management.', monthlyPrice: 999, annualPrice: 9999, branchLimit: 1, userLimit: 3, orderLimit: 500, features: ['QR Ordering', 'Menu Management', 'Table Management', 'Order Management'], status: 'Active' },
     { id: 'plan-standard', name: 'Standard Plan', description: 'Includes everything in Basic, plus tableside waiter service and app integrations.', monthlyPrice: 1999, annualPrice: 19999, branchLimit: 2, userLimit: 5, orderLimit: 1000, features: ['QR Ordering', 'Menu Management', 'Table Management', 'Order Management', 'Waiter Management'], status: 'Active' },
     { id: 'plan-premium', name: 'Premium Plan', description: 'Advanced operations with integrated Kitchen KDS displays and advanced billing.', monthlyPrice: 4999, annualPrice: 49999, branchLimit: 5, userLimit: 15, orderLimit: 5000, features: ['QR Ordering', 'Menu Management', 'Table Management', 'Order Management', 'Waiter Management', 'Kitchen Management'], status: 'Active' },
-    //{ id: 'plan-enterprise', name: 'Enterprise Plan', description: 'Full enterprise control for multi-branch chains, franchise dashboards, and premium SLA support.', monthlyPrice: 9999, annualPrice: 99999, branchLimit: 99999, userLimit: 99999, orderLimit: 99999, features: ['QR Ordering', 'Menu Management', 'Table Management', 'Order Management', 'Waiter Management', 'Kitchen Management', 'Advanced Billing System', 'Live Analytics Deck', 'Multi-Branch Super Deck', '24/7 Dedicated Support'], status: 'Active' }
+    // { id: 'plan-enterprise', name: 'Enterprise Plan', description: 'Full enterprise control for multi-branch chains, franchise dashboards, and premium SLA support.', monthlyPrice: 9999, annualPrice: 99999, branchLimit: 99999, userLimit: 99999, orderLimit: 99999, features: ['QR Ordering', 'Menu Management', 'Table Management', 'Order Management', 'Waiter Management', 'Kitchen Management', 'Advanced Billing System', 'Live Analytics Deck', 'Multi-Branch Super Deck', '24/7 Dedicated Support'], status: 'Active' }
   ])
 
   // Revenue & Billing states
   const [invoices, setInvoices] = useState([
     { id: 'INV-2026-001', restaurantName: 'Serviq', subscriptionPlan: 'Premium Plan', amount: 4999, taxAmount: 900, paymentMethod: 'UPI', paymentDate: '2026-06-01', dueDate: '2026-07-01', status: 'Paid', transactionId: 'TXN-8472917462' },
     { id: 'INV-2026-002', restaurantName: 'Sunset Diner', subscriptionPlan: 'Standard Plan', amount: 1999, taxAmount: 360, paymentMethod: 'Credit Card', paymentDate: '2026-05-28', dueDate: '2026-06-28', status: 'Paid', transactionId: 'TXN-1098273645' },
-    { id: 'INV-2026-003', restaurantName: 'Ocean Breeze Grill', subscriptionPlan: 'Enterprise Plan', amount: 9999, taxAmount: 1800, paymentMethod: 'Net Banking', paymentDate: '', dueDate: '2026-06-15', status: 'Pending', transactionId: '—' },
+    { id: 'INV-2026-003', restaurantName: 'Ocean Breeze Grill', subscriptionPlan: 'Premium Plan', amount: 4999, taxAmount: 900, paymentMethod: 'Net Banking', paymentDate: '', dueDate: '2026-06-15', status: 'Pending', transactionId: '—' },
     { id: 'INV-2026-004', restaurantName: 'Mountain Lodge Cafe', subscriptionPlan: 'Premium Plan', amount: 4999, taxAmount: 900, paymentMethod: 'UPI', paymentDate: '2026-05-15', dueDate: '2026-06-15', status: 'Refunded', transactionId: 'TXN-9018273645' },
     { id: 'INV-2026-005', restaurantName: 'Downtown Bakery', subscriptionPlan: 'Free Plan', amount: 0, taxAmount: 0, paymentMethod: 'N/A', paymentDate: '2026-05-20', dueDate: '2026-06-20', status: 'Paid', transactionId: 'TXN-SYSTEM-001' }
   ])
@@ -893,22 +894,19 @@ export default function SuperAdminDashboard({
   // Pending payments calculations from invoices list
   const pendingPaymentsCount = invoices.filter(inv => inv.status === 'Pending').length
   const pendingPaymentsSum = invoices.filter(inv => inv.status === 'Pending').reduce((acc, inv) => acc + inv.amount, 0)
-  const expiringSubscriptionsCount = restaurants.filter(r => r.status === 'Active' && r.subscriptionPlan !== 'Enterprise').length > 0 ? 3 : 1
+  const expiringSubscriptionsCount = restaurants.filter(r => r.status === 'Active' && r.subscriptionPlan !== 'Premium').length > 0 ? 3 : 1
 
   // Subscription Plan Distributions for Donut/Pie Chart
   const standardCount = restaurants.filter(r => r.subscriptionPlan?.includes('Standard')).length || 0
   const premiumCount = restaurants.filter(r => r.subscriptionPlan?.includes('Premium')).length || 0
-  const enterpriseCount = restaurants.filter(r => r.subscriptionPlan?.includes('Enterprise')).length || 0
-  const totalPlans = standardCount + premiumCount + enterpriseCount || 1
+  const totalPlans = standardCount + premiumCount || 1
   const standardPct = (standardCount / totalPlans) * 100
   const premiumPct = (premiumCount / totalPlans) * 100
-  const enterprisePct = (enterpriseCount / totalPlans) * 100
 
   // Donut chart stroke math (Circumference C = 251.2 for r = 40)
   const donutCircumference = 251.2
   const standardDash = (standardCount / totalPlans) * donutCircumference
   const premiumDash = (premiumCount / totalPlans) * donutCircumference
-  const enterpriseDash = (enterpriseCount / totalPlans) * donutCircumference
 
   // Category distributions for visualization
   const categorySales = [
@@ -1045,8 +1043,8 @@ export default function SuperAdminDashboard({
     const expiry = new Date()
     expiry.setFullYear(expiry.getFullYear() + 1)
     const expiryStr = expiry.toISOString().split('T')[0]
-    const restaurantToAdd = { 
-      ...newRestState, 
+    const restaurantToAdd = {
+      ...newRestState,
       id: newId,
       subscriptionStatus: 'Active',
       expiryDate: expiryStr
@@ -1289,7 +1287,7 @@ export default function SuperAdminDashboard({
 
   return (
     <>
-      <div className="superadmin-wrapper animate-fade-in" style={{ display: 'grid', gridTemplateColumns: isMerged ? '1fr' : '260px 1fr', gap: '24px', padding: '24px 30px', width: '100%', minHeight: isMerged ? 'none' : 'calc(100vh - 60px)', background: '#ffffff', transition: 'background-color var(--transition-normal)' }}>
+      <div className="superadmin-wrapper animate-fade-in" style={{ display: 'grid', gridTemplateColumns: isMerged ? '1fr' : '260px 1fr', gap: '24px', padding: '24px 30px', width: '100%', minHeight: isMerged ? 'none' : 'calc(100vh - 60px)', background: 'rgb(226 232 239 / 26%)', transition: 'background-color var(--transition-normal)' }}>
 
         {/* Super Admin Control Navigation (Left) */}
         {!isMerged && (
@@ -1541,254 +1539,317 @@ export default function SuperAdminDashboard({
                     </button>
                   </div>
 
-                  <form onSubmit={handleCreateRestaurant} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                      <ValidatedInput
-                        label="Tenant"
-                        type="text"
-                        value={newRestState.name}
-                        onChange={(e) => setNewRestState({ ...newRestState, name: e.target.value })}
-                        placeholder="e.g. serveiq_main"
-                        required
-                        error={formErrors.name}
-                        setError={(val) => setFormErrors({ ...formErrors, name: val })}
-                      />
-                      <ValidatedInput
-                        label="Business Name"
-                        type="text"
-                        value={newRestState.legalName}
-                        onChange={(e) => setNewRestState({ ...newRestState, legalName: e.target.value })}
-                        placeholder="e.g. Serviq Hospitality Pvt. Ltd."
-                        required
-                        error={formErrors.legalName}
-                        setError={(val) => setFormErrors({ ...formErrors, legalName: val })}
-                      />
+                  <form onSubmit={handleCreateRestaurant} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    {/* Card 1: Restaurant Information */}
+                    <div style={{
+                      background: 'var(--bg-app)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '12px',
+                      padding: '20px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '16px'
+                    }}>
+                      <h4 style={{ margin: '0 0 4px 0', fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        <Building style={{ width: '15px', height: '15px', color: '#F95E10' }} />
+                        Restaurant Information
+                      </h4>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <ValidatedInput
+                          label="Tenant"
+                          type="text"
+                          value={newRestState.name}
+                          onChange={(e) => setNewRestState({ ...newRestState, name: e.target.value })}
+                          placeholder="e.g. serveiq_main"
+                          required
+                          error={formErrors.name}
+                          setError={(val) => setFormErrors({ ...formErrors, name: val })}
+                        />
+                        <ValidatedInput
+                          label="Business Name"
+                          type="text"
+                          value={newRestState.legalName}
+                          onChange={(e) => setNewRestState({ ...newRestState, legalName: e.target.value })}
+                          placeholder="e.g. Serviq Hospitality Pvt. Ltd."
+                          required
+                          error={formErrors.legalName}
+                          setError={(val) => setFormErrors({ ...formErrors, legalName: val })}
+                        />
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <ValidatedInput
+                          label="Owner Name"
+                          type="text"
+                          value={newRestState.ownerName}
+                          onChange={(e) => setNewRestState({ ...newRestState, ownerName: e.target.value })}
+                          placeholder="e.g. Rajesh Kumar"
+                          required
+                          error={formErrors.ownerName}
+                          setError={(val) => setFormErrors({ ...formErrors, ownerName: val })}
+                        />
+                        <ValidatedInput
+                          label="Mobile Number"
+                          type="text"
+                          value={newRestState.mobileNumber}
+                          onChange={(e) => setNewRestState({ ...newRestState, mobileNumber: e.target.value, phone: e.target.value })}
+                          placeholder="e.g. +91 98765 43210"
+                          required
+                          error={formErrors.mobileNumber}
+                          setError={(val) => setFormErrors({ ...formErrors, mobileNumber: val })}
+                        />
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <ValidatedInput
+                          label="Email"
+                          type="email"
+                          value={newRestState.email}
+                          onChange={(e) => setNewRestState({ ...newRestState, email: e.target.value })}
+                          placeholder="e.g. contact@serviqbistro.com"
+                          required
+                          error={formErrors.email}
+                          setError={(val) => setFormErrors({ ...formErrors, email: val })}
+                        />
+                        <ValidatedInput
+                          label="Website Domain"
+                          type="text"
+                          value={newRestState.website}
+                          onChange={(e) => setNewRestState({ ...newRestState, website: e.target.value })}
+                          placeholder="e.g. https://serviqbistro.com"
+                          error={formErrors.website}
+                          setError={(val) => setFormErrors({ ...formErrors, website: val })}
+                        />
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <ValidatedInput
+                          label="Opening Time"
+                          type="text"
+                          value={newRestState.openingTime}
+                          onChange={(e) => setNewRestState({ ...newRestState, openingTime: e.target.value })}
+                          placeholder="e.g. 11:00 AM"
+                          required
+                          error={formErrors.openingTime}
+                          setError={(val) => setFormErrors({ ...formErrors, openingTime: val })}
+                        />
+                        <ValidatedInput
+                          label="Closing Time"
+                          type="text"
+                          value={newRestState.closingTime}
+                          onChange={(e) => setNewRestState({ ...newRestState, closingTime: e.target.value })}
+                          placeholder="e.g. 11:00 PM"
+                          required
+                          error={formErrors.closingTime}
+                          setError={(val) => setFormErrors({ ...formErrors, closingTime: val })}
+                        />
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                        <ValidatedInput
+                          label="Tax Rate (%)"
+                          type="number"
+                          value={newRestState.taxRate}
+                          onChange={(e) => setNewRestState({ ...newRestState, taxRate: parseFloat(e.target.value) || 0 })}
+                          min="0" max="30" step="0.5" required
+                          error={formErrors.taxRate}
+                          setError={(val) => setFormErrors({ ...formErrors, taxRate: val })}
+                        />
+                        <ValidatedInput
+                          label="Service Fee (%)"
+                          type="number"
+                          value={newRestState.serviceCharge}
+                          onChange={(e) => setNewRestState({ ...newRestState, serviceCharge: parseFloat(e.target.value) || 0 })}
+                          min="0" max="20" step="0.5" required
+                          error={formErrors.serviceCharge}
+                          setError={(val) => setFormErrors({ ...formErrors, serviceCharge: val })}
+                        />
+                        <ValidatedSelect
+                          label="Initial Status"
+                          value={newRestState.status}
+                          onChange={(e) => setNewRestState({ ...newRestState, status: e.target.value })}
+                          error={formErrors.status}
+                          setError={(val) => setFormErrors({ ...formErrors, status: val })}
+                        >
+                          <option value="Active">Active</option>
+                          <option value="Suspended">Suspended</option>
+                          <option value="Inactive">Inactive</option>
+                        </ValidatedSelect>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <ValidatedInput
+                          label="Restaurant Logo URL"
+                          type="text"
+                          value={newRestState.logo}
+                          onChange={(e) => setNewRestState({ ...newRestState, logo: e.target.value })}
+                          placeholder="https://images.unsplash.com/... (Logo)"
+                          error={formErrors.logo}
+                          setError={(val) => setFormErrors({ ...formErrors, logo: val })}
+                        />
+                        <ValidatedInput
+                          label="Restaurant Banner URL"
+                          type="text"
+                          value={newRestState.banner}
+                          onChange={(e) => setNewRestState({ ...newRestState, banner: e.target.value })}
+                          placeholder="https://images.unsplash.com/... (Banner)"
+                          error={formErrors.banner}
+                          setError={(val) => setFormErrors({ ...formErrors, banner: val })}
+                        />
+                      </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    {/* Card 2: Address Information */}
+                    <div style={{
+                      background: 'var(--bg-app)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '12px',
+                      padding: '20px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '16px'
+                    }}>
+                      <h4 style={{ margin: '0 0 4px 0', fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        <MapPin style={{ width: '15px', height: '15px', color: '#F95E10' }} />
+                        Address Information
+                      </h4>
+
                       <ValidatedInput
-                        label="Owner Name"
+                        label="Registered Location Address"
                         type="text"
-                        value={newRestState.ownerName}
-                        onChange={(e) => setNewRestState({ ...newRestState, ownerName: e.target.value })}
-                        placeholder="e.g. Rajesh Kumar"
+                        value={newRestState.address}
+                        onChange={(e) => setNewRestState({ ...newRestState, address: e.target.value })}
+                        placeholder="e.g. 12, Khader Nawaz Khan Road, Nungambakkam"
                         required
-                        error={formErrors.ownerName}
-                        setError={(val) => setFormErrors({ ...formErrors, ownerName: val })}
+                        error={formErrors.address}
+                        setError={(val) => setFormErrors({ ...formErrors, address: val })}
                       />
-                      <ValidatedInput
-                        label="Mobile Number"
-                        type="text"
-                        value={newRestState.mobileNumber}
-                        onChange={(e) => setNewRestState({ ...newRestState, mobileNumber: e.target.value, phone: e.target.value })}
-                        placeholder="e.g. +91 98765 43210"
-                        required
-                        error={formErrors.mobileNumber}
-                        setError={(val) => setFormErrors({ ...formErrors, mobileNumber: val })}
-                      />
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                        <ValidatedInput
+                          label="City"
+                          type="text"
+                          value={newRestState.city}
+                          onChange={(e) => setNewRestState({ ...newRestState, city: e.target.value, branch: `${e.target.value}` })}
+                          placeholder="e.g. Chennai"
+                          required
+                          error={formErrors.city}
+                          setError={(val) => setFormErrors({ ...formErrors, city: val })}
+                        />
+                        <ValidatedInput
+                          label="State"
+                          type="text"
+                          value={newRestState.state}
+                          onChange={(e) => setNewRestState({ ...newRestState, state: e.target.value })}
+                          placeholder="e.g. Tamil Nadu"
+                          required
+                          error={formErrors.state}
+                          setError={(val) => setFormErrors({ ...formErrors, state: val })}
+                        />
+                        <ValidatedInput
+                          label="Country"
+                          type="text"
+                          value={newRestState.country}
+                          onChange={(e) => setNewRestState({ ...newRestState, country: e.target.value })}
+                          placeholder="e.g. India"
+                          required
+                          error={formErrors.country}
+                          setError={(val) => setFormErrors({ ...formErrors, country: val })}
+                        />
+                      </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                      <ValidatedInput
-                        label="Email"
-                        type="email"
-                        value={newRestState.email}
-                        onChange={(e) => setNewRestState({ ...newRestState, email: e.target.value })}
-                        placeholder="e.g. contact@serviqbistro.com"
-                        required
-                        error={formErrors.email}
-                        setError={(val) => setFormErrors({ ...formErrors, email: val })}
-                      />
-                      <ValidatedInput
-                        label="Website Domain"
-                        type="text"
-                        value={newRestState.website}
-                        onChange={(e) => setNewRestState({ ...newRestState, website: e.target.value })}
-                        placeholder="e.g. https://serviqbistro.com"
-                        error={formErrors.website}
-                        setError={(val) => setFormErrors({ ...formErrors, website: val })}
-                      />
+                    {/* Card 3: Compliance Information */}
+                    <div style={{
+                      background: 'var(--bg-app)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '12px',
+                      padding: '20px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '16px'
+                    }}>
+                      <h4 style={{ margin: '0 0 4px 0', fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        <Shield style={{ width: '15px', height: '15px', color: '#F95E10' }} />
+                        Compliance Information
+                      </h4>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                        <ValidatedInput
+                          label="FSSAI License Number"
+                          type="text"
+                          value={newRestState.license}
+                          onChange={(e) => setNewRestState({ ...newRestState, license: e.target.value })}
+                          placeholder="FSSAI-12345678901234"
+                          required
+                          error={formErrors.license}
+                          setError={(val) => setFormErrors({ ...formErrors, license: val })}
+                        />
+                        <ValidatedInput
+                          label="GSTIN Number"
+                          type="text"
+                          value={newRestState.gstin}
+                          onChange={(e) => setNewRestState({ ...newRestState, gstin: e.target.value })}
+                          placeholder="33AAAAA1111A1Z1"
+                          required
+                          error={formErrors.gstin}
+                          setError={(val) => setFormErrors({ ...formErrors, gstin: val })}
+                        />
+                        <ValidatedInput
+                          label="PAN Number"
+                          type="text"
+                          value={newRestState.pan}
+                          onChange={(e) => setNewRestState({ ...newRestState, pan: e.target.value })}
+                          placeholder="ABCDE1234F"
+                          required
+                          error={formErrors.pan}
+                          setError={(val) => setFormErrors({ ...formErrors, pan: val })}
+                        />
+                      </div>
                     </div>
 
-                    <ValidatedInput
-                      label="Registered Location Address"
-                      type="text"
-                      value={newRestState.address}
-                      onChange={(e) => setNewRestState({ ...newRestState, address: e.target.value })}
-                      placeholder="e.g. 12, Khader Nawaz Khan Road, Nungambakkam"
-                      required
-                      error={formErrors.address}
-                      setError={(val) => setFormErrors({ ...formErrors, address: val })}
-                    />
+                    {/* Card 4: Subscription Information */}
+                    <div style={{
+                      background: 'var(--bg-app)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '12px',
+                      padding: '20px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '16px'
+                    }}>
+                      <h4 style={{ margin: '0 0 4px 0', fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        <Gem style={{ width: '15px', height: '15px', color: '#F95E10' }} />
+                        Subscription Information
+                      </h4>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-                      <ValidatedInput
-                        label="City"
-                        type="text"
-                        value={newRestState.city}
-                        onChange={(e) => setNewRestState({ ...newRestState, city: e.target.value, branch: `${e.target.value}` })}
-                        placeholder="e.g. Chennai"
-                        required
-                        error={formErrors.city}
-                        setError={(val) => setFormErrors({ ...formErrors, city: val })}
-                      />
-                      <ValidatedInput
-                        label="State"
-                        type="text"
-                        value={newRestState.state}
-                        onChange={(e) => setNewRestState({ ...newRestState, state: e.target.value })}
-                        placeholder="e.g. Tamil Nadu"
-                        required
-                        error={formErrors.state}
-                        setError={(val) => setFormErrors({ ...formErrors, state: val })}
-                      />
-                      <ValidatedInput
-                        label="Country"
-                        type="text"
-                        value={newRestState.country}
-                        onChange={(e) => setNewRestState({ ...newRestState, country: e.target.value })}
-                        placeholder="e.g. India"
-                        required
-                        error={formErrors.country}
-                        setError={(val) => setFormErrors({ ...formErrors, country: val })}
-                      />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-                      <ValidatedInput
-                        label="FSSAI License Number"
-                        type="text"
-                        value={newRestState.license}
-                        onChange={(e) => setNewRestState({ ...newRestState, license: e.target.value })}
-                        placeholder="FSSAI-12345678901234"
-                        required
-                        error={formErrors.license}
-                        setError={(val) => setFormErrors({ ...formErrors, license: val })}
-                      />
-                      <ValidatedInput
-                        label="GSTIN Number"
-                        type="text"
-                        value={newRestState.gstin}
-                        onChange={(e) => setNewRestState({ ...newRestState, gstin: e.target.value })}
-                        placeholder="33AAAAA1111A1Z1"
-                        required
-                        error={formErrors.gstin}
-                        setError={(val) => setFormErrors({ ...formErrors, gstin: val })}
-                      />
-                      <ValidatedInput
-                        label="PAN Number"
-                        type="text"
-                        value={newRestState.pan}
-                        onChange={(e) => setNewRestState({ ...newRestState, pan: e.target.value })}
-                        placeholder="ABCDE1234F"
-                        required
-                        error={formErrors.pan}
-                        setError={(val) => setFormErrors({ ...formErrors, pan: val })}
-                      />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                      <ValidatedInput
-                        label="Opening Time"
-                        type="text"
-                        value={newRestState.openingTime}
-                        onChange={(e) => setNewRestState({ ...newRestState, openingTime: e.target.value })}
-                        placeholder="e.g. 11:00 AM"
-                        required
-                        error={formErrors.openingTime}
-                        setError={(val) => setFormErrors({ ...formErrors, openingTime: val })}
-                      />
-                      <ValidatedInput
-                        label="Closing Time"
-                        type="text"
-                        value={newRestState.closingTime}
-                        onChange={(e) => setNewRestState({ ...newRestState, closingTime: e.target.value })}
-                        placeholder="e.g. 11:00 PM"
-                        required
-                        error={formErrors.closingTime}
-                        setError={(val) => setFormErrors({ ...formErrors, closingTime: val })}
-                      />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-                      <ValidatedInput
-                        label="Tax Rate (%)"
-                        type="number"
-                        value={newRestState.taxRate}
-                        onChange={(e) => setNewRestState({ ...newRestState, taxRate: parseFloat(e.target.value) || 0 })}
-                        min="0" max="30" step="0.5" required
-                        error={formErrors.taxRate}
-                        setError={(val) => setFormErrors({ ...formErrors, taxRate: val })}
-                      />
-                      <ValidatedInput
-                        label="Service Fee (%)"
-                        type="number"
-                        value={newRestState.serviceCharge}
-                        onChange={(e) => setNewRestState({ ...newRestState, serviceCharge: parseFloat(e.target.value) || 0 })}
-                        min="0" max="20" step="0.5" required
-                        error={formErrors.serviceCharge}
-                        setError={(val) => setFormErrors({ ...formErrors, serviceCharge: val })}
-                      />
-                      <ValidatedSelect
-                        label="Initial Status"
-                        value={newRestState.status}
-                        onChange={(e) => setNewRestState({ ...newRestState, status: e.target.value })}
-                        error={formErrors.status}
-                        setError={(val) => setFormErrors({ ...formErrors, status: val })}
-                      >
-                        <option value="Active">Active</option>
-                        <option value="Suspended">Suspended</option>
-                        <option value="Inactive">Inactive</option>
-                      </ValidatedSelect>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                      <ValidatedSelect
-                        label="Subscription Plan"
-                        value={newRestState.subscriptionPlan || 'Standard'}
-                        onChange={(e) => setNewRestState({ ...newRestState, subscriptionPlan: e.target.value })}
-                        error={formErrors.subscriptionPlan}
-                        setError={(val) => setFormErrors({ ...formErrors, subscriptionPlan: val })}
-                      >
-                        <option value="Standard">Standard Plan</option>
-                        <option value="Premium">Premium Plan</option>
-                        <option value="Enterprise">Enterprise Plan</option>
-                      </ValidatedSelect>
-                      <ValidatedInput
-                        label="Created Date"
-                        type="date"
-                        value={newRestState.createdDate || ''}
-                        onChange={(e) => setNewRestState({ ...newRestState, createdDate: e.target.value })}
-                        required
-                        error={formErrors.createdDate}
-                        setError={(val) => setFormErrors({ ...formErrors, createdDate: val })}
-                      />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                      <ValidatedInput
-                        label="Restaurant Logo URL"
-                        type="text"
-                        value={newRestState.logo}
-                        onChange={(e) => setNewRestState({ ...newRestState, logo: e.target.value })}
-                        placeholder="https://images.unsplash.com/... (Logo)"
-                        error={formErrors.logo}
-                        setError={(val) => setFormErrors({ ...formErrors, logo: val })}
-                      />
-                      <ValidatedInput
-                        label="Restaurant Banner URL"
-                        type="text"
-                        value={newRestState.banner}
-                        onChange={(e) => setNewRestState({ ...newRestState, banner: e.target.value })}
-                        placeholder="https://images.unsplash.com/... (Banner)"
-                        error={formErrors.banner}
-                        setError={(val) => setFormErrors({ ...formErrors, banner: val })}
-                      />
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <ValidatedSelect
+                          label="Subscription Plan"
+                          value={newRestState.subscriptionPlan || 'Standard'}
+                          onChange={(e) => setNewRestState({ ...newRestState, subscriptionPlan: e.target.value })}
+                          error={formErrors.subscriptionPlan}
+                          setError={(val) => setFormErrors({ ...formErrors, subscriptionPlan: val })}
+                        >
+                          <option value="Standard">Standard Plan</option>
+                          <option value="Premium">Premium Plan</option>
+                        </ValidatedSelect>
+                        <ValidatedInput
+                          label="Created Date"
+                          type="date"
+                          value={newRestState.createdDate || ''}
+                          onChange={(e) => setNewRestState({ ...newRestState, createdDate: e.target.value })}
+                          required
+                          error={formErrors.createdDate}
+                          setError={(val) => setFormErrors({ ...formErrors, createdDate: val })}
+                        />
+                      </div>
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>
                       <button type="button" onClick={() => setShowAddModal(false)} style={{ padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1' }}>Cancel</button>
-                      <button type="submit" style={{ padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#000000', color: '#ffffff', border: 'none' }}>Register</button>
+                      <button type="submit" style={{ padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#000000', color: '#ffffff', border: 'none' }}>Register Branch</button>
                     </div>
                   </form>
                 </div>
@@ -1867,19 +1928,19 @@ export default function SuperAdminDashboard({
                                   {rest.email || '—'}
                                 </td>
                                 <td style={{ padding: '14px 18px', whiteSpace: 'nowrap' }}>
-                                   <span style={{
-                                     fontSize: '0.7rem',
-                                     fontWeight: '800',
-                                     padding: '4px 10px',
-                                     borderRadius: '6px',
-                                     background: rest.subscriptionPlan?.includes('Enterprise') ? 'rgba(124, 58, 237, 0.1)' : rest.subscriptionPlan?.includes('Premium') ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                                     color: rest.subscriptionPlan?.includes('Enterprise') ? '#7c3aed' : rest.subscriptionPlan?.includes('Premium') ? '#3b82f6' : '#10b981',
-                                     border: rest.subscriptionPlan?.includes('Enterprise') ? '1px solid rgba(124, 58, 237, 0.2)' : rest.subscriptionPlan?.includes('Premium') ? '1px solid rgba(59, 130, 246, 0.2)' : '1px solid rgba(16, 185, 129, 0.2)',
-                                     display: 'inline-block'
-                                   }}>
-                                     {rest.subscriptionPlan || 'Standard Plan'}
-                                   </span>
-                                 </td>
+                                  <span style={{
+                                    fontSize: '0.7rem',
+                                    fontWeight: '800',
+                                    padding: '4px 10px',
+                                    borderRadius: '6px',
+                                    background: rest.subscriptionPlan?.includes('Enterprise') ? 'rgba(124, 58, 237, 0.1)' : rest.subscriptionPlan?.includes('Premium') ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                                    color: rest.subscriptionPlan?.includes('Enterprise') ? '#7c3aed' : rest.subscriptionPlan?.includes('Premium') ? '#3b82f6' : '#10b981',
+                                    border: rest.subscriptionPlan?.includes('Enterprise') ? '1px solid rgba(124, 58, 237, 0.2)' : rest.subscriptionPlan?.includes('Premium') ? '1px solid rgba(59, 130, 246, 0.2)' : '1px solid rgba(16, 185, 129, 0.2)',
+                                    display: 'inline-block'
+                                  }}>
+                                    {rest.subscriptionPlan || 'Standard Plan'}
+                                  </span>
+                                </td>
                                 <td style={{ padding: '14px 18px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', whiteSpace: 'nowrap' }}>
                                   {rest.phone || rest.mobileNumber || '—'}
                                 </td>
@@ -2392,7 +2453,7 @@ export default function SuperAdminDashboard({
               {/* KPI Metrics Row 1: Restaurants & Users */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
                 {/* Card 1: Total Restaurants */}
-                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px' }}>
+                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRight: '5px solid #f95e10', borderRadius: '16px' }}>
                   <div style={{ background: 'var(--primary-light)', color: 'var(--primary)', width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Building style={{ width: '22px', height: '22px' }} /></div>
                   <div>
                     <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>Total Restaurants</span>
@@ -2402,7 +2463,7 @@ export default function SuperAdminDashboard({
                 </div>
 
                 {/* Card 2: Active Restaurants */}
-                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px' }}>
+                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRight: '5px solid #f95e10', borderRadius: '16px' }}>
                   <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><CheckCircle style={{ width: '22px', height: '22px' }} /></div>
                   <div>
                     <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>Active Restaurants</span>
@@ -2412,7 +2473,7 @@ export default function SuperAdminDashboard({
                 </div>
 
                 {/* Card 3: Inactive Restaurants */}
-                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px' }}>
+                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRight: '5px solid #f95e10', borderRadius: '16px' }}>
                   <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><AlertTriangle style={{ width: '22px', height: '22px' }} /></div>
                   <div>
                     <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>Inactive Restaurants</span>
@@ -2427,7 +2488,7 @@ export default function SuperAdminDashboard({
               {/* KPI Metrics Row 2: Platform Financials & Subscriptions */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
                 {/* Card: Monthly Revenue */}
-                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px' }}>
+                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRight: '5px solid #f95e10', borderRadius: '16px' }}>
                   <div style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <TrendingUp style={{ width: '22px', height: '22px' }} />
                   </div>
@@ -2439,7 +2500,7 @@ export default function SuperAdminDashboard({
                 </div>
 
                 {/* Card: Expiring Subscriptions */}
-                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px' }}>
+                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRight: '5px solid #f95e10', borderRadius: '16px' }}>
                   <div style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Clock style={{ width: '22px', height: '22px' }} />
                   </div>
@@ -2451,7 +2512,7 @@ export default function SuperAdminDashboard({
                 </div>
 
                 {/* Card: Pending Payments */}
-                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px' }}>
+                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRight: '5px solid #f95e10', borderRadius: '16px' }}>
                   <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CreditCard style={{ width: '22px', height: '22px' }} />
                   </div>
@@ -2465,8 +2526,18 @@ export default function SuperAdminDashboard({
 
               {/* KPI Metrics Row 2: Orders & Financials */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                {/* Card 4: Basic Plan Count */}
+                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRight: '5px solid #f95e10', borderRadius: '16px' }}>
+                  <div style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Award style={{ width: '22px', height: '22px' }} /></div>
+                  <div>
+                    <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>Basic Plan</span>
+                    <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900' }}>{restaurants.filter(r => r.subscriptionPlan?.includes('Basic')).length}</h3>
+                    <span style={{ fontSize: '0.65rem', color: '#f59e0b', fontWeight: '700' }}>Active Branches</span>
+                  </div>
+                </div>
+
                 {/* Card 5: Standard Plan Count */}
-                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px' }}>
+                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRight: '5px solid #f95e10', borderRadius: '16px' }}>
                   <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Award style={{ width: '22px', height: '22px' }} /></div>
                   <div>
                     <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>Standard Plan</span>
@@ -2476,22 +2547,12 @@ export default function SuperAdminDashboard({
                 </div>
 
                 {/* Card 6: Premium Plan Count */}
-                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px' }}>
+                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRight: '5px solid #f95e10', borderRadius: '16px' }}>
                   <div style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Award style={{ width: '22px', height: '22px' }} /></div>
                   <div>
                     <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>Premium Plan</span>
                     <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900' }}>{restaurants.filter(r => r.subscriptionPlan?.includes('Premium')).length}</h3>
                     <span style={{ fontSize: '0.65rem', color: '#3b82f6', fontWeight: '700' }}>Active Branches</span>
-                  </div>
-                </div>
-
-                {/* Card 7: Enterprise Plan Count */}
-                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px' }}>
-                  <div style={{ background: 'rgba(124, 58, 237, 0.1)', color: '#7c3aed', width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Award style={{ width: '22px', height: '22px' }} /></div>
-                  <div>
-                    <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>Enterprise Plan</span>
-                    <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900' }}>{restaurants.filter(r => r.subscriptionPlan?.includes('Enterprise')).length}</h3>
-                    <span style={{ fontSize: '0.65rem', color: '#7c3aed', fontWeight: '700' }}>Active Branches</span>
                   </div>
                 </div>
 
@@ -2655,7 +2716,7 @@ export default function SuperAdminDashboard({
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Active branch plan types and percentages</span>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <h2 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '900', color: '#10b981' }}>{standardCount + premiumCount + enterpriseCount}</h2>
+                      <h2 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '900', color: '#10b981' }}>{standardCount + premiumCount}</h2>
                       <span style={{ fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '4px 10px', borderRadius: '6px', fontWeight: '800' }}>Active Branches</span>
                     </div>
                   </div>
@@ -2684,15 +2745,6 @@ export default function SuperAdminDashboard({
                           strokeDashoffset={-standardDash}
                           strokeLinecap="round"
                         />
-
-                        {/* Enterprise segment (Purple) */}
-                        <circle
-                          cx="50" cy="50" r="40" fill="none"
-                          stroke="#7c3aed" strokeWidth="12"
-                          strokeDasharray={`${enterpriseDash} ${donutCircumference}`}
-                          strokeDashoffset={-(standardDash + premiumDash)}
-                          strokeLinecap="round"
-                        />
                       </svg>
 
                       {/* Text inside the Donut hole */}
@@ -2704,7 +2756,7 @@ export default function SuperAdminDashboard({
                         textAlign: 'center'
                       }}>
                         <span style={{ fontSize: '1.4rem', fontWeight: '900', color: 'var(--text-main)', display: 'block', lineHeight: 1 }}>
-                          {standardCount + premiumCount + enterpriseCount}
+                          {standardCount + premiumCount}
                         </span>
                         <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.5px' }}>
                           Branches
@@ -2735,18 +2787,6 @@ export default function SuperAdminDashboard({
                         <div style={{ textAlign: 'right' }}>
                           <span style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)', display: 'block' }}>{premiumCount}</span>
                           <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '600' }}>{premiumPct.toFixed(0)}%</span>
-                        </div>
-                      </div>
-
-                      {/* Enterprise */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#7c3aed', flexShrink: 0 }} />
-                          <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-main)' }}>Enterprise Plan</span>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <span style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)', display: 'block' }}>{enterpriseCount}</span>
-                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '600' }}>{enterprisePct.toFixed(0)}%</span>
                         </div>
                       </div>
                     </div>
@@ -2853,45 +2893,6 @@ export default function SuperAdminDashboard({
                 ))}
               </div>
 
-              <div className="glass-card" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', alignItems: 'flex-start', marginBottom: '18px', flexWrap: 'wrap' }}>
-                  <div>
-                    <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Purpose</span>
-                    <h3 style={{ margin: '4px 0', fontSize: '1.15rem', fontWeight: '900', color: 'var(--text-main)' }}>Manage Potential Customers</h3>
-                    <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)' }}>Create leads, assign ownership, schedule follow-ups, and convert won leads to restaurants.</p>
-                  </div>
-                  <button
-                    type="button"
-                    className="btn-black"
-                    onClick={() => {
-                      setFormErrors({})
-                      resetLeadForm()
-                      setShowCreateLeadForm(true)
-                    }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '6px', borderRadius: '8px' }}
-                  >
-                    <Plus style={{ width: '14px', height: '14px' }} /> Create Lead
-                  </button>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '18px', borderTop: '1px solid var(--border-color)' }}>
-                  {leadStatuses.map((status, idx) => (
-                    <React.Fragment key={status}>
-                      <span style={{
-                        padding: '6px 10px',
-                        borderRadius: '8px',
-                        background: status === 'Won' ? 'rgba(16, 185, 129, 0.1)' : status === 'Lost' ? 'rgba(239, 68, 68, 0.1)' : 'var(--bg-app)',
-                        color: status === 'Won' ? '#10b981' : status === 'Lost' ? '#ef4444' : 'var(--text-main)',
-                        border: '1px solid var(--border-color)',
-                        fontSize: '0.68rem',
-                        fontWeight: '800',
-                        whiteSpace: 'nowrap'
-                      }}>{status}</span>
-                      {idx < leadStatuses.length - 1 && <ArrowRight style={{ width: '12px', height: '12px', color: 'var(--text-muted)' }} />}
-                    </React.Fragment>
-                  ))}
-                </div>
-              </div>
-
               <div className="glass-card" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', overflow: 'hidden' }}>
                 <div style={{ padding: '18px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', gap: '12px', flexWrap: 'wrap' }}>
                   <div>
@@ -2973,55 +2974,105 @@ export default function SuperAdminDashboard({
                 )}
 
                 <div style={{ padding: '20px', overflowX: 'auto' }}>
-                  <table className="menu-data-table">
+                  <table className="menu-data-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1200px', tableLayout: 'fixed' }}>
                     <thead>
-                      <tr>
-                        <th>Lead</th>
-                        <th>Contact</th>
-                        <th>Source</th>
-                        <th>Status</th>
-                        <th>Assigned To</th>
-                        <th>Follow-up</th>
-                        <th>Remarks</th>
-                        <th style={{ textAlign: 'right' }}>Actions</th>
+                      <tr style={{ background: 'var(--bg-app)', borderBottom: '1px solid var(--border-color)' }}>
+                        <th style={{ textAlign: 'left', padding: '12px 14px', fontSize: '0.75rem', fontWeight: '800', whiteSpace: 'nowrap', textTransform: 'uppercase', width: '220px' }}>Lead</th>
+                        <th style={{ textAlign: 'left', padding: '12px 14px', fontSize: '0.75rem', fontWeight: '800', whiteSpace: 'nowrap', textTransform: 'uppercase', width: '250px' }}>Contact</th>
+                        <th style={{ textAlign: 'left', padding: '12px 14px', fontSize: '0.75rem', fontWeight: '800', whiteSpace: 'nowrap', textTransform: 'uppercase', width: '110px' }}>Source</th>
+                        <th style={{ textAlign: 'left', padding: '12px 14px', fontSize: '0.75rem', fontWeight: '800', whiteSpace: 'nowrap', textTransform: 'uppercase', width: '150px' }}>Status</th>
+                        <th style={{ textAlign: 'left', padding: '12px 14px', fontSize: '0.75rem', fontWeight: '800', whiteSpace: 'nowrap', textTransform: 'uppercase', width: '160px' }}>Assigned To</th>
+                        <th style={{ textAlign: 'left', padding: '12px 14px', fontSize: '0.75rem', fontWeight: '800', whiteSpace: 'nowrap', textTransform: 'uppercase', width: '140px' }}>Follow-up</th>
+                        <th style={{ textAlign: 'left', padding: '12px 14px', fontSize: '0.75rem', fontWeight: '800', whiteSpace: 'nowrap', textTransform: 'uppercase', width: '200px' }}>Remarks</th>
+                        <th style={{ textAlign: 'right', padding: '12px 14px', fontSize: '0.75rem', fontWeight: '800', whiteSpace: 'nowrap', textTransform: 'uppercase', width: '180px' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredLeads.map(lead => (
-                        <tr key={lead.id}>
-                          <td>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <strong style={{ color: 'var(--text-main)', whiteSpace: 'nowrap' }}>{lead.businessName}</strong>
+                        <tr key={lead.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background-color 0.2s' }}>
+                          <td style={{ padding: '12px 14px', verticalAlign: 'middle', whiteSpace: 'nowrap', width: '220px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                              <strong style={{ color: 'var(--text-main)', fontSize: '0.85rem', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{lead.businessName}</strong>
                               <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontFamily: 'monospace', fontWeight: '700', background: 'var(--bg-app)', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '1px 6px', whiteSpace: 'nowrap', flexShrink: 0 }}>{lead.id}</span>
                             </div>
                           </td>
-                          <td>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                              <strong style={{ fontSize: '0.82rem', color: 'var(--text-main)', whiteSpace: 'nowrap' }}>{lead.contactPerson}</strong>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
-                                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{lead.mobileNumber}</span>
+                          <td style={{ padding: '12px 14px', verticalAlign: 'middle', whiteSpace: 'nowrap', width: '250px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', overflow: 'hidden' }}>
+                              <strong style={{ fontSize: '0.82rem', color: 'var(--text-main)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{lead.contactPerson}</strong>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{lead.mobileNumber}</span>
                                 <span style={{ width: '3px', height: '3px', borderRadius: '50%', background: 'var(--border-color)', flexShrink: 0 }}></span>
-                                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{lead.emailAddress}</span>
+                                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{lead.emailAddress}</span>
                               </div>
                             </div>
                           </td>
-                          <td>{lead.leadSource}</td>
-                          <td>
-                            <select value={lead.leadStatus} onChange={(e) => handleLeadStatusChange(lead.id, e.target.value)} style={{ padding: '6px 8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', fontSize: '0.75rem', fontWeight: '700' }}>
+                          <td style={{ padding: '12px 14px', verticalAlign: 'middle', fontSize: '0.8rem', color: 'var(--text-main)', fontWeight: '600', whiteSpace: 'nowrap', width: '110px' }}>
+                            {lead.leadSource}
+                          </td>
+                          <td style={{ padding: '12px 14px', verticalAlign: 'middle', whiteSpace: 'nowrap', width: '150px' }}>
+                            <select
+                              value={lead.leadStatus}
+                              onChange={(e) => handleLeadStatusChange(lead.id, e.target.value)}
+                              style={{
+                                padding: '6px 10px',
+                                borderRadius: '8px',
+                                border: '1px solid var(--border-color)',
+                                background: 'var(--bg-app)',
+                                color: 'var(--text-main)',
+                                fontSize: '0.75rem',
+                                fontWeight: '700',
+                                outline: 'none',
+                                cursor: 'pointer',
+                                boxSizing: 'border-box',
+                                width: '100%'
+                              }}
+                            >
                               {leadStatuses.map(status => <option key={status} value={status}>{status}</option>)}
                             </select>
                           </td>
-                          <td>
-                            <select value={lead.assignedTo} onChange={(e) => handleLeadAssignmentChange(lead.id, e.target.value)} style={{ padding: '6px 8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', fontSize: '0.75rem' }}>
+                          <td style={{ padding: '12px 14px', verticalAlign: 'middle', whiteSpace: 'nowrap', width: '160px' }}>
+                            <select
+                              value={lead.assignedTo}
+                              onChange={(e) => handleLeadAssignmentChange(lead.id, e.target.value)}
+                              style={{
+                                padding: '6px 10px',
+                                borderRadius: '8px',
+                                border: '1px solid var(--border-color)',
+                                background: 'var(--bg-app)',
+                                color: 'var(--text-main)',
+                                fontSize: '0.75rem',
+                                outline: 'none',
+                                cursor: 'pointer',
+                                boxSizing: 'border-box',
+                                width: '100%'
+                              }}
+                            >
                               <option value="Unassigned">Unassigned</option>
                               {restaurantAdmins.map(admin => <option key={admin.id} value={admin.name}>{admin.name}</option>)}
                             </select>
                           </td>
-                          <td>
-                            <input type="date" value={lead.followUpDate} onChange={(e) => handleLeadFollowUpChange(lead.id, e.target.value)} style={{ padding: '6px 8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', fontSize: '0.75rem' }} />
+                          <td style={{ padding: '12px 14px', verticalAlign: 'middle', whiteSpace: 'nowrap', width: '140px' }}>
+                            <input
+                              type="date"
+                              value={lead.followUpDate}
+                              onChange={(e) => handleLeadFollowUpChange(lead.id, e.target.value)}
+                              style={{
+                                padding: '6px 10px',
+                                borderRadius: '8px',
+                                border: '1px solid var(--border-color)',
+                                background: 'var(--bg-app)',
+                                color: 'var(--text-main)',
+                                fontSize: '0.75rem',
+                                outline: 'none',
+                                boxSizing: 'border-box',
+                                width: '100%'
+                              }}
+                            />
                           </td>
-                          <td style={{ maxWidth: '220px', color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.4 }}>{lead.remarks || '-'}</td>
-                          <td style={{ textAlign: 'right' }}>
+                          <td style={{ padding: '12px 14px', verticalAlign: 'middle', color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.4, width: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {lead.remarks || '-'}
+                          </td>
+                          <td style={{ padding: '12px 14px', verticalAlign: 'middle', textAlign: 'right', width: '180px', whiteSpace: 'nowrap' }}>
                             <button
                               type="button"
                               className="btn-outline"
@@ -3213,6 +3264,18 @@ export default function SuperAdminDashboard({
                       />
                     </div>
 
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <ValidatedInput
+                        label="Invoice Number"
+                        type="text"
+                        value={newInvoiceFormState.transactionId}
+                        onChange={(e) => setNewInvoiceFormState({ ...newInvoiceFormState, transactionId: e.target.value })}
+                        placeholder="e.g. TXN-129847184"
+                        disabled={newInvoiceFormState.status === 'Pending'}
+                        error={formErrors.transactionId}
+                        setError={(val) => setFormErrors({ ...formErrors, transactionId: val })}
+                      />
+                    </div>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px', paddingTop: '24px', borderTop: '1px solid var(--border-color)' }}>
                       <button type="button" className="btn-outline" onClick={() => setShowGenerateInvoiceModal(false)} style={{ padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1' }}>Cancel</button>
                       <button type="submit" className="btn-black" style={{ padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#000000', color: '#ffffff', border: 'none' }}>Generate Invoice</button>

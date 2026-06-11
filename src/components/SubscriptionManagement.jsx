@@ -156,7 +156,6 @@ export default function SubscriptionManagement({ restaurants, onUpdateRestaurant
 
   const getPlanRank = (planName) => {
     if (!planName) return 0
-    if (planName.toLowerCase().includes('enterprise')) return 4
     if (planName.toLowerCase().includes('premium')) return 3
     if (planName.toLowerCase().includes('standard')) return 2
     if (planName.toLowerCase().includes('basic')) return 1
@@ -303,9 +302,6 @@ export default function SubscriptionManagement({ restaurants, onUpdateRestaurant
                 {plans.filter(p => p.status === 'Active').map(p => (
                   <option key={p.id} value={p.name}>{p.name}</option>
                 ))}
-                {!plans.some(p => p.name === 'Enterprise Plan' && p.status === 'Active') && (
-                  <option value="Enterprise Plan">Enterprise Plan</option>
-                )}
               </select>
             </div>
 
@@ -448,14 +444,13 @@ export default function SubscriptionManagement({ restaurants, onUpdateRestaurant
               </thead>
               <tbody>
                 {restaurants.map((rest, idx) => {
-                  const isEnterprise = rest.subscriptionPlan?.toLowerCase().includes('enterprise')
                   const isPremium = rest.subscriptionPlan?.toLowerCase().includes('premium')
                   const isStandard = rest.subscriptionPlan?.toLowerCase().includes('standard')
                   const isBasic = rest.subscriptionPlan?.toLowerCase().includes('basic')
                   
-                  const planBadgeColor = isEnterprise ? '#7c3aed' : isPremium ? '#3b82f6' : isStandard ? '#10b981' : '#64748b'
-                  const planBadgeBg = isEnterprise ? 'rgba(124, 58, 237, 0.1)' : isPremium ? 'rgba(59, 130, 246, 0.1)' : isStandard ? 'rgba(16, 185, 129, 0.1)' : 'rgba(100, 116, 139, 0.1)'
-                  const planBadgeBorder = isEnterprise ? '1px solid rgba(124, 58, 237, 0.2)' : isPremium ? '1px solid rgba(59, 130, 246, 0.2)' : isStandard ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(100, 116, 139, 0.2)'
+                  const planBadgeColor = isPremium ? '#3b82f6' : isStandard ? '#10b981' : '#64748b'
+                  const planBadgeBg = isPremium ? 'rgba(59, 130, 246, 0.1)' : isStandard ? 'rgba(16, 185, 129, 0.1)' : 'rgba(100, 116, 139, 0.1)'
+                  const planBadgeBorder = isPremium ? '1px solid rgba(59, 130, 246, 0.2)' : isStandard ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(100, 116, 139, 0.2)'
                   
                   const statusStyles = getStatusColor(rest.subscriptionStatus || 'Active')
 
@@ -674,8 +669,8 @@ export default function SubscriptionManagement({ restaurants, onUpdateRestaurant
                   fontWeight: '800',
                   padding: '3px 8px',
                   borderRadius: '4px',
-                  background: viewingSubscriptionRest.subscriptionPlan?.includes('Enterprise') ? 'rgba(124, 58, 237, 0.1)' : viewingSubscriptionRest.subscriptionPlan?.includes('Premium') ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                  color: viewingSubscriptionRest.subscriptionPlan?.includes('Enterprise') ? '#7c3aed' : viewingSubscriptionRest.subscriptionPlan?.includes('Premium') ? '#3b82f6' : '#10b981'
+                  background: viewingSubscriptionRest.subscriptionPlan?.includes('Premium') ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                  color: viewingSubscriptionRest.subscriptionPlan?.includes('Premium') ? '#3b82f6' : '#10b981'
                 }}>
                   {viewingSubscriptionRest.subscriptionPlan || 'Basic Plan'}
                 </span>

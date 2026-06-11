@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Bell,
   Send,
@@ -202,7 +203,15 @@ export default function NotificationsManagement({ restaurants = [], showToast })
     : notifications.filter(n => n.type === filterType)
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%', boxSizing: 'border-box' }}>
+    <div className="animate-fade-in" style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '24px',
+      width: '100%',
+      boxSizing: 'border-box',
+      position: (showCreateModal || selectedNotification) ? 'relative' : 'static',
+      zIndex: (showCreateModal || selectedNotification) ? 100000 : 'auto'
+    }}>
       
       {/* Counters Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
@@ -251,6 +260,33 @@ export default function NotificationsManagement({ restaurants = [], showToast })
         gap: '20px'
       }}>
         
+        {/* Header Row */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', marginBottom: '4px' }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900', color: 'var(--text-main)' }}>Notifications Management</h3>
+          </div>
+          <button
+            onClick={() => {
+              setErrors({})
+              setNewNtf({
+                subject: '',
+                type: 'Subscription Expiry',
+                channel: 'Email',
+                recipients: 'All Restaurants',
+                body: '',
+                isScheduled: false,
+                scheduledDate: '',
+                scheduledTime: ''
+              })
+              setShowCreateModal(true)
+            }}
+            className="btn-black"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}
+          >
+            <Plus style={{ width: '16px', height: '16px' }} /> Compose Notification
+          </button>
+        </div>
+
         {/* Controls Bar */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           
@@ -265,27 +301,6 @@ export default function NotificationsManagement({ restaurants = [], showToast })
               {types.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
           </div>
-
-          <button
-            className="welcome-btn"
-            onClick={() => setShowCreateModal(true)}
-            style={{
-              padding: '10px 18px',
-              background: 'linear-gradient(135deg, hsl(var(--primary-hue), 95%, 52%), hsl(var(--primary-hue), 95%, 45%))',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '10px',
-              fontWeight: '700',
-              fontSize: '0.82rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.25)'
-            }}
-          >
-            <Plus style={{ width: '16px', height: '16px' }} /> Compose Notification
-          </button>
         </div>
 
         {/* History Table */}
@@ -381,7 +396,7 @@ export default function NotificationsManagement({ restaurants = [], showToast })
       </div>
 
       {/* CREATE / SCHEDULE MODAL */}
-      {showCreateModal && (
+      {showCreateModal && createPortal(
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
@@ -459,7 +474,7 @@ export default function NotificationsManagement({ restaurants = [], showToast })
                     if (errors.subject) setErrors({ ...errors, subject: '' })
                   }}
                   placeholder="e.g. System upgrade alert"
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', color: 'var(--text-main)', fontSize: '0.82rem', outline: 'none' }}
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: `1.5px solid ${errors.subject ? '#ef4444' : 'var(--border-color)'}`, background: errors.subject ? 'rgba(239,68,68,0.04)' : 'var(--bg-app)', color: 'var(--text-main)', fontSize: '0.82rem', outline: 'none', transition: 'border-color 0.15s' }}
                 />
                 {errors.subject && <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: '600' }}>{errors.subject}</span>}
               </div>
@@ -475,7 +490,7 @@ export default function NotificationsManagement({ restaurants = [], showToast })
                     if (errors.body) setErrors({ ...errors, body: '' })
                   }}
                   placeholder="Type message text here..."
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', color: 'var(--text-main)', fontSize: '0.82rem', outline: 'none', resize: 'vertical' }}
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: `1.5px solid ${errors.body ? '#ef4444' : 'var(--border-color)'}`, background: errors.body ? 'rgba(239,68,68,0.04)' : 'var(--bg-app)', color: 'var(--text-main)', fontSize: '0.82rem', outline: 'none', resize: 'vertical', transition: 'border-color 0.15s' }}
                 />
                 {errors.body && <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: '600' }}>{errors.body}</span>}
               </div>
@@ -504,7 +519,7 @@ export default function NotificationsManagement({ restaurants = [], showToast })
                         setNewNtf({ ...newNtf, scheduledDate: e.target.value })
                         if (errors.scheduledDate) setErrors({ ...errors, scheduledDate: '' })
                       }}
-                      style={{ padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-main)', fontSize: '0.78rem', outline: 'none' }}
+                      style={{ padding: '8px', borderRadius: '6px', border: `1.5px solid ${errors.scheduledDate ? '#ef4444' : 'var(--border-color)'}`, background: errors.scheduledDate ? 'rgba(239,68,68,0.04)' : 'var(--bg-card)', color: 'var(--text-main)', fontSize: '0.78rem', outline: 'none', transition: 'border-color 0.15s' }}
                     />
                     {errors.scheduledDate && <span style={{ fontSize: '0.65rem', color: '#ef4444' }}>{errors.scheduledDate}</span>}
                   </div>
@@ -517,7 +532,7 @@ export default function NotificationsManagement({ restaurants = [], showToast })
                         setNewNtf({ ...newNtf, scheduledTime: e.target.value })
                         if (errors.scheduledTime) setErrors({ ...errors, scheduledTime: '' })
                       }}
-                      style={{ padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-main)', fontSize: '0.78rem', outline: 'none' }}
+                      style={{ padding: '8px', borderRadius: '6px', border: `1.5px solid ${errors.scheduledTime ? '#ef4444' : 'var(--border-color)'}`, background: errors.scheduledTime ? 'rgba(239,68,68,0.04)' : 'var(--bg-card)', color: 'var(--text-main)', fontSize: '0.78rem', outline: 'none', transition: 'border-color 0.15s' }}
                     />
                     {errors.scheduledTime && <span style={{ fontSize: '0.65rem', color: '#ef4444' }}>{errors.scheduledTime}</span>}
                   </div>
@@ -535,11 +550,12 @@ export default function NotificationsManagement({ restaurants = [], showToast })
 
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* VIEW NOTIFICATION DETAILS MODAL */}
-      {selectedNotification && (
+      {selectedNotification && createPortal(
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
@@ -641,7 +657,8 @@ export default function NotificationsManagement({ restaurants = [], showToast })
 
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

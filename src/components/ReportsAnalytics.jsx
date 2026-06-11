@@ -23,24 +23,23 @@ export default function ReportsAnalytics({ restaurants = [], showToast }) {
 
   // Mock Data
   const monthlyRevenue = [
-    { month: 'Jan', revenue: 120000, planStandard: 45000, planPremium: 55000, planEnterprise: 20000 },
-    { month: 'Feb', revenue: 145000, planStandard: 50000, planPremium: 65000, planEnterprise: 30000 },
-    { month: 'Mar', revenue: 160000, planStandard: 52000, planPremium: 78000, planEnterprise: 30000 },
-    { month: 'Apr', revenue: 195000, planStandard: 60000, planPremium: 85000, planEnterprise: 50000 },
-    { month: 'May', revenue: 230000, planStandard: 70000, planPremium: 100000, planEnterprise: 60000 },
-    { month: 'Jun', revenue: 275000, planStandard: 85000, planPremium: 120000, planEnterprise: 70000 }
+    { month: 'Jan', revenue: 120000, planStandard: 50000, planPremium: 70000 },
+    { month: 'Feb', revenue: 145000, planStandard: 60000, planPremium: 85000 },
+    { month: 'Mar', revenue: 160000, planStandard: 70000, planPremium: 90000 },
+    { month: 'Apr', revenue: 195000, planStandard: 80000, planPremium: 115000 },
+    { month: 'May', revenue: 230000, planStandard: 95000, planPremium: 135000 },
+    { month: 'Jun', revenue: 275000, planStandard: 115000, planPremium: 160000 }
   ]
 
   const planBreakdown = [
     { plan: 'Standard Plan', active: 14, price: 1999, total: 27986 },
-    { plan: 'Premium Plan', active: 22, price: 4999, total: 109978 },
-    { plan: 'Enterprise Plan', active: 8, price: 9999, total: 79992 }
+    { plan: 'Premium Plan', active: 22, price: 4999, total: 109978 }
   ]
 
   const subscriptionsList = [
     { id: 'SUB-001', name: 'Spice Garden Bistro', plan: 'Premium Plan', status: 'Active', startDate: '2026-01-15', expiryDate: '2026-07-15' },
     { id: 'SUB-002', name: 'Urban Tiffin House', plan: 'Standard Plan', status: 'Active', startDate: '2026-02-10', expiryDate: '2026-08-10' },
-    { id: 'SUB-003', name: 'Blue Plate Cafe', plan: 'Enterprise Plan', status: 'Active', startDate: '2025-12-05', expiryDate: '2026-12-05' },
+    { id: 'SUB-003', name: 'Blue Plate Cafe', plan: 'Premium Plan', status: 'Active', startDate: '2025-12-05', expiryDate: '2026-12-05' },
     { id: 'SUB-004', name: 'Noodle Express', plan: 'Standard Plan', status: 'Expired', startDate: '2025-05-10', expiryDate: '2026-05-10' },
     { id: 'SUB-005', name: 'The Burger Joint', plan: 'Premium Plan', status: 'Expired', startDate: '2025-06-01', expiryDate: '2026-06-01' },
     { id: 'SUB-006', name: 'Royal Tandoor', plan: 'Premium Plan', status: 'Active', startDate: '2026-04-20', expiryDate: '2026-10-20' }
@@ -282,7 +281,7 @@ export default function ReportsAnalytics({ restaurants = [], showToast }) {
               {planBreakdown.map((item, idx) => {
                 const totalTarget = planBreakdown.reduce((sum, p) => sum + p.total, 0)
                 const percentage = Math.round((item.total / totalTarget) * 100)
-                const fillBarColor = item.plan.includes('Enterprise') ? '#7c3aed' : item.plan.includes('Premium') ? '#3b82f6' : '#10b981'
+                const fillBarColor = item.plan.includes('Premium') ? '#3b82f6' : '#10b981'
                 return (
                   <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: '700' }}>
@@ -343,7 +342,6 @@ export default function ReportsAnalytics({ restaurants = [], showToast }) {
                 <option value="All">All Plans</option>
                 <option value="Standard">Standard</option>
                 <option value="Premium">Premium</option>
-                <option value="Enterprise">Enterprise</option>
               </select>
             </div>
           </div>
@@ -373,8 +371,8 @@ export default function ReportsAnalytics({ restaurants = [], showToast }) {
                           fontWeight: '800',
                           padding: '3px 8px',
                           borderRadius: '6px',
-                          background: sub.plan.includes('Enterprise') ? 'rgba(124, 58, 237, 0.08)' : sub.plan.includes('Premium') ? 'rgba(59, 130, 246, 0.08)' : 'rgba(16, 185, 129, 0.08)',
-                          color: sub.plan.includes('Enterprise') ? '#7c3aed' : sub.plan.includes('Premium') ? '#3b82f6' : '#10b981'
+                          background: sub.plan.includes('Premium') ? 'rgba(59, 130, 246, 0.08)' : 'rgba(16, 185, 129, 0.08)',
+                          color: sub.plan.includes('Premium') ? '#3b82f6' : '#10b981'
                         }}>{sub.plan}</span>
                       </td>
                       <td style={{ padding: '14px 18px', fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '600' }}>{sub.startDate}</td>
