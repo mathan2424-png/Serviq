@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react' // Trigger rebuild
 import {
   Building,
+  Briefcase,
   CreditCard,
   Activity,
   FileText,
@@ -11,31 +12,107 @@ import {
   AlertTriangle,
   Save,
   Percent,
-  ShieldCheck,
-  Mail,
-  Phone,
-  Globe,
-  MapPin,
-  Calendar,
-  Clock,
-  FileSpreadsheet,
-  ArrowRight,
+  Star,
   Plus,
-  Trash2,
-  Edit2,
-  Eye,
+  Award,
   Users,
+  ShieldCheck,
+  TrendingDown,
+  Clock,
+  Layers,
+  ArrowRight,
+  ChevronDown,
+  LifeBuoy,
+  X,
+  Crown,
   Lock,
   Unlock,
-  Key,
-  Layers,
-  ChevronDown,
-  Crown,
-  X,
+  Eye,
+  Edit2,
+  Trash2,
+  MapPin,
   Gem,
-  Award,
-  Star
+  Calendar,
+  Key,
+  FileSpreadsheet
 } from 'lucide-react'
+
+import PlansManagement from './PlansManagement'
+import SubscriptionManagement from './SubscriptionManagement'
+import SupportTicketManagement from './SupportTicketManagement'
+import NotificationsManagement from './NotificationsManagement'
+import ReportsAnalytics from './ReportsAnalytics'
+
+// ─── Reusable validated input component (defined outside to prevent remount on re-render) ───
+const ValidatedInput = ({ label, type = 'text', value, onChange, placeholder, required, error, setError, ...rest }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', position: 'relative' }}>
+    <label style={{ fontSize: '0.75rem', fontWeight: '700', color: error ? '#ef4444' : 'var(--text-main)' }}>
+      {label}{required && <span style={{ color: '#ef4444', marginLeft: '2px' }}>*</span>}
+    </label>
+    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => {
+          onChange(e)
+          if (error && setError) setError('')
+        }}
+        required={required}
+        style={{
+          width: '100%',
+          padding: '9px 12px',
+          border: `1.5px solid ${error ? '#ef4444' : 'var(--border-color)'}`,
+          background: error ? 'rgba(239,68,68,0.04)' : 'var(--bg-app)',
+          color: 'var(--text-main)',
+          borderRadius: '8px',
+          fontSize: '0.82rem',
+          outline: 'none',
+          boxSizing: 'border-box',
+          transition: 'border-color 0.15s'
+        }}
+        {...rest}
+      />
+      {error && (
+        <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#ef4444', pointerEvents: 'none', display: 'flex' }}><AlertTriangle style={{ width: '14px', height: '14px' }} /></span>
+      )}
+    </div>
+    {error && <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: '600' }}>{error}</span>}
+  </div>
+)
+
+// ─── Reusable validated select component (defined outside to prevent remount on re-render) ───
+const ValidatedSelect = ({ label, value, onChange, required, error, setError, children, ...rest }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+    <label style={{ fontSize: '0.75rem', fontWeight: '700', color: error ? '#ef4444' : 'var(--text-main)' }}>
+      {label}{required && <span style={{ color: '#ef4444', marginLeft: '2px' }}>*</span>}
+    </label>
+    <select
+      value={value}
+      onChange={(e) => {
+        onChange(e)
+        if (error && setError) setError('')
+      }}
+      required={required}
+      style={{
+        width: '100%',
+        padding: '9px 12px',
+        border: `1.5px solid ${error ? '#ef4444' : 'var(--border-color)'}`,
+        background: error ? 'rgba(239,68,68,0.04)' : 'var(--bg-app)',
+        color: 'var(--text-main)',
+        borderRadius: '8px',
+        fontSize: '0.82rem',
+        outline: 'none',
+        cursor: 'pointer',
+        boxSizing: 'border-box',
+        transition: 'border-color 0.15s'
+      }}
+      {...rest}
+    >
+      {children}
+    </select>
+    {error && <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: '600' }}>{error}</span>}
+  </div>
+)
 
 export default function SuperAdminDashboard({
   restaurantDetails,
@@ -91,67 +168,94 @@ export default function SuperAdminDashboard({
     password: ''
   })
   const [plans, setPlans] = useState([
-    { id: 'plan-standard', name: 'Standard Plan', monthlyPrice: 1999, annualPrice: 19999, branchLimit: 2, userLimit: 5, orderLimit: 1000, features: ['QR Menu Seating', 'Live Orders', 'Waiter Apps', 'Kitchen KDS'], status: 'Active' },
-    { id: 'plan-premium', name: 'Premium Plan', monthlyPrice: 4999, annualPrice: 49999, branchLimit: 5, userLimit: 15, orderLimit: 5000, features: ['QR Menu Seating', 'Live Orders', 'Waiter Apps', 'Kitchen KDS', 'Advanced Billing System', 'Live Analytics Deck'], status: 'Active' },
-    { id: 'plan-enterprise', name: 'Enterprise Plan', monthlyPrice: 9999, annualPrice: 99999, branchLimit: 99999, userLimit: 99999, orderLimit: 99999, features: ['QR Menu Seating', 'Live Orders', 'Waiter Apps', 'Kitchen KDS', 'Advanced Billing System', 'Live Analytics Deck', 'Multi-Branch Super Deck', '24/7 Dedicated Support'], status: 'Active' }
+    { id: 'plan-basic', name: 'Basic Plan', description: 'Essential tools for small eateries, QR menu ordering and simple table management.', monthlyPrice: 999, annualPrice: 9999, branchLimit: 1, userLimit: 3, orderLimit: 500, features: ['QR Ordering', 'Menu Management', 'Table Management', 'Order Management'], status: 'Active' },
+    { id: 'plan-standard', name: 'Standard Plan', description: 'Includes everything in Basic, plus tableside waiter service and app integrations.', monthlyPrice: 1999, annualPrice: 19999, branchLimit: 2, userLimit: 5, orderLimit: 1000, features: ['QR Ordering', 'Menu Management', 'Table Management', 'Order Management', 'Waiter Management'], status: 'Active' },
+    { id: 'plan-premium', name: 'Premium Plan', description: 'Advanced operations with integrated Kitchen KDS displays and advanced billing.', monthlyPrice: 4999, annualPrice: 49999, branchLimit: 5, userLimit: 15, orderLimit: 5000, features: ['QR Ordering', 'Menu Management', 'Table Management', 'Order Management', 'Waiter Management', 'Kitchen Management'], status: 'Active' },
+    //{ id: 'plan-enterprise', name: 'Enterprise Plan', description: 'Full enterprise control for multi-branch chains, franchise dashboards, and premium SLA support.', monthlyPrice: 9999, annualPrice: 99999, branchLimit: 99999, userLimit: 99999, orderLimit: 99999, features: ['QR Ordering', 'Menu Management', 'Table Management', 'Order Management', 'Waiter Management', 'Kitchen Management', 'Advanced Billing System', 'Live Analytics Deck', 'Multi-Branch Super Deck', '24/7 Dedicated Support'], status: 'Active' }
   ])
-  const [editingPlanId, setEditingPlanId] = useState(null)
-  const [planFormState, setPlanFormState] = useState({
-    name: '',
-    monthlyPrice: 0,
-    annualPrice: 0,
-    branchLimit: 1,
-    userLimit: 5,
-    orderLimit: 1000,
-    features: '',
-    status: 'Active'
-  })
-  const [changingPlanRestId, setChangingPlanRestId] = useState(null)
 
   // Revenue & Billing states
   const [invoices, setInvoices] = useState([
-    { id: 'INV-2026-001', restaurantName: 'Serviq', subscriptionPlan: 'Premium Plan', amount: 4999, paymentMethod: 'UPI', paymentDate: '2026-06-01', dueDate: '2026-07-01', status: 'Paid' },
-    { id: 'INV-2026-002', restaurantName: 'Sunset Diner', subscriptionPlan: 'Standard Plan', amount: 1999, paymentMethod: 'Credit Card', paymentDate: '2026-05-28', dueDate: '2026-06-28', status: 'Paid' },
-    { id: 'INV-2026-003', restaurantName: 'Ocean Breeze Grill', subscriptionPlan: 'Enterprise Plan', amount: 9999, paymentMethod: 'Net Banking', paymentDate: '', dueDate: '2026-06-15', status: 'Pending' },
-    { id: 'INV-2026-004', restaurantName: 'Mountain Lodge Cafe', subscriptionPlan: 'Premium Plan', amount: 4999, paymentMethod: 'UPI', paymentDate: '2026-05-15', dueDate: '2026-06-15', status: 'Refunded' },
-    { id: 'INV-2026-005', restaurantName: 'Downtown Bakery', subscriptionPlan: 'Free Plan', amount: 0, paymentMethod: 'N/A', paymentDate: '2026-05-20', dueDate: '2026-06-20', status: 'Paid' }
+    { id: 'INV-2026-001', restaurantName: 'Serviq', subscriptionPlan: 'Premium Plan', amount: 4999, taxAmount: 900, paymentMethod: 'UPI', paymentDate: '2026-06-01', dueDate: '2026-07-01', status: 'Paid', transactionId: 'TXN-8472917462' },
+    { id: 'INV-2026-002', restaurantName: 'Sunset Diner', subscriptionPlan: 'Standard Plan', amount: 1999, taxAmount: 360, paymentMethod: 'Credit Card', paymentDate: '2026-05-28', dueDate: '2026-06-28', status: 'Paid', transactionId: 'TXN-1098273645' },
+    { id: 'INV-2026-003', restaurantName: 'Ocean Breeze Grill', subscriptionPlan: 'Enterprise Plan', amount: 9999, taxAmount: 1800, paymentMethod: 'Net Banking', paymentDate: '', dueDate: '2026-06-15', status: 'Pending', transactionId: '—' },
+    { id: 'INV-2026-004', restaurantName: 'Mountain Lodge Cafe', subscriptionPlan: 'Premium Plan', amount: 4999, taxAmount: 900, paymentMethod: 'UPI', paymentDate: '2026-05-15', dueDate: '2026-06-15', status: 'Refunded', transactionId: 'TXN-9018273645' },
+    { id: 'INV-2026-005', restaurantName: 'Downtown Bakery', subscriptionPlan: 'Free Plan', amount: 0, taxAmount: 0, paymentMethod: 'N/A', paymentDate: '2026-05-20', dueDate: '2026-06-20', status: 'Paid', transactionId: 'TXN-SYSTEM-001' }
   ])
   const [showGenerateInvoiceModal, setShowGenerateInvoiceModal] = useState(false)
   const [newInvoiceFormState, setNewInvoiceFormState] = useState({
     restaurantName: '',
     subscriptionPlan: 'Standard Plan',
     amount: 1999,
+    taxAmount: 360,
     paymentMethod: 'UPI',
     paymentDate: '',
     dueDate: '',
-    status: 'Paid'
+    status: 'Paid',
+    transactionId: ''
   })
   const [viewingInvoice, setViewingInvoice] = useState(null)
   const [refundModalInvoice, setRefundModalInvoice] = useState(null)
   const [refundReason, setRefundReason] = useState('')
   const [invoiceSearchQuery, setInvoiceSearchQuery] = useState('')
   const [invoiceStatusFilter, setInvoiceStatusFilter] = useState('All')
+  const leadStatuses = ['New Lead', 'Contacted', 'Demo Scheduled', 'Proposal Sent', 'Negotiation', 'Won', 'Lost']
+  const leadSources = ['Website', 'Referral', 'Cold Call', 'Walk-in', 'Partner', 'Social Media']
+  const [leads, setLeads] = useState([
+    { id: 'LEAD-001', businessName: 'Spice Garden Bistro', contactPerson: 'Anita Rao', mobileNumber: '+91 98765 70001', emailAddress: 'anita@spicegarden.in', leadSource: 'Website', leadStatus: 'Demo Scheduled', followUpDate: '2026-06-12', assignedTo: 'Rajesh Kumar', remarks: 'Owner wants a table QR demo for 18 tables.', convertedRestaurantId: '' },
+    { id: 'LEAD-002', businessName: 'Urban Tiffin House', contactPerson: 'Karthik Nair', mobileNumber: '+91 98765 70002', emailAddress: 'karthik@urbantiffin.in', leadSource: 'Referral', leadStatus: 'Proposal Sent', followUpDate: '2026-06-14', assignedTo: 'Amit Patel', remarks: 'Asked for Premium Plan with billing module.', convertedRestaurantId: '' },
+    { id: 'LEAD-003', businessName: 'Blue Plate Cafe', contactPerson: 'Meera Shah', mobileNumber: '+91 98765 70003', emailAddress: 'meera@blueplate.in', leadSource: 'Cold Call', leadStatus: 'Contacted', followUpDate: '2026-06-10', assignedTo: 'Unassigned', remarks: 'Needs callback after lunch service.', convertedRestaurantId: '' }
+  ])
+  const [leadFormState, setLeadFormState] = useState({
+    businessName: '',
+    contactPerson: '',
+    mobileNumber: '',
+    emailAddress: '',
+    leadSource: 'Website',
+    leadStatus: 'New Lead',
+    followUpDate: '',
+    assignedTo: '',
+    remarks: ''
+  })
+  const [leadSearchQuery, setLeadSearchQuery] = useState('')
+  const [leadStatusFilter, setLeadStatusFilter] = useState('All')
+  const [showCreateLeadForm, setShowCreateLeadForm] = useState(false)
   const [passwordResetValue, setPasswordResetValue] = useState('')
   const [passwordConfirmValue, setPasswordConfirmValue] = useState('')
   const [confirmModal, setConfirmModal] = useState(null)
+  const [viewingSubscriptionRest, setViewingSubscriptionRest] = useState(null)
 
 
-  const handleCreatePlan = (e) => {
+  const resetLeadForm = () => {
+    setLeadFormState({
+      businessName: '',
+      contactPerson: '',
+      mobileNumber: '',
+      emailAddress: '',
+      leadSource: 'Website',
+      leadStatus: 'New Lead',
+      followUpDate: '',
+      assignedTo: restaurantAdmins[0]?.name || '',
+      remarks: ''
+    })
+  }
+
+  const handleCreateLeadSubmit = (e) => {
     e.preventDefault()
 
     const errors = {}
     const requiredFields = {
-      name: 'Plan Name',
-      monthlyPrice: 'Monthly Price',
-      annualPrice: 'Annual Price',
-      branchLimit: 'Branch Limit',
-      userLimit: 'User Limit',
-      orderLimit: 'Order Limit',
-      features: 'Features'
+      businessName: 'Business Name',
+      contactPerson: 'Contact Person',
+      mobileNumber: 'Mobile Number',
+      emailAddress: 'Email Address',
+      leadSource: 'Lead Source',
+      leadStatus: 'Lead Status',
+      followUpDate: 'Follow-up Date'
     }
 
     for (const [field, label] of Object.entries(requiredFields)) {
-      if (!planFormState[field] || String(planFormState[field]).trim() === '') {
+      if (!leadFormState[field] || String(leadFormState[field]).trim() === '') {
         errors[field] = `${label} is Required`
       }
     }
@@ -163,84 +267,89 @@ export default function SuperAdminDashboard({
 
     setFormErrors({})
 
-    const nextPlanId = `plan-${planFormState.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
-    const newPlan = {
-      id: nextPlanId,
-      name: planFormState.name,
-      monthlyPrice: parseFloat(planFormState.monthlyPrice) || 0,
-      annualPrice: parseFloat(planFormState.annualPrice) || 0,
-      branchLimit: parseInt(planFormState.branchLimit) || 1,
-      userLimit: parseInt(planFormState.userLimit) || 1,
-      orderLimit: parseInt(planFormState.orderLimit) || 1,
-      features: planFormState.features.split(',').map(f => f.trim()).filter(Boolean),
-      status: planFormState.status
+    const nextIdNum = leads.length > 0
+      ? Math.max(...leads.map(lead => parseInt(lead.id.replace('LEAD-', '')) || 0)) + 1
+      : 1
+
+    const newLead = {
+      id: `LEAD-${String(nextIdNum).padStart(3, '0')}`,
+      ...leadFormState,
+      assignedTo: leadFormState.assignedTo || restaurantAdmins[0]?.name || 'Unassigned',
+      convertedRestaurantId: ''
     }
-    setPlans([...plans, newPlan])
-    setEditingPlanId(null)
-    showToast('success', `Subscription plan "${newPlan.name}" created successfully!`)
+
+    setLeads([newLead, ...leads])
+    resetLeadForm()
+    setShowCreateLeadForm(false)
+    showToast('success', `Lead "${newLead.businessName}" created successfully!`)
   }
 
-  const handleModifyPlan = (e) => {
-    e.preventDefault()
+  const handleLeadStatusChange = (leadId, leadStatus) => {
+    setLeads(leads.map(lead => lead.id === leadId ? { ...lead, leadStatus } : lead))
+    showToast('success', `Lead status updated to ${leadStatus}.`)
+  }
 
-    const errors = {}
-    const requiredFields = {
-      name: 'Plan Name',
-      monthlyPrice: 'Monthly Price',
-      annualPrice: 'Annual Price',
-      branchLimit: 'Branch Limit',
-      userLimit: 'User Limit',
-      orderLimit: 'Order Limit',
-      features: 'Features'
-    }
+  const handleLeadAssignmentChange = (leadId, assignedTo) => {
+    setLeads(leads.map(lead => lead.id === leadId ? { ...lead, assignedTo } : lead))
+    showToast('success', `Lead assigned to ${assignedTo}.`)
+  }
 
-    for (const [field, label] of Object.entries(requiredFields)) {
-      if (!planFormState[field] || String(planFormState[field]).trim() === '') {
-        errors[field] = `${label} is Required`
-      }
-    }
+  const handleLeadFollowUpChange = (leadId, followUpDate) => {
+    setLeads(leads.map(lead => lead.id === leadId ? { ...lead, followUpDate } : lead))
+    showToast('success', 'Follow-up date scheduled.')
+  }
 
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors)
+  const handleConvertLeadToRestaurant = (lead) => {
+    if (lead.convertedRestaurantId) {
+      showToast('info', 'This lead is already converted to a restaurant.')
       return
     }
 
-    setFormErrors({})
+    const nextIdNum = restaurants.length > 0
+      ? Math.max(...restaurants.map(rest => parseInt(String(rest.id).replace('R-', '')) || 0)) + 1
+      : 1
+    const newRestaurantId = `R-${String(nextIdNum).padStart(2, '0')}`
+    const newRestaurant = {
+      id: newRestaurantId,
+      name: lead.businessName,
+      legalName: `${lead.businessName} Pvt. Ltd.`,
+      ownerName: lead.contactPerson,
+      mobileNumber: lead.mobileNumber,
+      phone: lead.mobileNumber,
+      email: lead.emailAddress,
+      website: '',
+      address: '',
+      city: '',
+      state: '',
+      country: 'India',
+      license: '',
+      gstin: '',
+      currency: 'INR',
+      taxRate: 5,
+      serviceCharge: 5,
+      openingTime: '10:00 AM',
+      closingTime: '10:00 PM',
+      status: 'Active',
+      subscriptionPlan: 'Standard',
+      subscriptionStatus: 'Active',
+      expiryDate: (() => {
+        const expiry = new Date()
+        expiry.setFullYear(expiry.getFullYear() + 1)
+        return expiry.toISOString().split('T')[0]
+      })(),
+      createdDate: new Date().toISOString().split('T')[0],
+      logo: '',
+      banner: ''
+    }
 
-    const updated = plans.map(p => p.id === editingPlanId ? {
-      ...p,
-      name: planFormState.name,
-      monthlyPrice: parseFloat(planFormState.monthlyPrice) || 0,
-      annualPrice: parseFloat(planFormState.annualPrice) || 0,
-      branchLimit: parseInt(planFormState.branchLimit) || 1,
-      userLimit: parseInt(planFormState.userLimit) || 1,
-      orderLimit: parseInt(planFormState.orderLimit) || 1,
-      features: planFormState.features.split(',').map(f => f.trim()).filter(Boolean),
-      status: planFormState.status
-    } : p)
-    setPlans(updated)
-    setEditingPlanId(null)
-    showToast('success', `Plan "${planFormState.name}" modified successfully!`)
-  }
-
-  const handleAssignPlan = (restaurantId, planName) => {
-    const updated = restaurants.map(r => r.id === restaurantId ? {
-      ...r,
-      subscriptionPlan: planName
-    } : r)
-    onUpdateRestaurants(updated)
-    setChangingPlanRestId(null)
-    showToast('success', `Branch plan updated to ${planName}!`)
-  }
-
-  const handleToggleAutoRenewal = (restaurant) => {
-    const nextVal = !restaurant.autoRenewal
-    const updated = restaurants.map(r => r.id === restaurant.id ? {
-      ...r,
-      autoRenewal: nextVal
-    } : r)
-    onUpdateRestaurants(updated)
-    showToast('info', `Auto-renewal for ${restaurant.name} is now ${nextVal ? 'ENABLED' : 'DISABLED'}`)
+    onUpdateRestaurants([...restaurants, newRestaurant])
+    setLeads(leads.map(item => item.id === lead.id ? {
+      ...item,
+      leadStatus: 'Won',
+      convertedRestaurantId: newRestaurantId,
+      remarks: item.remarks ? `${item.remarks} Converted to restaurant ${newRestaurantId}.` : `Converted to restaurant ${newRestaurantId}.`
+    } : item))
+    showToast('success', `${lead.businessName} converted to restaurant ${newRestaurantId}.`)
   }
 
   const handleGenerateInvoiceSubmit = (e) => {
@@ -277,15 +386,21 @@ export default function SuperAdminDashboard({
       : 1
     const nextInvId = `INV-${year}-${String(nextNum).padStart(3, '0')}`
 
+    const amountVal = parseFloat(newInvoiceFormState.amount) || 0
+    const taxVal = parseFloat(newInvoiceFormState.taxAmount) >= 0 ? parseFloat(newInvoiceFormState.taxAmount) : Math.round(amountVal * 0.18)
+    const generatedTxnId = newInvoiceFormState.status === 'Pending' ? '—' : (newInvoiceFormState.transactionId || `TXN-${Math.floor(100000000 + Math.random() * 900000000)}`)
+
     const newInv = {
       id: nextInvId,
       restaurantName: newInvoiceFormState.restaurantName || (restaurants[0]?.name || 'Serviq Bistro'),
       subscriptionPlan: newInvoiceFormState.subscriptionPlan,
-      amount: parseFloat(newInvoiceFormState.amount) || 0,
+      amount: amountVal,
+      taxAmount: taxVal,
       paymentMethod: newInvoiceFormState.status === 'Pending' ? 'N/A' : newInvoiceFormState.paymentMethod,
       paymentDate: newInvoiceFormState.status === 'Pending' ? '' : (newInvoiceFormState.paymentDate || new Date().toISOString().split('T')[0]),
       dueDate: newInvoiceFormState.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      status: newInvoiceFormState.status
+      status: newInvoiceFormState.status,
+      transactionId: generatedTxnId
     }
 
     setInvoices([newInv, ...invoices])
@@ -296,10 +411,12 @@ export default function SuperAdminDashboard({
       restaurantName: restaurants[0]?.name || '',
       subscriptionPlan: 'Standard Plan',
       amount: 1999,
+      taxAmount: 360,
       paymentMethod: 'UPI',
       paymentDate: '',
       dueDate: '',
-      status: 'Paid'
+      status: 'Paid',
+      transactionId: ''
     })
   }
 
@@ -528,8 +645,8 @@ export default function SuperAdminDashboard({
 
     const errors = {}
     const requiredFields = {
-      name: 'Business Name',
-      legalName: 'Legal Entity Name',
+      name: 'Tenant',
+      legalName: 'Business Name',
       ownerName: 'Owner Name',
       mobileNumber: 'Mobile Number',
       email: 'Email',
@@ -624,6 +741,7 @@ export default function SuperAdminDashboard({
         roles: { view: true, add: true, edit: true, delete: true },
         adminUsers: { view: true, add: true, edit: true, delete: true },
         subscriptions: { view: true, add: true, edit: true, delete: true },
+        plans: { view: true, add: true, edit: true, delete: true },
         revenue: { view: true, add: true, edit: true, delete: true }
       }
     },
@@ -638,6 +756,7 @@ export default function SuperAdminDashboard({
         roles: { view: true, add: true, edit: true, delete: true },
         adminUsers: { view: true, add: true, edit: true, delete: true },
         subscriptions: { view: true, add: true, edit: true, delete: true },
+        plans: { view: true, add: true, edit: true, delete: true },
         revenue: { view: false, add: false, edit: false, delete: false }
       }
     },
@@ -652,6 +771,7 @@ export default function SuperAdminDashboard({
         roles: { view: true, add: true, edit: true, delete: true },
         adminUsers: { view: true, add: true, edit: true, delete: true },
         subscriptions: { view: true, add: true, edit: true, delete: true },
+        plans: { view: true, add: true, edit: true, delete: true },
         revenue: { view: false, add: false, edit: false, delete: false }
       }
     },
@@ -666,6 +786,7 @@ export default function SuperAdminDashboard({
         roles: { view: false, add: false, edit: false, delete: false },
         adminUsers: { view: false, add: false, edit: false, delete: false },
         subscriptions: { view: false, add: false, edit: false, delete: false },
+        plans: { view: false, add: false, edit: false, delete: false },
         revenue: { view: false, add: false, edit: false, delete: false }
       }
     },
@@ -680,6 +801,7 @@ export default function SuperAdminDashboard({
         roles: { view: false, add: false, edit: false, delete: false },
         adminUsers: { view: true, add: true, edit: true, delete: true },
         subscriptions: { view: true, add: true, edit: true, delete: true },
+        plans: { view: true, add: true, edit: true, delete: true },
         revenue: { view: false, add: false, edit: false, delete: false }
       }
     },
@@ -694,6 +816,7 @@ export default function SuperAdminDashboard({
         roles: { view: false, add: false, edit: false, delete: false },
         adminUsers: { view: false, add: false, edit: false, delete: false },
         subscriptions: { view: true, add: true, edit: true, delete: true },
+        plans: { view: true, add: true, edit: true, delete: true },
         revenue: { view: false, add: false, edit: false, delete: false }
       }
     }
@@ -710,6 +833,7 @@ export default function SuperAdminDashboard({
       roles: { view: false, add: false, edit: false, delete: false },
       adminUsers: { view: false, add: false, edit: false, delete: false },
       subscriptions: { view: false, add: false, edit: false, delete: false },
+      plans: { view: false, add: false, edit: false, delete: false },
       revenue: { view: false, add: false, edit: false, delete: false }
     }
   })
@@ -765,6 +889,11 @@ export default function SuperAdminDashboard({
   // Subscription Revenue from branches (Active branches * ₹4,999 base fee/month)
   const activeRestaurants = restaurants.filter(r => r.status === 'Active')
   const subscriptionRevenue = activeRestaurants.length * 4999
+
+  // Pending payments calculations from invoices list
+  const pendingPaymentsCount = invoices.filter(inv => inv.status === 'Pending').length
+  const pendingPaymentsSum = invoices.filter(inv => inv.status === 'Pending').reduce((acc, inv) => acc + inv.amount, 0)
+  const expiringSubscriptionsCount = restaurants.filter(r => r.status === 'Active' && r.subscriptionPlan !== 'Enterprise').length > 0 ? 3 : 1
 
   // Subscription Plan Distributions for Donut/Pie Chart
   const standardCount = restaurants.filter(r => r.subscriptionPlan?.includes('Standard')).length || 0
@@ -880,8 +1009,8 @@ export default function SuperAdminDashboard({
 
     const errors = {}
     const requiredFields = {
-      name: 'Business Name',
-      legalName: 'Legal Entity Name',
+      name: 'Tenant',
+      legalName: 'Business Name',
       ownerName: 'Owner Name',
       mobileNumber: 'Mobile Number',
       email: 'Email',
@@ -913,7 +1042,15 @@ export default function SuperAdminDashboard({
       ? Math.max(...restaurants.map(r => parseInt(r.id.replace('R-', '')))) + 1
       : 6
     const newId = `R-${String(nextIdNum).padStart(2, '0')}`
-    const restaurantToAdd = { ...newRestState, id: newId }
+    const expiry = new Date()
+    expiry.setFullYear(expiry.getFullYear() + 1)
+    const expiryStr = expiry.toISOString().split('T')[0]
+    const restaurantToAdd = { 
+      ...newRestState, 
+      id: newId,
+      subscriptionStatus: 'Active',
+      expiryDate: expiryStr
+    }
     onUpdateRestaurants([...restaurants, restaurantToAdd])
     onSetActiveRestaurantId(newId)
     setShowAddModal(false)
@@ -1019,6 +1156,20 @@ export default function SuperAdminDashboard({
     setSystemRoles(updated)
     showToast('info', `Role "${target.name}" status changed to ${nextStatus.toUpperCase()}`)
   }
+
+  const filteredLeads = leads.filter(lead => {
+    const query = leadSearchQuery.toLowerCase()
+    const matchesSearch =
+      lead.businessName.toLowerCase().includes(query) ||
+      lead.contactPerson.toLowerCase().includes(query) ||
+      lead.mobileNumber.toLowerCase().includes(query) ||
+      lead.emailAddress.toLowerCase().includes(query)
+    const matchesStatus = leadStatusFilter === 'All' || lead.leadStatus === leadStatusFilter
+    return matchesSearch && matchesStatus
+  })
+  const openLeadsCount = leads.filter(lead => !['Won', 'Lost'].includes(lead.leadStatus)).length
+  const wonLeadsCount = leads.filter(lead => lead.leadStatus === 'Won').length
+  const upcomingFollowUpsCount = leads.filter(lead => lead.followUpDate && !['Won', 'Lost'].includes(lead.leadStatus)).length
 
   const renderPerformanceModal = () => {
     if (!viewingPerfRestId) return null;
@@ -1135,77 +1286,6 @@ export default function SuperAdminDashboard({
     );
   };
 
-  // ─── Reusable validated input component ───────────────────────────────────
-  const ValidatedInput = ({ label, type = 'text', value, onChange, placeholder, required, error, setError, ...rest }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-      <label style={{ fontSize: '0.75rem', fontWeight: '700', color: error ? '#ef4444' : 'var(--text-main)' }}>
-        {label}{required && <span style={{ color: '#ef4444', marginLeft: '2px' }}>*</span>}
-      </label>
-      <div style={{ position: 'relative' }}>
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => {
-            onChange(e)
-            if (error && setError) setError('')
-          }}
-          placeholder={placeholder}
-          required={required}
-          style={{
-            width: '100%',
-            padding: '9px 12px',
-            border: `1.5px solid ${error ? '#ef4444' : 'var(--border-color)'}`,
-            background: error ? 'rgba(239,68,68,0.04)' : 'var(--bg-app)',
-            color: 'var(--text-main)',
-            borderRadius: '8px',
-            fontSize: '0.82rem',
-            outline: 'none',
-            boxSizing: 'border-box',
-            transition: 'border-color 0.15s'
-          }}
-          {...rest}
-        />
-        {error && (
-          <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#ef4444', pointerEvents: 'none', display: 'flex' }}><AlertTriangle style={{ width: '14px', height: '14px' }} /></span>
-        )}
-      </div>
-      {error && <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: '600' }}>{error}</span>}
-    </div>
-  )
-
-  // ─── Reusable validated select component ──────────────────────────────────
-  const ValidatedSelect = ({ label, value, onChange, required, error, setError, children, ...rest }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-      <label style={{ fontSize: '0.75rem', fontWeight: '700', color: error ? '#ef4444' : 'var(--text-main)' }}>
-        {label}{required && <span style={{ color: '#ef4444', marginLeft: '2px' }}>*</span>}
-      </label>
-      <select
-        value={value}
-        onChange={(e) => {
-          onChange(e)
-          if (error && setError) setError('')
-        }}
-        required={required}
-        style={{
-          width: '100%',
-          padding: '9px 12px',
-          border: `1.5px solid ${error ? '#ef4444' : 'var(--border-color)'}`,
-          background: error ? 'rgba(239,68,68,0.04)' : 'var(--bg-app)',
-          color: 'var(--text-main)',
-          borderRadius: '8px',
-          fontSize: '0.82rem',
-          outline: 'none',
-          cursor: 'pointer',
-          boxSizing: 'border-box',
-          transition: 'border-color 0.15s'
-        }}
-        {...rest}
-      >
-        {children}
-      </select>
-      {error && <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: '600' }}>{error}</span>}
-    </div>
-  )
 
   return (
     <>
@@ -1341,6 +1421,26 @@ export default function SuperAdminDashboard({
               </li>
 
               <li
+                onClick={() => setActiveTab('subscriptions')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '12px 14px',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  fontWeight: '700',
+                  color: activeTab === 'subscriptions' ? 'var(--primary)' : 'var(--text-main)',
+                  background: activeTab === 'subscriptions' ? 'var(--primary-light)' : 'transparent',
+                  transition: 'all var(--transition-fast)'
+                }}
+              >
+                <Activity style={{ width: '16px', height: '16px' }} />
+                <span>Subscriptions</span>
+              </li>
+
+              <li
                 onClick={() => setActiveTab('plans')}
                 style={{
                   display: 'flex',
@@ -1357,7 +1457,7 @@ export default function SuperAdminDashboard({
                 }}
               >
                 <Layers style={{ width: '16px', height: '16px' }} />
-                <span>Subscription & Plans</span>
+                <span>Plans</span>
               </li>
 
               <li
@@ -1378,6 +1478,25 @@ export default function SuperAdminDashboard({
               >
                 <CreditCard style={{ width: '16px', height: '16px' }} />
                 <span>Revenue & Billing</span>
+              </li>
+              <li
+                onClick={() => setActiveTab('leads')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '12px 14px',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  fontWeight: '700',
+                  color: activeTab === 'leads' ? 'var(--primary)' : 'var(--text-main)',
+                  background: activeTab === 'leads' ? 'var(--primary-light)' : 'transparent',
+                  transition: 'all var(--transition-fast)'
+                }}
+              >
+                <Briefcase style={{ width: '16px', height: '16px' }} />
+                <span>Leads / CRM</span>
               </li>
             </ul>
 
@@ -1411,8 +1530,7 @@ export default function SuperAdminDashboard({
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
                     <div>
-                      <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', letterSpacing: '0.5px' }}>Branch Registration</span>
-                      <h3 style={{ margin: '4px 0 0 0', fontSize: '1.25rem', fontWeight: '900', color: 'var(--text-main)' }}>Register New Restaurant Branch</h3>
+                      <h3 style={{ margin: '4px 0 0 0', fontSize: '1.25rem', fontWeight: '900', color: 'var(--text-main)' }}>Register Restaurant</h3>
                     </div>
                     <button
                       className="btn-outline"
@@ -1426,17 +1544,17 @@ export default function SuperAdminDashboard({
                   <form onSubmit={handleCreateRestaurant} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                       <ValidatedInput
-                        label="Business Name"
+                        label="Tenant"
                         type="text"
                         value={newRestState.name}
                         onChange={(e) => setNewRestState({ ...newRestState, name: e.target.value })}
-                        placeholder="e.g. Serviq"
+                        placeholder="e.g. serveiq_main"
                         required
                         error={formErrors.name}
                         setError={(val) => setFormErrors({ ...formErrors, name: val })}
                       />
                       <ValidatedInput
-                        label="Legal Entity Name"
+                        label="Business Name"
                         type="text"
                         value={newRestState.legalName}
                         onChange={(e) => setNewRestState({ ...newRestState, legalName: e.target.value })}
@@ -1670,7 +1788,7 @@ export default function SuperAdminDashboard({
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>
                       <button type="button" onClick={() => setShowAddModal(false)} style={{ padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1' }}>Cancel</button>
-                      <button type="submit" style={{ padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#000000', color: '#ffffff', border: 'none' }}>Register Branch</button>
+                      <button type="submit" style={{ padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#000000', color: '#ffffff', border: 'none' }}>Register</button>
                     </div>
                   </form>
                 </div>
@@ -1749,18 +1867,19 @@ export default function SuperAdminDashboard({
                                   {rest.email || '—'}
                                 </td>
                                 <td style={{ padding: '14px 18px', whiteSpace: 'nowrap' }}>
-                                  <span style={{
-                                    fontSize: '0.7rem',
-                                    fontWeight: '800',
-                                    padding: '4px 10px',
-                                    borderRadius: '6px',
-                                    background: rest.subscriptionPlan?.includes('Enterprise') ? 'rgba(124, 58, 237, 0.1)' : rest.subscriptionPlan?.includes('Premium') ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                                    color: rest.subscriptionPlan?.includes('Enterprise') ? '#7c3aed' : rest.subscriptionPlan?.includes('Premium') ? '#3b82f6' : '#10b981',
-                                    border: rest.subscriptionPlan?.includes('Enterprise') ? '1px solid rgba(124, 58, 237, 0.2)' : rest.subscriptionPlan?.includes('Premium') ? '1px solid rgba(59, 130, 246, 0.2)' : '1px solid rgba(16, 185, 129, 0.2)'
-                                  }}>
-                                    {rest.subscriptionPlan || 'Standard Plan'}
-                                  </span>
-                                </td>
+                                   <span style={{
+                                     fontSize: '0.7rem',
+                                     fontWeight: '800',
+                                     padding: '4px 10px',
+                                     borderRadius: '6px',
+                                     background: rest.subscriptionPlan?.includes('Enterprise') ? 'rgba(124, 58, 237, 0.1)' : rest.subscriptionPlan?.includes('Premium') ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                                     color: rest.subscriptionPlan?.includes('Enterprise') ? '#7c3aed' : rest.subscriptionPlan?.includes('Premium') ? '#3b82f6' : '#10b981',
+                                     border: rest.subscriptionPlan?.includes('Enterprise') ? '1px solid rgba(124, 58, 237, 0.2)' : rest.subscriptionPlan?.includes('Premium') ? '1px solid rgba(59, 130, 246, 0.2)' : '1px solid rgba(16, 185, 129, 0.2)',
+                                     display: 'inline-block'
+                                   }}>
+                                     {rest.subscriptionPlan || 'Standard Plan'}
+                                   </span>
+                                 </td>
                                 <td style={{ padding: '14px 18px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', whiteSpace: 'nowrap' }}>
                                   {rest.phone || rest.mobileNumber || '—'}
                                 </td>
@@ -1810,6 +1929,16 @@ export default function SuperAdminDashboard({
                                       ) : (
                                         <Unlock style={{ width: '16px', height: '16px' }} />
                                       )}
+                                    </button>
+
+                                    <button
+                                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: 'var(--text-muted)', transition: 'color 0.2s', display: 'flex', alignItems: 'center' }}
+                                      onClick={(e) => { e.stopPropagation(); setViewingSubscriptionRest(rest); }}
+                                      title="View Subscription Details"
+                                      onMouseOver={(e) => e.currentTarget.style.color = 'var(--text-main)'}
+                                      onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
+                                    >
+                                      <Gem style={{ width: '16px', height: '16px' }} />
                                     </button>
 
                                     <button
@@ -1934,7 +2063,7 @@ export default function SuperAdminDashboard({
                               <span style={{ fontSize: '0.75rem', color: 'var(--text-main)', fontWeight: '700' }}>{viewedRest.ownerName || 'Rajesh Kumar'}</span>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '4px' }}>
-                              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '600' }}>Legal Entity Corporate Name</span>
+                              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '600' }}>Business Name</span>
                               <span style={{ fontSize: '0.75rem', color: 'var(--text-main)', fontWeight: '700', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={viewedRest.legalName}>{viewedRest.legalName}</span>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '4px' }}>
@@ -2025,17 +2154,17 @@ export default function SuperAdminDashboard({
                     <form onSubmit={handleUpdateRestaurantSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '70vh', overflowY: 'auto', paddingRight: '8px' }}>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                         <ValidatedInput
-                          label="Business Name"
+                          label="Tenant"
                           type="text"
                           value={editFormState.name}
                           onChange={(e) => setEditFormState({ ...editFormState, name: e.target.value })}
-                          placeholder="e.g. Serviq"
+                          placeholder="e.g. serveiq_main"
                           required
                           error={formErrors.name}
                           setError={(val) => setFormErrors({ ...formErrors, name: val })}
                         />
                         <ValidatedInput
-                          label="Legal Entity Name"
+                          label="Business Name"
                           type="text"
                           value={editFormState.legalName}
                           onChange={(e) => setEditFormState({ ...editFormState, legalName: e.target.value })}
@@ -2295,6 +2424,45 @@ export default function SuperAdminDashboard({
 
               </div>
 
+              {/* KPI Metrics Row 2: Platform Financials & Subscriptions */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                {/* Card: Monthly Revenue */}
+                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px' }}>
+                  <div style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <TrendingUp style={{ width: '22px', height: '22px' }} />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>Monthly Revenue (Est.)</span>
+                    <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900' }}>₹{monthlyRevenue.toLocaleString()}</h3>
+                    <span style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: '700' }}>+12.4% vs last month</span>
+                  </div>
+                </div>
+
+                {/* Card: Expiring Subscriptions */}
+                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px' }}>
+                  <div style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Clock style={{ width: '22px', height: '22px' }} />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>Expiring Subscriptions</span>
+                    <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900' }}>{expiringSubscriptionsCount} Branches</h3>
+                    <span style={{ fontSize: '0.65rem', color: '#ef4444', fontWeight: '700' }}>Awaiting renewal (30d)</span>
+                  </div>
+                </div>
+
+                {/* Card: Pending Payments */}
+                <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px' }}>
+                  <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CreditCard style={{ width: '22px', height: '22px' }} />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>Pending Payments</span>
+                    <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900' }}>₹{pendingPaymentsSum.toLocaleString()}</h3>
+                    <span style={{ fontSize: '0.65rem', color: '#f59e0b', fontWeight: '700' }}>{pendingPaymentsCount} Invoice(s) Pending</span>
+                  </div>
+                </div>
+              </div>
+
               {/* KPI Metrics Row 2: Orders & Financials */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
                 {/* Card 5: Standard Plan Count */}
@@ -2327,6 +2495,69 @@ export default function SuperAdminDashboard({
                   </div>
                 </div>
 
+              </div>
+
+              {/* View Support Ticket Summary */}
+              <div className="glass-card" style={{
+                padding: '24px',
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '10px',
+                      background: 'linear-gradient(135deg, #f97316, #ea580c)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <LifeBuoy style={{ width: '18px', height: '18px', color: '#ffffff' }} />
+                    </div>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-main)' }}>View Support Ticket Summary</h4>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '600' }}>Track and manage all restaurant support requests</span>
+                    </div>
+                  </div>
+                  <span style={{
+                    fontSize: '0.65rem',
+                    fontWeight: '800',
+                    padding: '3px 10px',
+                    borderRadius: '20px',
+                    background: 'rgba(249, 115, 22, 0.1)',
+                    color: '#f97316',
+                    border: '1px solid rgba(249, 115, 22, 0.2)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.3px'
+                  }}>Live</span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+                  {[
+                    { label: 'Open Tickets', value: '12', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.08)', borderColor: 'rgba(239, 68, 68, 0.15)' },
+                    { label: 'In Progress', value: '8', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.08)', borderColor: 'rgba(245, 158, 11, 0.15)' },
+                    { label: 'Resolved (30d)', value: '47', color: '#10b981', bg: 'rgba(16, 185, 129, 0.08)', borderColor: 'rgba(16, 185, 129, 0.15)' },
+                    { label: 'Avg Response', value: '2.4h', color: '#6366f1', bg: 'rgba(99, 102, 241, 0.08)', borderColor: 'rgba(99, 102, 241, 0.15)' }
+                  ].map((stat, idx) => (
+                    <div key={idx} style={{
+                      padding: '16px',
+                      borderRadius: '12px',
+                      background: stat.bg,
+                      border: `1px solid ${stat.borderColor}`,
+                      textAlign: 'center'
+                    }}>
+                      <div style={{ fontSize: '1.4rem', fontWeight: '900', color: stat.color, lineHeight: 1 }}>{stat.value}</div>
+                      <div style={{ fontSize: '0.68rem', fontWeight: '700', color: 'var(--text-muted)', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.3px' }}>{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Split Cards Container */}
@@ -2603,6 +2834,218 @@ export default function SuperAdminDashboard({
             </div>
           )}
 
+          {activeTab === 'leads' && (
+            <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '16px' }}>
+                {[
+                  { label: 'Total Leads', value: leads.length, tone: '#0f172a' },
+                  { label: 'Open Pipeline', value: openLeadsCount, tone: '#f59e0b' },
+                  { label: 'Follow-ups', value: upcomingFollowUpsCount, tone: '#3b82f6' },
+                  { label: 'Won / Converted', value: wonLeadsCount, tone: '#10b981' }
+                ].map(item => (
+                  <div key={item.label} className="glass-card" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '18px' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase' }}>{item.label}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                      <strong style={{ fontSize: '1.6rem', color: 'var(--text-main)' }}>{item.value}</strong>
+                      <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: item.tone }}></span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="glass-card" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', alignItems: 'flex-start', marginBottom: '18px', flexWrap: 'wrap' }}>
+                  <div>
+                    <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Purpose</span>
+                    <h3 style={{ margin: '4px 0', fontSize: '1.15rem', fontWeight: '900', color: 'var(--text-main)' }}>Manage Potential Customers</h3>
+                    <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)' }}>Create leads, assign ownership, schedule follow-ups, and convert won leads to restaurants.</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-black"
+                    onClick={() => {
+                      setFormErrors({})
+                      resetLeadForm()
+                      setShowCreateLeadForm(true)
+                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px', borderRadius: '8px' }}
+                  >
+                    <Plus style={{ width: '14px', height: '14px' }} /> Create Lead
+                  </button>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '18px', borderTop: '1px solid var(--border-color)' }}>
+                  {leadStatuses.map((status, idx) => (
+                    <React.Fragment key={status}>
+                      <span style={{
+                        padding: '6px 10px',
+                        borderRadius: '8px',
+                        background: status === 'Won' ? 'rgba(16, 185, 129, 0.1)' : status === 'Lost' ? 'rgba(239, 68, 68, 0.1)' : 'var(--bg-app)',
+                        color: status === 'Won' ? '#10b981' : status === 'Lost' ? '#ef4444' : 'var(--text-main)',
+                        border: '1px solid var(--border-color)',
+                        fontSize: '0.68rem',
+                        fontWeight: '800',
+                        whiteSpace: 'nowrap'
+                      }}>{status}</span>
+                      {idx < leadStatuses.length - 1 && <ArrowRight style={{ width: '12px', height: '12px', color: 'var(--text-muted)' }} />}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </div>
+
+              <div className="glass-card" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', overflow: 'hidden' }}>
+                <div style={{ padding: '18px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', gap: '12px', flexWrap: 'wrap' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '900' }}>Leads / CRM Pipeline</h3>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Track lifecycle from New Lead to Won or Lost.</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    {!showCreateLeadForm && (
+                      <>
+                        <input
+                          type="text"
+                          placeholder="Search lead..."
+                          value={leadSearchQuery}
+                          onChange={(e) => setLeadSearchQuery(e.target.value)}
+                          style={{ padding: '7px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', color: 'var(--text-main)', fontSize: '0.75rem', width: '180px' }}
+                        />
+                        <select
+                          value={leadStatusFilter}
+                          onChange={(e) => setLeadStatusFilter(e.target.value)}
+                          style={{ padding: '7px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', color: 'var(--text-main)', fontSize: '0.75rem', cursor: 'pointer' }}
+                        >
+                          <option value="All">All Statuses</option>
+                          {leadStatuses.map(status => <option key={status} value={status}>{status}</option>)}
+                        </select>
+                      </>
+                    )}
+                    <button
+                      type="button"
+                      className={showCreateLeadForm ? 'btn-outline' : 'btn-black'}
+                      onClick={() => {
+                        setFormErrors({})
+                        resetLeadForm()
+                        setShowCreateLeadForm(!showCreateLeadForm)
+                      }}
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px', borderRadius: '8px', padding: '7px 14px' }}
+                    >
+                      {showCreateLeadForm ? 'Back to Leads' : <><Plus style={{ width: '14px', height: '14px' }} /> Create Lead</>}
+                    </button>
+                  </div>
+                </div>
+
+                {showCreateLeadForm && (
+                  <div className="animate-fade-in" style={{ padding: '20px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-card)' }}>
+                    <form onSubmit={handleCreateLeadSubmit} noValidate style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '12px', alignItems: 'end' }}>
+                      <ValidatedInput label="Business Name" value={leadFormState.businessName} onChange={(e) => setLeadFormState({ ...leadFormState, businessName: e.target.value })} placeholder="e.g. Green Bowl Cafe" required error={formErrors.businessName} setError={(val) => setFormErrors({ ...formErrors, businessName: val })} />
+                      <ValidatedInput label="Contact Person" value={leadFormState.contactPerson} onChange={(e) => setLeadFormState({ ...leadFormState, contactPerson: e.target.value })} placeholder="Owner / manager name" required error={formErrors.contactPerson} setError={(val) => setFormErrors({ ...formErrors, contactPerson: val })} />
+                      <ValidatedInput label="Mobile Number" value={leadFormState.mobileNumber} onChange={(e) => setLeadFormState({ ...leadFormState, mobileNumber: e.target.value })} placeholder="+91..." required error={formErrors.mobileNumber} setError={(val) => setFormErrors({ ...formErrors, mobileNumber: val })} />
+                      <ValidatedInput label="Email Address" type="email" value={leadFormState.emailAddress} onChange={(e) => setLeadFormState({ ...leadFormState, emailAddress: e.target.value })} placeholder="name@business.com" required error={formErrors.emailAddress} setError={(val) => setFormErrors({ ...formErrors, emailAddress: val })} />
+
+                      <ValidatedSelect label="Lead Source" value={leadFormState.leadSource} onChange={(e) => setLeadFormState({ ...leadFormState, leadSource: e.target.value })} required error={formErrors.leadSource} setError={(val) => setFormErrors({ ...formErrors, leadSource: val })}>
+                        {leadSources.map(source => <option key={source} value={source}>{source}</option>)}
+                      </ValidatedSelect>
+                      <ValidatedSelect label="Lead Status" value={leadFormState.leadStatus} onChange={(e) => setLeadFormState({ ...leadFormState, leadStatus: e.target.value })} required error={formErrors.leadStatus} setError={(val) => setFormErrors({ ...formErrors, leadStatus: val })}>
+                        {leadStatuses.map(status => <option key={status} value={status}>{status}</option>)}
+                      </ValidatedSelect>
+                      <ValidatedInput label="Follow-up Date" type="date" value={leadFormState.followUpDate} onChange={(e) => setLeadFormState({ ...leadFormState, followUpDate: e.target.value })} required error={formErrors.followUpDate} setError={(val) => setFormErrors({ ...formErrors, followUpDate: val })} />
+                      <ValidatedSelect label="Assign Lead" value={leadFormState.assignedTo} onChange={(e) => setLeadFormState({ ...leadFormState, assignedTo: e.target.value })}>
+                        <option value="">Unassigned</option>
+                        {restaurantAdmins.map(admin => <option key={admin.id} value={admin.name}>{admin.name}</option>)}
+                      </ValidatedSelect>
+
+                      <div style={{ gridColumn: '1 / -1' }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '4px' }}>Remarks</label>
+                        <textarea
+                          value={leadFormState.remarks}
+                          onChange={(e) => setLeadFormState({ ...leadFormState, remarks: e.target.value })}
+                          placeholder="Lead notes, call outcome, demo preference, proposal details..."
+                          rows="3"
+                          style={{ width: '100%', padding: '9px 12px', border: '1.5px solid var(--border-color)', borderRadius: '8px', background: 'var(--bg-app)', color: 'var(--text-main)', fontSize: '0.82rem', resize: 'vertical', boxSizing: 'border-box' }}
+                        />
+                      </div>
+
+                      <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                        <button type="button" className="btn-outline" onClick={resetLeadForm}>Reset</button>
+                        <button type="submit" className="btn-black" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Plus style={{ width: '14px', height: '14px' }} /> Save Lead</button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+
+                <div style={{ padding: '20px', overflowX: 'auto' }}>
+                  <table className="menu-data-table">
+                    <thead>
+                      <tr>
+                        <th>Lead</th>
+                        <th>Contact</th>
+                        <th>Source</th>
+                        <th>Status</th>
+                        <th>Assigned To</th>
+                        <th>Follow-up</th>
+                        <th>Remarks</th>
+                        <th style={{ textAlign: 'right' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredLeads.map(lead => (
+                        <tr key={lead.id}>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <strong style={{ color: 'var(--text-main)', whiteSpace: 'nowrap' }}>{lead.businessName}</strong>
+                              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontFamily: 'monospace', fontWeight: '700', background: 'var(--bg-app)', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '1px 6px', whiteSpace: 'nowrap', flexShrink: 0 }}>{lead.id}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                              <strong style={{ fontSize: '0.82rem', color: 'var(--text-main)', whiteSpace: 'nowrap' }}>{lead.contactPerson}</strong>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+                                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{lead.mobileNumber}</span>
+                                <span style={{ width: '3px', height: '3px', borderRadius: '50%', background: 'var(--border-color)', flexShrink: 0 }}></span>
+                                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{lead.emailAddress}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td>{lead.leadSource}</td>
+                          <td>
+                            <select value={lead.leadStatus} onChange={(e) => handleLeadStatusChange(lead.id, e.target.value)} style={{ padding: '6px 8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', fontSize: '0.75rem', fontWeight: '700' }}>
+                              {leadStatuses.map(status => <option key={status} value={status}>{status}</option>)}
+                            </select>
+                          </td>
+                          <td>
+                            <select value={lead.assignedTo} onChange={(e) => handleLeadAssignmentChange(lead.id, e.target.value)} style={{ padding: '6px 8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', fontSize: '0.75rem' }}>
+                              <option value="Unassigned">Unassigned</option>
+                              {restaurantAdmins.map(admin => <option key={admin.id} value={admin.name}>{admin.name}</option>)}
+                            </select>
+                          </td>
+                          <td>
+                            <input type="date" value={lead.followUpDate} onChange={(e) => handleLeadFollowUpChange(lead.id, e.target.value)} style={{ padding: '6px 8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', fontSize: '0.75rem' }} />
+                          </td>
+                          <td style={{ maxWidth: '220px', color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.4 }}>{lead.remarks || '-'}</td>
+                          <td style={{ textAlign: 'right' }}>
+                            <button
+                              type="button"
+                              className="btn-outline"
+                              disabled={Boolean(lead.convertedRestaurantId) || lead.leadStatus === 'Lost'}
+                              onClick={() => handleConvertLeadToRestaurant(lead)}
+                              style={{ padding: '6px 10px', fontSize: '0.72rem', borderRadius: '8px', cursor: lead.convertedRestaurantId || lead.leadStatus === 'Lost' ? 'not-allowed' : 'pointer', opacity: lead.convertedRestaurantId || lead.leadStatus === 'Lost' ? 0.55 : 1 }}
+                            >
+                              {lead.convertedRestaurantId ? `Converted ${lead.convertedRestaurantId}` : 'Convert to Restaurant'}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredLeads.length === 0 && (
+                        <tr>
+                          <td colSpan="8" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>No leads found matching your filters.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'billing' && (
             showGenerateInvoiceModal ? (
               <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -2652,7 +3095,8 @@ export default function SuperAdminDashboard({
                           setNewInvoiceFormState({
                             ...newInvoiceFormState,
                             subscriptionPlan: selectedPlanName,
-                            amount: price
+                            amount: price,
+                            taxAmount: Math.round(price * 0.18)
                           })
                         }}
                         required
@@ -2668,12 +3112,44 @@ export default function SuperAdminDashboard({
                         label="Amount (₹)"
                         type="number"
                         value={newInvoiceFormState.amount}
-                        onChange={(e) => setNewInvoiceFormState({ ...newInvoiceFormState, amount: parseFloat(e.target.value) || 0 })}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value) || 0
+                          setNewInvoiceFormState({
+                            ...newInvoiceFormState,
+                            amount: val,
+                            taxAmount: Math.round(val * 0.18)
+                          })
+                        }}
                         placeholder="e.g. 4999"
                         required
                         min="0"
                         error={formErrors.amount}
                         setError={(val) => setFormErrors({ ...formErrors, amount: val })}
+                      />
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <ValidatedInput
+                        label="Tax Amount (GST 18% Incl.) (₹)"
+                        type="number"
+                        value={newInvoiceFormState.taxAmount}
+                        onChange={(e) => setNewInvoiceFormState({ ...newInvoiceFormState, taxAmount: parseFloat(e.target.value) || 0 })}
+                        placeholder="e.g. 900"
+                        required
+                        min="0"
+                        error={formErrors.taxAmount}
+                        setError={(val) => setFormErrors({ ...formErrors, taxAmount: val })}
+                      />
+
+                      <ValidatedInput
+                        label="Transaction ID"
+                        type="text"
+                        value={newInvoiceFormState.transactionId}
+                        onChange={(e) => setNewInvoiceFormState({ ...newInvoiceFormState, transactionId: e.target.value })}
+                        placeholder="e.g. TXN-129847184"
+                        disabled={newInvoiceFormState.status === 'Pending'}
+                        error={formErrors.transactionId}
+                        setError={(val) => setFormErrors({ ...formErrors, transactionId: val })}
                       />
                     </div>
 
@@ -2701,7 +3177,8 @@ export default function SuperAdminDashboard({
                             ...newInvoiceFormState,
                             status: nextStatus,
                             paymentMethod: nextStatus === 'Pending' ? 'N/A' : (newInvoiceFormState.paymentMethod === 'N/A' ? 'UPI' : newInvoiceFormState.paymentMethod),
-                            paymentDate: nextStatus === 'Pending' ? '' : (newInvoiceFormState.paymentDate || new Date().toISOString().split('T')[0])
+                            paymentDate: nextStatus === 'Pending' ? '' : (newInvoiceFormState.paymentDate || new Date().toISOString().split('T')[0]),
+                            transactionId: nextStatus === 'Pending' ? '' : newInvoiceFormState.transactionId
                           })
                         }}
                         required
@@ -2802,12 +3279,12 @@ export default function SuperAdminDashboard({
                             <th style={{ textAlign: 'left', padding: '12px 24px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', width: '60px', whiteSpace: 'nowrap' }}>S.No.</th>
                             <th style={{ textAlign: 'left', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', whiteSpace: 'nowrap' }}>Invoice Number</th>
                             <th style={{ textAlign: 'left', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', whiteSpace: 'nowrap' }}>Restaurant Name</th>
-                            <th style={{ textAlign: 'left', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', whiteSpace: 'nowrap' }}>Subscription Plan</th>
+                            <th style={{ textAlign: 'left', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', whiteSpace: 'nowrap' }}>Plan Name</th>
                             <th style={{ textAlign: 'left', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', whiteSpace: 'nowrap' }}>Amount</th>
-                            <th style={{ textAlign: 'left', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', whiteSpace: 'nowrap' }}>Payment Method</th>
+                            <th style={{ textAlign: 'left', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', whiteSpace: 'nowrap' }}>Tax Amount</th>
                             <th style={{ textAlign: 'left', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', whiteSpace: 'nowrap' }}>Payment Date</th>
-                            <th style={{ textAlign: 'left', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', whiteSpace: 'nowrap' }}>Due Date</th>
                             <th style={{ textAlign: 'left', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', whiteSpace: 'nowrap' }}>Payment Status</th>
+                            <th style={{ textAlign: 'left', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', whiteSpace: 'nowrap' }}>Transaction ID</th>
                             <th style={{ textAlign: 'right', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', whiteSpace: 'nowrap' }}>Actions</th>
                           </tr>
                         </thead>
@@ -2846,14 +3323,11 @@ export default function SuperAdminDashboard({
                                 <td style={{ padding: '14px 18px', fontSize: '0.8rem', color: 'var(--text-main)', fontWeight: '700', whiteSpace: 'nowrap' }}>
                                   ₹{inv.amount.toLocaleString()}
                                 </td>
-                                <td style={{ padding: '14px 18px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', whiteSpace: 'nowrap' }}>
-                                  {inv.paymentMethod}
+                                <td style={{ padding: '14px 18px', fontSize: '0.8rem', color: 'var(--text-main)', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                                  ₹{(inv.taxAmount !== undefined ? inv.taxAmount : Math.round(inv.amount * 0.18)).toLocaleString()}
                                 </td>
                                 <td style={{ padding: '14px 18px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', whiteSpace: 'nowrap' }}>
                                   {inv.paymentDate || '—'}
-                                </td>
-                                <td style={{ padding: '14px 18px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', whiteSpace: 'nowrap' }}>
-                                  {inv.dueDate}
                                 </td>
                                 <td style={{ padding: '14px 18px', whiteSpace: 'nowrap' }}>
                                   <span style={{
@@ -2868,6 +3342,9 @@ export default function SuperAdminDashboard({
                                   }}>
                                     {inv.status.toUpperCase()}
                                   </span>
+                                </td>
+                                <td style={{ padding: '14px 18px', fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: 'monospace', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                                  {inv.transactionId || '—'}
                                 </td>
                                 <td style={{ padding: '14px 18px', textAlign: 'right', whiteSpace: 'nowrap' }}>
                                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', alignItems: 'center' }}>
@@ -3458,17 +3935,18 @@ export default function SuperAdminDashboard({
                             </tr>
                           </thead>
                           <tbody>
-                            {['dashboard', 'restaurants', 'roles', 'adminUsers', 'subscriptions', 'revenue'].map((module, idx) => {
+                            {['dashboard', 'restaurants', 'roles', 'adminUsers', 'subscriptions', 'plans', 'revenue'].map((module, idx) => {
                               const displayNames = {
                                 dashboard: 'Dashboard',
                                 restaurants: 'Restaurants',
                                 roles: 'Roles & Permissions',
                                 adminUsers: 'Admin Users',
-                                subscriptions: 'Subscription & Plans',
+                                subscriptions: 'Subscriptions',
+                                plans: 'Plans',
                                 revenue: 'Revenue & Billing'
                               }
                               return (
-                                <tr key={module} style={{ borderBottom: idx === 5 ? 'none' : '1px solid #f1f5f9' }}>
+                                <tr key={module} style={{ borderBottom: idx === 6 ? 'none' : '1px solid #f1f5f9' }}>
                                   <td style={{ padding: '16px 20px', fontWeight: '700', color: '#1e293b', fontSize: '0.85rem' }}>
                                     {displayNames[module]}
                                   </td>
@@ -3633,352 +4111,52 @@ export default function SuperAdminDashboard({
           })()}
 
 
+          {activeTab === 'subscriptions' && (
+            <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0 }}>
+              <SubscriptionManagement
+                restaurants={restaurants}
+                onUpdateRestaurants={onUpdateRestaurants}
+                plans={plans}
+                showToast={showToast}
+              />
+            </div>
+          )}
+
           {activeTab === 'plans' && (
-            editingPlanId ? (
-              <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={{
-                  background: 'var(--bg-card)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: '16px',
-                  padding: '32px',
-                  boxShadow: 'var(--shadow-sm)'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
-                    <div>
-                      <h3 style={{ margin: '4px 0 0 0', fontSize: '1.25rem', fontWeight: '900', color: 'var(--text-main)' }}>
-                        {editingPlanId === 'new' ? 'Create Subscription Plan' : 'Modify Subscription Plan'}
-                      </h3>
-                    </div>
-                    <button
-                      className="btn-outline"
-                      style={{ padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '700' }}
-                      onClick={() => setEditingPlanId(null)}
-                    >
-                      Back to Plans
-                    </button>
-                  </div>
+            <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0 }}>
+              <PlansManagement
+                plans={plans}
+                setPlans={setPlans}
+                showToast={showToast}
+              />
+            </div>
+          )}
 
-                  <form onSubmit={editingPlanId === 'new' ? handleCreatePlan : handleModifyPlan} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <ValidatedInput
-                      label="Plan Name"
-                      type="text"
-                      value={planFormState.name}
-                      onChange={(e) => setPlanFormState({ ...planFormState, name: e.target.value })}
-                      placeholder="e.g. Starter Plan"
-                      required
-                      error={formErrors.name}
-                      setError={(val) => setFormErrors({ ...formErrors, name: val })}
-                    />
+          {activeTab === 'tickets' && (
+            <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0 }}>
+              <SupportTicketManagement
+                restaurants={restaurants}
+                showToast={showToast}
+              />
+            </div>
+          )}
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                      <ValidatedInput
-                        label="Monthly Price (₹)"
-                        type="number"
-                        value={planFormState.monthlyPrice}
-                        onChange={(e) => setPlanFormState({ ...planFormState, monthlyPrice: e.target.value })}
-                        placeholder="e.g. 1999"
-                        required
-                        min="0"
-                        error={formErrors.monthlyPrice}
-                        setError={(val) => setFormErrors({ ...formErrors, monthlyPrice: val })}
-                      />
-                      <ValidatedInput
-                        label="Annual Price (₹)"
-                        type="number"
-                        value={planFormState.annualPrice}
-                        onChange={(e) => setPlanFormState({ ...planFormState, annualPrice: e.target.value })}
-                        placeholder="e.g. 19999"
-                        required
-                        min="0"
-                        error={formErrors.annualPrice}
-                        setError={(val) => setFormErrors({ ...formErrors, annualPrice: val })}
-                      />
-                    </div>
+          {activeTab === 'notifications' && (
+            <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0 }}>
+              <NotificationsManagement
+                restaurants={restaurants}
+                showToast={showToast}
+              />
+            </div>
+          )}
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                      <ValidatedInput
-                        label="Branch Limit"
-                        type="number"
-                        value={planFormState.branchLimit}
-                        onChange={(e) => setPlanFormState({ ...planFormState, branchLimit: e.target.value })}
-                        placeholder="Unlimited: 99999"
-                        required
-                        min="1"
-                        error={formErrors.branchLimit}
-                        setError={(val) => setFormErrors({ ...formErrors, branchLimit: val })}
-                      />
-                      <ValidatedInput
-                        label="User Limit"
-                        type="number"
-                        value={planFormState.userLimit}
-                        onChange={(e) => setPlanFormState({ ...planFormState, userLimit: e.target.value })}
-                        placeholder="Unlimited: 99999"
-                        required
-                        min="1"
-                        error={formErrors.userLimit}
-                        setError={(val) => setFormErrors({ ...formErrors, userLimit: val })}
-                      />
-                      <ValidatedInput
-                        label="Order Limit"
-                        type="number"
-                        value={planFormState.orderLimit}
-                        onChange={(e) => setPlanFormState({ ...planFormState, orderLimit: e.target.value })}
-                        placeholder="Unlimited: 99999"
-                        required
-                        min="1"
-                        error={formErrors.orderLimit}
-                        setError={(val) => setFormErrors({ ...formErrors, orderLimit: val })}
-                      />
-                    </div>
-
-                    <ValidatedInput
-                      label="Features Included (comma-separated)"
-                      type="text"
-                      value={planFormState.features}
-                      onChange={(e) => setPlanFormState({ ...planFormState, features: e.target.value })}
-                      placeholder="e.g. Waiter Apps, Kitchen KDS, Advanced Billing"
-                      required
-                      error={formErrors.features}
-                      setError={(val) => setFormErrors({ ...formErrors, features: val })}
-                    />
-
-                    <ValidatedSelect
-                      label="Status"
-                      value={planFormState.status}
-                      onChange={(e) => setPlanFormState({ ...planFormState, status: e.target.value })}
-                      error={formErrors.status}
-                      setError={(val) => setFormErrors({ ...formErrors, status: val })}
-                    >
-                      <option value="Active">Active</option>
-                      <option value="Inactive">Inactive</option>
-                    </ValidatedSelect>
-
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px', paddingTop: '24px', borderTop: '1px solid var(--border-color)' }}>
-                      <button type="button" className="btn-outline" onClick={() => setEditingPlanId(null)} style={{ padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1' }}>Cancel</button>
-                      <button type="submit" className="btn-black" style={{ padding: '10px 24px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer', background: '#000000', color: '#ffffff', border: 'none' }}>{editingPlanId === 'new' ? 'Create Plan' : 'Save Changes'}</button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            ) : (
-              <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0 }}>
-
-                {/* Top Banner / Actions Control */}
-                <div className="glass-card" style={{ padding: '24px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <h3 style={{ margin: '4px 0 0 0', fontSize: '1.25rem', fontWeight: '900', color: 'var(--text-main)' }}>Subscription Tier Configurations</h3>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setEditingPlanId('new')
-                      setPlanFormState({
-                        name: '',
-                        monthlyPrice: '',
-                        annualPrice: '',
-                        branchLimit: '',
-                        userLimit: '',
-                        orderLimit: '',
-                        features: '',
-                        status: 'Active'
-                      })
-                    }}
-                    className="btn-black"
-                    style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}
-                  >
-                    <Plus style={{ width: '16px', height: '16px' }} /> Create Plan
-                  </button>
-                </div>
-
-                {/* Plans Cards Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                  {plans.map(plan => (
-                    <div key={plan.id} className="glass-card" style={{
-                      padding: '24px',
-                      background: 'var(--bg-card)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: '16px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                      gap: '16px',
-                      position: 'relative'
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div>
-                          <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>{plan.name}</h4>
-                          <span style={{
-                            fontSize: '0.65rem',
-                            fontWeight: '800',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            background: plan.status === 'Active' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                            color: plan.status === 'Active' ? '#10b981' : '#ef4444',
-                            display: 'inline-block',
-                            marginTop: '6px'
-                          }}>{plan.status}</span>
-                        </div>
-
-                        <button
-                          onClick={() => {
-                            setEditingPlanId(plan.id)
-                            setPlanFormState({
-                              name: plan.name,
-                              monthlyPrice: plan.monthlyPrice.toString(),
-                              annualPrice: plan.annualPrice.toString(),
-                              branchLimit: plan.branchLimit.toString(),
-                              userLimit: plan.userLimit.toString(),
-                              orderLimit: plan.orderLimit.toString(),
-                              features: plan.features.join(', '),
-                              status: plan.status
-                            })
-                          }}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: 'var(--text-muted)' }}
-                          title="Modify Plan"
-                        >
-                          <Edit2 style={{ width: '16px', height: '16px' }} />
-                        </button>
-                      </div>
-
-                      <div style={{ borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)', padding: '12px 0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600' }}>Monthly Price</span>
-                          <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: '800' }}>₹{plan.monthlyPrice.toLocaleString()}/mo</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600' }}>Annual Price</span>
-                          <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: '800' }}>₹{plan.annualPrice.toLocaleString()}/yr</span>
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.75rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ color: 'var(--text-muted)' }}>Branch Limit:</span>
-                          <span style={{ fontWeight: '700', color: 'var(--text-main)' }}>{plan.branchLimit === 99999 ? 'Unlimited' : `${plan.branchLimit} Branch(es)`}</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ color: 'var(--text-muted)' }}>User Limit:</span>
-                          <span style={{ fontWeight: '700', color: 'var(--text-main)' }}>{plan.userLimit === 99999 ? 'Unlimited' : `${plan.userLimit} User(s)`}</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ color: 'var(--text-muted)' }}>Order Limit:</span>
-                          <span style={{ fontWeight: '700', color: 'var(--text-main)' }}>{plan.orderLimit === 99999 ? 'Unlimited' : `${plan.orderLimit.toLocaleString()} Orders/mo`}</span>
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
-                        {plan.features.map((feat, idx) => (
-                          <span key={idx} style={{
-                            fontSize: '0.6rem',
-                            fontWeight: '700',
-                            padding: '3px 8px',
-                            borderRadius: '6px',
-                            background: 'var(--bg-app)',
-                            color: 'var(--text-muted)',
-                            border: '1px solid var(--border-color)'
-                          }}>{feat}</span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Branch Subscriptions Control List */}
-                <div className="glass-card" style={{ padding: '24px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: '800', color: 'var(--text-main)' }}>Active Branch Subscription Assignments</h4>
-
-                  <div style={{ overflowX: 'auto', background: 'var(--bg-app)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                    <table className="menu-data-table">
-                      <thead>
-                        <tr>
-                          <th style={{ textAlign: 'left', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', width: '60px', whiteSpace: 'nowrap' }}>S.No</th>
-                          <th style={{ textAlign: 'left', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800' }}>Branch Name</th>
-                          <th style={{ textAlign: 'left', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800' }}>Plan Classification</th>
-                          <th style={{ textAlign: 'left', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800' }}>Tariff Rate</th>
-                          <th style={{ textAlign: 'left', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800' }}>Auto Renewal</th>
-                          <th style={{ textAlign: 'right', padding: '12px 18px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', width: '220px' }}>Upgrade/Downgrade Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {restaurants.map((rest, idx) => {
-                          const matchingPlan = plans.find(p => p.name.toLowerCase().includes(rest.subscriptionPlan?.toLowerCase())) || plans[0]
-                          const isAutoRenew = rest.autoRenewal !== false
-                          return (
-                            <tr key={rest.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                              <td style={{ padding: '14px 18px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '700', whiteSpace: 'nowrap' }}>
-                                {idx + 1}
-                              </td>
-                              <td style={{ padding: '14px 18px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                  <img src={rest.logo || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=60&auto=format&fit=crop&q=60'} alt={rest.name} style={{ width: '28px', height: '28px', borderRadius: '6px', objectFit: 'cover' }} />
-                                  <div>
-                                    <span style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)', display: 'block' }}>{rest.name}</span>
-                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Code: {rest.id} • {rest.city}</span>
-                                  </div>
-                                </div>
-                              </td>
-                              <td style={{ padding: '14px 18px' }}>
-                                <span style={{
-                                  fontSize: '0.7rem',
-                                  fontWeight: '800',
-                                  padding: '4px 10px',
-                                  borderRadius: '6px',
-                                  background: rest.subscriptionPlan === 'Enterprise' ? 'rgba(124, 58, 237, 0.1)' : rest.subscriptionPlan === 'Premium' ? 'rgba(59, 130, 246, 0.1)' : rest.subscriptionPlan === 'Standard' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(100, 116, 139, 0.1)',
-                                  color: rest.subscriptionPlan === 'Enterprise' ? '#7c3aed' : rest.subscriptionPlan === 'Premium' ? '#3b82f6' : rest.subscriptionPlan === 'Standard' ? '#10b981' : '#64748b',
-                                  display: 'inline-block'
-                                }}>{rest.subscriptionPlan || 'Free Plan'}</span>
-                              </td>
-                              <td style={{ padding: '14px 18px', fontSize: '0.8rem', color: 'var(--text-main)', fontWeight: '700' }}>
-                                ₹{matchingPlan.monthlyPrice.toLocaleString()}/mo
-                              </td>
-                              <td style={{ padding: '14px 18px' }}>
-                                <label className="switch-label" style={{ margin: 0, gap: '6px' }}>
-                                  <input
-                                    type="checkbox"
-                                    className="switch-input"
-                                    checked={isAutoRenew}
-                                    onChange={() => handleToggleAutoRenewal(rest)}
-                                  />
-                                  <div className="switch-track" style={{ width: '28px', height: '16px', background: isAutoRenew ? 'var(--primary)' : '#cbd5e1' }}>
-                                    <div className="switch-thumb" style={{ width: '12px', height: '12px', left: isAutoRenew ? '13px' : '3px' }}></div>
-                                  </div>
-                                  <span style={{ fontSize: '0.75rem', minWidth: '40px', color: isAutoRenew ? 'var(--text-main)' : 'var(--text-muted)' }}>
-                                    {isAutoRenew ? 'Active' : 'Disabled'}
-                                  </span>
-                                </label>
-                              </td>
-                              <td style={{ padding: '14px 18px', textAlign: 'right' }}>
-                                {changingPlanRestId === rest.id ? (
-                                  <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', alignItems: 'center' }}>
-                                    <select
-                                      defaultValue={rest.subscriptionPlan}
-                                      onChange={(e) => handleAssignPlan(rest.id, e.target.value)}
-                                      style={{ padding: '4px 8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', color: 'var(--text-main)', fontSize: '0.75rem', cursor: 'pointer' }}
-                                    >
-                                      {plans.map(p => (
-                                        <option key={p.id} value={p.name}>{p.name}</option>
-                                      ))}
-                                    </select>
-                                    <button onClick={() => setChangingPlanRestId(null)} style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer', fontWeight: '700', display: 'flex', alignItems: 'center' }}><X style={{ width: '14px', height: '14px' }} /></button>
-                                  </div>
-                                ) : (
-                                  <button
-                                    onClick={() => setChangingPlanRestId(rest.id)}
-                                    className="btn-outline"
-                                    style={{ padding: '6px 12px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer' }}
-                                  >
-                                    Modify Plan
-                                  </button>
-                                )}
-                              </td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            )
+          {activeTab === 'reports' && (
+            <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0 }}>
+              <ReportsAnalytics
+                restaurants={restaurants}
+                showToast={showToast}
+              />
+            </div>
           )}
 
         </div>
@@ -4142,6 +4320,12 @@ export default function SuperAdminDashboard({
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Payment Method: </span>
                     <span style={{ fontWeight: '700' }}>{viewingInvoice.paymentMethod}</span>
                   </div>
+                  {viewingInvoice.transactionId && viewingInvoice.transactionId !== '—' && (
+                    <div style={{ marginTop: '4px' }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Transaction ID: </span>
+                      <span style={{ fontWeight: '700' }}>{viewingInvoice.transactionId}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -4161,18 +4345,18 @@ export default function SuperAdminDashboard({
                       <span style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 'normal', marginTop: '2px' }}>Monthly recurring platform license fee</span>
                     </td>
                     <td style={{ padding: '10px 0', textAlign: 'right', fontWeight: '700' }}>1</td>
-                    <td style={{ padding: '10px 0', textAlign: 'right' }}>₹{viewingInvoice.amount.toLocaleString()}</td>
-                    <td style={{ padding: '10px 0', textAlign: 'right', fontWeight: '800', color: 'var(--text-main)' }}>₹{viewingInvoice.amount.toLocaleString()}</td>
+                    <td style={{ padding: '10px 0', textAlign: 'right' }}>₹{(viewingInvoice.amount - (viewingInvoice.taxAmount !== undefined ? viewingInvoice.taxAmount : Math.round(viewingInvoice.amount * 0.18))).toLocaleString()}</td>
+                    <td style={{ padding: '10px 0', textAlign: 'right', fontWeight: '800', color: 'var(--text-main)' }}>₹{(viewingInvoice.amount - (viewingInvoice.taxAmount !== undefined ? viewingInvoice.taxAmount : Math.round(viewingInvoice.amount * 0.18))).toLocaleString()}</td>
                   </tr>
                   <tr>
                     <td colSpan="2" style={{ padding: '10px 0' }}></td>
                     <td style={{ padding: '10px 0', textAlign: 'right', color: 'var(--text-muted)', fontWeight: '600' }}>Subtotal</td>
-                    <td style={{ padding: '10px 0', textAlign: 'right', fontWeight: '700', color: 'var(--text-main)' }}>₹{viewingInvoice.amount.toLocaleString()}</td>
+                    <td style={{ padding: '10px 0', textAlign: 'right', fontWeight: '700', color: 'var(--text-main)' }}>₹{(viewingInvoice.amount - (viewingInvoice.taxAmount !== undefined ? viewingInvoice.taxAmount : Math.round(viewingInvoice.amount * 0.18))).toLocaleString()}</td>
                   </tr>
                   <tr>
                     <td colSpan="2" style={{ padding: '4px 0' }}></td>
                     <td style={{ padding: '4px 0', textAlign: 'right', color: 'var(--text-muted)', fontWeight: '600' }}>Tax (GST 18% Incl.)</td>
-                    <td style={{ padding: '4px 0', textAlign: 'right', color: 'var(--text-muted)' }}>₹0.00</td>
+                    <td style={{ padding: '4px 0', textAlign: 'right', color: 'var(--text-muted)', fontWeight: '700' }}>₹{(viewingInvoice.taxAmount !== undefined ? viewingInvoice.taxAmount : Math.round(viewingInvoice.amount * 0.18)).toLocaleString()}</td>
                   </tr>
                   <tr style={{ borderTop: '2px solid var(--border-color)' }}>
                     <td colSpan="2" style={{ padding: '12px 0' }}></td>
@@ -4368,6 +4552,120 @@ export default function SuperAdminDashboard({
                 }}
               >
                 {confirmModal.confirmText}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Subscription Details Modal Overlay */}
+      {viewingSubscriptionRest && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            background: 'rgba(9, 13, 22, 0.45)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1100,
+            padding: '20px'
+          }}
+          onClick={() => setViewingSubscriptionRest(null)}
+        >
+          <div
+            className="animate-fade-in"
+            style={{
+              background: '#ffffff',
+              borderRadius: '20px',
+              padding: '32px',
+              width: '95%',
+              maxWidth: '420px',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
+              position: 'relative',
+              textAlign: 'left'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '14px' }}>
+              <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: '900', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Gem style={{ width: '18px', height: '18px', color: 'var(--primary)' }} />
+                Subscription Information
+              </h3>
+              <button
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }}
+                onClick={() => setViewingSubscriptionRest(null)}
+              >
+                <X style={{ width: '18px', height: '18px' }} />
+              </button>
+            </div>
+
+            {/* Details Content */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600' }}>Restaurant Name</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-main)', fontWeight: '800' }}>{viewingSubscriptionRest.name}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600' }}>Plan Name</span>
+                <span style={{
+                  fontSize: '0.8rem',
+                  fontWeight: '800',
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  background: viewingSubscriptionRest.subscriptionPlan?.includes('Enterprise') ? 'rgba(124, 58, 237, 0.1)' : viewingSubscriptionRest.subscriptionPlan?.includes('Premium') ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                  color: viewingSubscriptionRest.subscriptionPlan?.includes('Enterprise') ? '#7c3aed' : viewingSubscriptionRest.subscriptionPlan?.includes('Premium') ? '#3b82f6' : '#10b981'
+                }}>
+                  {viewingSubscriptionRest.subscriptionPlan || 'Basic Plan'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600' }}>Start Date</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-main)', fontWeight: '700', fontFamily: 'monospace' }}>
+                  {viewingSubscriptionRest.createdDate || '—'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600' }}>End Date</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-main)', fontWeight: '700', fontFamily: 'monospace' }}>
+                  {viewingSubscriptionRest.expiryDate || '—'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600' }}>Renewal Date</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-main)', fontWeight: '700', fontFamily: 'monospace' }}>
+                  {viewingSubscriptionRest.renewalDate || viewingSubscriptionRest.expiryDate || '—'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '10px' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600' }}>Subscription Status</span>
+                <span style={{
+                  fontSize: '0.8rem',
+                  fontWeight: '800',
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  background: viewingSubscriptionRest.subscriptionStatus === 'Active' ? 'rgba(16, 185, 129, 0.1)' : viewingSubscriptionRest.subscriptionStatus === 'Expiring Soon' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                  color: viewingSubscriptionRest.subscriptionStatus === 'Active' ? '#10b981' : viewingSubscriptionRest.subscriptionStatus === 'Expiring Soon' ? '#f59e0b' : '#ef4444'
+                }}>
+                  {viewingSubscriptionRest.subscriptionStatus || 'Active'}
+                </span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                className="btn-black"
+                style={{ padding: '8px 18px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700', fontSize: '0.8rem' }}
+                onClick={() => setViewingSubscriptionRest(null)}
+              >
+                Close
               </button>
             </div>
           </div>

@@ -28,18 +28,29 @@ import {
   User,
   CheckCircle2,
   XCircle,
-  Info
+  Info,
+  Briefcase,
+  LifeBuoy,
+  BellRing,
+  BarChart3,
+  Globe,
+  Mail,
+  MessageSquare,
+  Shield,
+  Eye,
+  EyeOff,
+  Save,
+  RefreshCw,
+  Server,
+  Smartphone,
+  Key,
+  Clock
 } from 'lucide-react'
 import './App.css'
 
 // Import components
-import AdminDashboard from './components/AdminDashboard'
-import IncomingOrders from './components/IncomingOrders'
-import MenuManagement from './components/MenuManagement'
-import BillingSystem from './components/BillingSystem'
 import Login from './components/Login'
 import SuperAdminDashboard from './components/SuperAdminDashboard'
-import TableManagement from './components/TableManagement'
 
 // Define default menu items matching wireframes
 const INITIAL_MENU = [
@@ -183,6 +194,8 @@ const INITIAL_RESTAURANTS = [
     closingTime: '11:00 PM',
     status: 'Active', // 'Active', 'Suspended', 'Inactive'
     subscriptionPlan: 'Enterprise',
+    subscriptionStatus: 'Active',
+    expiryDate: '2026-12-15',
     createdDate: '2025-01-15',
     logo: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=120&auto=format&fit=crop&q=60',
     banner: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1000&auto=format&fit=crop&q=60'
@@ -209,6 +222,8 @@ const INITIAL_RESTAURANTS = [
     closingTime: '10:00 PM',
     status: 'Active',
     subscriptionPlan: 'Premium',
+    subscriptionStatus: 'Active',
+    expiryDate: '2026-09-22',
     createdDate: '2025-03-22',
     logo: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=120&auto=format&fit=crop&q=60',
     banner: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1000&auto=format&fit=crop&q=60'
@@ -235,6 +250,8 @@ const INITIAL_RESTAURANTS = [
     closingTime: '12:00 AM',
     status: 'Active',
     subscriptionPlan: 'Enterprise',
+    subscriptionStatus: 'Active',
+    expiryDate: '2026-06-30',
     createdDate: '2025-06-10',
     logo: 'https://images.unsplash.com/photo-1574096079513-d8259312b785?w=120&auto=format&fit=crop&q=60',
     banner: 'https://images.unsplash.com/photo-1485686531765-ba63b07845a7?w=1000&auto=format&fit=crop&q=60'
@@ -261,6 +278,8 @@ const INITIAL_RESTAURANTS = [
     closingTime: '09:00 PM',
     status: 'Active',
     subscriptionPlan: 'Standard',
+    subscriptionStatus: 'Expiring Soon',
+    expiryDate: '2026-06-15',
     createdDate: '2025-09-05',
     logo: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=120&auto=format&fit=crop&q=60',
     banner: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=1000&auto=format&fit=crop&q=60'
@@ -287,6 +306,8 @@ const INITIAL_RESTAURANTS = [
     closingTime: '09:30 PM',
     status: 'Active',
     subscriptionPlan: 'Standard',
+    subscriptionStatus: 'Expired',
+    expiryDate: '2026-05-18',
     createdDate: '2025-11-18',
     logo: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=120&auto=format&fit=crop&q=60',
     banner: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1000&auto=format&fit=crop&q=60'
@@ -391,7 +412,7 @@ export default function App() {
     const formatDateTime = () => {
       const now = new Date()
       const day = String(now.getDate()).padStart(2, '0')
-      const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December']
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
       const month = monthNames[now.getMonth()]
       const year = now.getFullYear()
       let hours = now.getHours()
@@ -445,6 +466,57 @@ export default function App() {
   const [restaurants, setRestaurants] = useState(INITIAL_RESTAURANTS)
   const [activeRestaurantId, setActiveRestaurantId] = useState('R-01')
   const [restaurantAdmins, setRestaurantAdmins] = useState(INITIAL_ADMINS)
+
+  // Settings view sub-tab and platform settings state
+  const [settingsSubTab, setSettingsSubTab] = useState('platform') // 'profile' or 'platform'
+  const [platformSettingsActiveSection, setPlatformSettingsActiveSection] = useState('company') // 'company', 'payment', 'communication', 'security'
+  
+  const DEFAULT_PLATFORM_SETTINGS = {
+    companyName: 'ServeIQ Super',
+    logo: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=120&auto=format&fit=crop&q=60',
+    contactPhone: '+91 98765 43210',
+    contactEmail: 'support@serveiq.com',
+    companyAddress: '12, Khader Nawaz Khan Road, Nungambakkam, Chennai, Tamil Nadu - 600006',
+    
+    razorpayEnabled: true,
+    razorpayKeyId: 'rzp_live_8Fh9Dk2m1J9s8q',
+    razorpayKeySecret: 'sk_live_secret_razorpay_key_9021',
+    stripeEnabled: false,
+    stripePublishableKey: 'pk_live_51NzkLySJH783jds81',
+    stripeSecretKey: 'sk_live_secret_stripe_key_4432',
+    
+    smtpHost: 'smtp.sendgrid.net',
+    smtpPort: '587',
+    smtpUser: 'apikey',
+    smtpPassword: 'sg_key_smtp_provider_credential_9918',
+    smsEnabled: true,
+    smsProvider: 'Twilio',
+    smsApiKey: 'twilio_auth_token_9018273645',
+    smsSenderId: 'SRVIQ',
+    whatsappEnabled: false,
+    whatsappProvider: 'Meta Cloud API',
+    whatsappToken: 'whatsapp_permanent_access_token_10029',
+    whatsappPhoneId: '1098273645',
+    
+    minPasswordLength: 8,
+    requireUppercase: true,
+    requireNumbers: true,
+    requireSpecialChars: true,
+    sessionTimeout: 30,
+    timeoutAction: 'logout'
+  }
+
+  const [platformSettings, setPlatformSettings] = useState({ ...DEFAULT_PLATFORM_SETTINGS })
+  
+  const [showPassFields, setShowPassFields] = useState({
+    razorpaySecret: false,
+    stripeSecret: false,
+    smtpPass: false,
+    smsApiKey: false,
+    whatsappToken: false
+  })
+  
+  const [logoPresetsModalOpen, setLogoPresetsModalOpen] = useState(false)
 
   // Dynamic Lookup of active restaurant details
   const restaurantDetails = restaurants.find(r => r.id === activeRestaurantId) || restaurants[0]
@@ -505,7 +577,7 @@ export default function App() {
 
   // Synchronize users dropdown open state when active tab changes
   useEffect(() => {
-    if (adminTab === 'super-admins' || adminTab === 'super-roles' || adminTab === 'super-users-list') {
+    if (adminTab === 'super-platform-admins' || adminTab === 'super-roles' || adminTab === 'super-users-list') {
       setUsersDropdownOpen(true)
     }
   }, [adminTab])
@@ -819,9 +891,11 @@ export default function App() {
                     </button>
                     {adminProfileDropdownOpen && (
                       <div className="animate-fade-in" style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', boxShadow: 'var(--shadow-md)', zIndex: 100, minWidth: '160px', overflow: 'hidden', padding: '4px' }}>
-                        <div onClick={() => { setAdminTab('settings'); setAdminProfileDropdownOpen(false); }} style={{ padding: '10px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-main)', borderRadius: '6px' }} onMouseOver={(e) => e.currentTarget.style.background = 'var(--bg-hover)'} onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}>
-                          <UserCheck style={{ width: '14px', height: '14px' }} /> Profile
-                        </div>
+                        {!isSuperAdmin && (
+                          <div onClick={() => { setAdminTab('settings'); setAdminProfileDropdownOpen(false); }} style={{ padding: '10px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-main)', borderRadius: '6px' }} onMouseOver={(e) => e.currentTarget.style.background = 'var(--bg-hover)'} onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}>
+                            <UserCheck style={{ width: '14px', height: '14px' }} /> Profile
+                          </div>
+                        )}
                         <div onClick={() => { setRole('login'); setCustomerTable(null); setActiveCustomerOrder(null); setIsSuperAdmin(false); setAdminTab('dashboard'); setAdminProfileDropdownOpen(false); }} style={{ padding: '10px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#ef4444', borderRadius: '6px' }} onMouseOver={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'} onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}>
                           <LogOut style={{ width: '14px', height: '14px' }} /> Log Out
                         </div>
@@ -853,7 +927,7 @@ export default function App() {
                     )}
 
                     <ul className="sidebar-nav">
-                      {!isSuperAdmin && (
+                       {!isSuperAdmin && (
                         <>
                           <li
                             className={`sidebar-item ${adminTab === 'dashboard' ? 'active' : ''}`}
@@ -891,13 +965,18 @@ export default function App() {
                           >
                             <Users /> Staff
                           </li>
+                          <li
+                            className={`sidebar-item ${adminTab === 'settings' ? 'active' : ''}`}
+                            onClick={() => setAdminTab('settings')}
+                          >
+                            <Settings /> Settings
+                          </li>
                         </>
                       )}
 
                       {/* Super Admin ONLY Unified Menus */}
                       {isSuperAdmin && (
                         <>
-
                           <li
                             className={`sidebar-item ${adminTab === 'super-revenue' ? 'active' : ''}`}
                             onClick={() => setAdminTab('super-revenue')}
@@ -908,15 +987,52 @@ export default function App() {
                             className={`sidebar-item ${adminTab === 'super-details' ? 'active' : ''}`}
                             onClick={() => setAdminTab('super-details')}
                           >
-                            <Building style={{ width: '18px', height: '18px' }} /> Restaurants
+                            <Building style={{ width: '18px', height: '18px' }} /> Restaurant Management
                           </li>
                           <li
-                            className={`sidebar-item ${adminTab === 'super-platform-admins' ? 'active' : ''}`}
-                            onClick={() => setAdminTab('super-platform-admins')}
+                            className={`sidebar-item ${adminTab === 'super-plans' ? 'active' : ''}`}
+                            onClick={() => setAdminTab('super-plans')}
                           >
-                            <ShieldCheck style={{ width: '18px', height: '18px' }} /> Admins
+                            <Layers style={{ width: '18px', height: '18px' }} /> Plans Management
                           </li>
-                          {/* Admin Management Dropdown Menu */}
+                          <li
+                            className={`sidebar-item ${adminTab === 'super-subscriptions' ? 'active' : ''}`}
+                            onClick={() => setAdminTab('super-subscriptions')}
+                          >
+                            <CheckCircle2 style={{ width: '18px', height: '18px' }} /> Subscription Management
+                          </li>
+                          <li
+                            className={`sidebar-item ${adminTab === 'super-billing' ? 'active' : ''}`}
+                            onClick={() => setAdminTab('super-billing')}
+                          >
+                            <CreditCard style={{ width: '18px', height: '18px' }} /> Billing & Payments
+                          </li>
+                          <li
+                            className={`sidebar-item ${adminTab === 'super-leads' ? 'active' : ''}`}
+                            onClick={() => setAdminTab('super-leads')}
+                          >
+                            <Briefcase style={{ width: '18px', height: '18px' }} /> Leads/CRM
+                          </li>
+                          <li
+                            className={`sidebar-item ${adminTab === 'super-tickets' ? 'active' : ''}`}
+                            onClick={() => setAdminTab('super-tickets')}
+                          >
+                            <LifeBuoy style={{ width: '18px', height: '18px' }} /> Support Ticket Management
+                          </li>
+                          <li
+                            className={`sidebar-item ${adminTab === 'super-notifications' ? 'active' : ''}`}
+                            onClick={() => setAdminTab('super-notifications')}
+                          >
+                            <BellRing style={{ width: '18px', height: '18px' }} /> Notifications
+                          </li>
+                          <li
+                            className={`sidebar-item ${adminTab === 'super-reports' ? 'active' : ''}`}
+                            onClick={() => setAdminTab('super-reports')}
+                          >
+                            <BarChart3 style={{ width: '18px', height: '18px' }} /> Reports & Analytics
+                          </li>
+
+                          {/* User & Role Management Dropdown Menu */}
                           <li style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
                             <div
                               className="sidebar-item"
@@ -925,13 +1041,13 @@ export default function App() {
                                 display: 'flex',
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
-                                color: (adminTab === 'super-users-list' || adminTab === 'super-roles') ? '#ffffff' : '#94a3b8',
-                                background: (adminTab === 'super-users-list' || adminTab === 'super-roles') ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
+                                color: (adminTab === 'super-platform-admins' || adminTab === 'super-users-list' || adminTab === 'super-roles') ? '#ffffff' : '#94a3b8',
+                                background: (adminTab === 'super-platform-admins' || adminTab === 'super-users-list' || adminTab === 'super-roles') ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
                               }}
                             >
                               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <Users style={{ width: '18px', height: '18px' }} />
-                                <span>Users</span>
+                                <span>User & Role Management</span>
                               </div>
                               <ChevronDown
                                 style={{
@@ -955,15 +1071,15 @@ export default function App() {
                                 marginLeft: '24px'
                               }}>
                                 <div
-                                  className={`sidebar-item ${adminTab === 'super-roles' ? 'active' : ''}`}
-                                  onClick={() => setAdminTab('super-roles')}
+                                  className={`sidebar-item ${adminTab === 'super-platform-admins' ? 'active' : ''}`}
+                                  onClick={() => setAdminTab('super-platform-admins')}
                                   style={{
                                     padding: '8px 12px',
                                     fontSize: '0.85rem',
-                                    fontWeight: adminTab === 'super-roles' ? '600' : '500'
+                                    fontWeight: adminTab === 'super-platform-admins' ? '600' : '500'
                                   }}
                                 >
-                                  Roles & Permissions
+                                  Platform Admins
                                 </div>
                                 <div
                                   className={`sidebar-item ${adminTab === 'super-users-list' ? 'active' : ''}`}
@@ -976,30 +1092,29 @@ export default function App() {
                                 >
                                   Users
                                 </div>
+                                <div
+                                  className={`sidebar-item ${adminTab === 'super-roles' ? 'active' : ''}`}
+                                  onClick={() => setAdminTab('super-roles')}
+                                  style={{
+                                    padding: '8px 12px',
+                                    fontSize: '0.85rem',
+                                    fontWeight: adminTab === 'super-roles' ? '600' : '500'
+                                  }}
+                                >
+                                  Roles & Permissions
+                                </div>
                               </div>
                             )}
                           </li>
+
                           <li
-                            className={`sidebar-item ${adminTab === 'super-plans' ? 'active' : ''}`}
-                            onClick={() => setAdminTab('super-plans')}
+                            className={`sidebar-item ${adminTab === 'settings' ? 'active' : ''}`}
+                            onClick={() => setAdminTab('settings')}
                           >
-                            <Layers style={{ width: '18px', height: '18px' }} /> Subscription & Plans
-                          </li>
-                          <li
-                            className={`sidebar-item ${adminTab === 'super-billing' ? 'active' : ''}`}
-                            onClick={() => setAdminTab('super-billing')}
-                          >
-                            <CreditCard style={{ width: '18px', height: '18px' }} /> Revenue & Billing
+                            <Settings /> System Settings
                           </li>
                         </>
                       )}
-
-                      <li
-                        className={`sidebar-item ${adminTab === 'settings' ? 'active' : ''}`}
-                        onClick={() => setAdminTab('settings')}
-                      >
-                        <Settings /> Settings
-                      </li>
                     </ul>
                   </div>
 
@@ -1016,13 +1131,19 @@ export default function App() {
                     <div className="header-title">
                       <h1 style={{ textTransform: 'capitalize' }}>
                         {adminTab === 'super-revenue' ? 'Dashboard' :
-                          adminTab === 'super-details' ? 'Restaurants' :
-                            adminTab === 'super-platform-admins' ? 'Admins' :
+                          adminTab === 'super-details' ? 'Restaurant Management' :
+                            adminTab === 'super-platform-admins' ? 'Platform Admins' :
                               adminTab === 'super-roles' ? 'Roles & Permissions' :
-                                adminTab === 'super-plans' ? 'Subscription & Plans' :
-                                  adminTab === 'super-billing' ? 'Revenue & Billing' :
-                                    adminTab === 'super-users-list' ? 'Users' :
-                                      adminTab.replace('-', ' ').replace('super ', '')}
+                                adminTab === 'super-subscriptions' ? 'Subscription Management' :
+                                  adminTab === 'super-plans' ? 'Plans Management' :
+                                    adminTab === 'super-billing' ? 'Billing & Payments' :
+                                      adminTab === 'super-leads' ? 'Leads/CRM' :
+                                        adminTab === 'super-tickets' ? 'Support Ticket Management' :
+                                          adminTab === 'super-notifications' ? 'Notifications' :
+                                            adminTab === 'super-reports' ? 'Reports & Analytics' :
+                                              adminTab === 'super-users-list' ? 'Users' :
+                                                adminTab === 'settings' ? (isSuperAdmin ? 'System Settings' : 'Profile Settings') :
+                                                  adminTab.replace('-', ' ').replace('super ', '')}
                       </h1>
                       {getTabSubtext() && <p>{getTabSubtext()}</p>}
                     </div>
@@ -1119,6 +1240,29 @@ export default function App() {
                     />
                   )}
 
+                  {adminTab === 'super-platform-admins' && (
+                    <SuperAdminDashboard
+                      restaurants={restaurants}
+                      activeRestaurantId={activeRestaurantId}
+                      onSetActiveRestaurantId={setActiveRestaurantId}
+                      onUpdateRestaurants={setRestaurants}
+                      restaurantDetails={restaurantDetails}
+                      onUpdateRestaurantDetails={handleUpdateRestaurantDetails}
+                      orders={orders}
+                      tables={tables}
+                      menuItems={menuItems}
+                      staffMembers={staffMembers}
+                      stats={getComputedStats()}
+                      showToast={showToast}
+                      onUpdateTables={setTables}
+                      onUpdateOrders={setOrders}
+                      activeTab="platform-admins"
+                      isMerged={true}
+                      restaurantAdmins={restaurantAdmins}
+                      onUpdateRestaurantAdmins={setRestaurantAdmins}
+                    />
+                  )}
+
                   {adminTab === 'super-revenue' && (
                     <SuperAdminDashboard
                       restaurants={restaurants}
@@ -1165,7 +1309,7 @@ export default function App() {
                     />
                   )}
 
-                  {adminTab === 'super-platform-admins' && (
+                  {adminTab === 'super-leads' && (
                     <SuperAdminDashboard
                       restaurants={restaurants}
                       activeRestaurantId={activeRestaurantId}
@@ -1181,7 +1325,76 @@ export default function App() {
                       showToast={showToast}
                       onUpdateTables={setTables}
                       onUpdateOrders={setOrders}
-                      activeTab="platform-admins"
+                      activeTab="leads"
+                      isMerged={true}
+                      restaurantAdmins={restaurantAdmins}
+                      onUpdateRestaurantAdmins={setRestaurantAdmins}
+                    />
+                  )}
+
+                  {adminTab === 'super-tickets' && (
+                    <SuperAdminDashboard
+                      restaurants={restaurants}
+                      activeRestaurantId={activeRestaurantId}
+                      onSetActiveRestaurantId={setActiveRestaurantId}
+                      onUpdateRestaurants={setRestaurants}
+                      restaurantDetails={restaurantDetails}
+                      onUpdateRestaurantDetails={handleUpdateRestaurantDetails}
+                      orders={orders}
+                      tables={tables}
+                      menuItems={menuItems}
+                      staffMembers={staffMembers}
+                      stats={getComputedStats()}
+                      showToast={showToast}
+                      onUpdateTables={setTables}
+                      onUpdateOrders={setOrders}
+                      activeTab="tickets"
+                      isMerged={true}
+                      restaurantAdmins={restaurantAdmins}
+                      onUpdateRestaurantAdmins={setRestaurantAdmins}
+                    />
+                  )}
+
+                  {adminTab === 'super-notifications' && (
+                    <SuperAdminDashboard
+                      restaurants={restaurants}
+                      activeRestaurantId={activeRestaurantId}
+                      onSetActiveRestaurantId={setActiveRestaurantId}
+                      onUpdateRestaurants={setRestaurants}
+                      restaurantDetails={restaurantDetails}
+                      onUpdateRestaurantDetails={handleUpdateRestaurantDetails}
+                      orders={orders}
+                      tables={tables}
+                      menuItems={menuItems}
+                      staffMembers={staffMembers}
+                      stats={getComputedStats()}
+                      showToast={showToast}
+                      onUpdateTables={setTables}
+                      onUpdateOrders={setOrders}
+                      activeTab="notifications"
+                      isMerged={true}
+                      restaurantAdmins={restaurantAdmins}
+                      onUpdateRestaurantAdmins={setRestaurantAdmins}
+                    />
+                  )}
+
+                  {adminTab === 'super-reports' && (
+                    <SuperAdminDashboard
+                      restaurants={restaurants}
+                      activeRestaurantId={activeRestaurantId}
+                      onSetActiveRestaurantId={setActiveRestaurantId}
+                      onUpdateRestaurants={setRestaurants}
+                      restaurantDetails={restaurantDetails}
+                      onUpdateRestaurantDetails={handleUpdateRestaurantDetails}
+                      orders={orders}
+                      tables={tables}
+                      menuItems={menuItems}
+                      staffMembers={staffMembers}
+                      stats={getComputedStats()}
+                      showToast={showToast}
+                      onUpdateTables={setTables}
+                      onUpdateOrders={setOrders}
+                      activeTab="reports"
                       isMerged={true}
                       restaurantAdmins={restaurantAdmins}
                       onUpdateRestaurantAdmins={setRestaurantAdmins}
@@ -1235,6 +1448,29 @@ export default function App() {
                   )}
 
 
+                  {adminTab === 'super-subscriptions' && (
+                    <SuperAdminDashboard
+                      restaurants={restaurants}
+                      activeRestaurantId={activeRestaurantId}
+                      onSetActiveRestaurantId={setActiveRestaurantId}
+                      onUpdateRestaurants={setRestaurants}
+                      restaurantDetails={restaurantDetails}
+                      onUpdateRestaurantDetails={handleUpdateRestaurantDetails}
+                      orders={orders}
+                      tables={tables}
+                      menuItems={menuItems}
+                      staffMembers={staffMembers}
+                      stats={getComputedStats()}
+                      showToast={showToast}
+                      onUpdateTables={setTables}
+                      onUpdateOrders={setOrders}
+                      activeTab="subscriptions"
+                      isMerged={true}
+                      restaurantAdmins={restaurantAdmins}
+                      onUpdateRestaurantAdmins={setRestaurantAdmins}
+                    />
+                  )}
+
                   {adminTab === 'super-plans' && (
                     <SuperAdminDashboard
                       restaurants={restaurants}
@@ -1260,99 +1496,722 @@ export default function App() {
 
                   {adminTab === 'settings' && (
                     <div style={{ padding: '30px 40px', width: '100%', boxSizing: 'border-box' }} className="animate-fade-in">
-                      <div style={{ marginBottom: '30px', borderBottom: '1px solid var(--border-color)', paddingBottom: '20px' }}>
-                        <h2 style={{ margin: '0 0 6px 0', fontSize: '1.75rem', fontWeight: '900', color: 'var(--text-main)' }}>Profile Settings</h2>
-                        <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: '500' }}>Manage your personal profile, security credentials, and preferences</p>
-                      </div>
+                      
+                      {!isSuperAdmin ? (
+                        <>
+                          <div style={{ marginBottom: '30px', borderBottom: '1px solid var(--border-color)', paddingBottom: '20px' }}>
+                            <h2 style={{ margin: '0 0 6px 0', fontSize: '1.75rem', fontWeight: '900', color: 'var(--text-main)' }}>Profile Settings</h2>
+                            <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: '500' }}>Manage your personal profile, security credentials, and preferences</p>
+                          </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
-                        {/* LEFT COLUMN */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-
-                          {/* Profile Information Card */}
-                          <div className="glass-card" style={{ padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-card)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
-                              <User style={{ width: '20px', height: '20px', color: 'var(--primary)' }} />
-                              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>Profile Information</h3>
-                            </div>
-
-                            <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
-                              {/* Left side: Profile Picture Area */}
-                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', minWidth: '160px' }}>
-                                <div style={{ width: '140px', height: '140px', border: '1px solid var(--border-color)', borderRadius: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8fafc' }}>
-                                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="12" cy="7" r="4"></circle>
-                                  </svg>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                              
+                              {/* Profile Information Card */}
+                              <div className="glass-card" style={{ padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-card)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+                                  <User style={{ width: '20px', height: '20px', color: 'var(--primary)' }} />
+                                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>Profile Information</h3>
                                 </div>
-                                <button type="button" style={{ width: '120px', padding: '10px 0', border: '1.5px solid #3b82f6', color: '#3b82f6', background: 'transparent', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '0.95rem' }}>Choose</button>
+
+                                <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
+                                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', minWidth: '160px' }}>
+                                    <div style={{ width: '140px', height: '140px', border: '1px solid var(--border-color)', borderRadius: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: 'var(--bg-app)' }}>
+                                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                      </svg>
+                                    </div>
+                                    <button type="button" style={{ width: '120px', padding: '10px 0', border: '1.5px solid var(--primary)', color: 'var(--primary)', background: 'transparent', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '0.95rem' }}>Choose</button>
+                                  </div>
+
+                                  <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                                    <div>
+                                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Full Name <span style={{ color: '#ef4444' }}>*</span></label>
+                                      <input type="text" defaultValue={isSuperAdmin ? "Super Admin" : "Admin User"} placeholder="Enter Full Name" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', background: 'var(--bg-app)', color: 'var(--text-main)', boxSizing: 'border-box', outline: 'none' }} />
+                                    </div>
+                                    <div>
+                                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Email Address <span style={{ color: '#ef4444' }}>*</span></label>
+                                      <input type="email" defaultValue={isSuperAdmin ? "superadmin@serveiq.com" : "admin@serveiq.com"} placeholder="Enter Email Address" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', background: 'var(--bg-app)', color: 'var(--text-main)', boxSizing: 'border-box', outline: 'none' }} />
+                                    </div>
+                                    <div>
+                                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Username <span style={{ color: '#ef4444' }}>*</span></label>
+                                      <input type="text" defaultValue={isSuperAdmin ? "superadmin" : "admin"} placeholder="Enter Username" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', background: 'var(--bg-app)', color: 'var(--text-main)', boxSizing: 'border-box', outline: 'none' }} />
+                                    </div>
+                                    <div>
+                                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Mobile Number <span style={{ color: '#ef4444' }}>*</span></label>
+                                      <input type="text" defaultValue="+91 9876543210" placeholder="Enter Phone Number" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', background: 'var(--bg-app)', color: 'var(--text-main)', boxSizing: 'border-box', outline: 'none' }} />
+                                    </div>
+                                    <div style={{ gridColumn: '1 / -1' }}>
+                                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Designation</label>
+                                      <input type="text" value={isSuperAdmin ? "Super Admin" : "Branch Admin"} readOnly style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', backgroundColor: 'var(--bg-app)', color: 'var(--text-muted)', fontWeight: '600', outline: 'none' }} />
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
 
-                              {/* Right side: Form Fields Grid */}
-                              <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                                <div>
-                                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Full Name <span style={{ color: '#ef4444' }}>*</span></label>
-                                  <input type="text" defaultValue="Admin User" placeholder="Enter Full Name" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
+                              {/* Login & Security Card */}
+                              <div className="glass-card" style={{ padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-card)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+                                  <Lock style={{ width: '20px', height: '20px', color: 'var(--primary)' }} />
+                                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>Login & Security</h3>
                                 </div>
-                                <div>
-                                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Email Address <span style={{ color: '#ef4444' }}>*</span></label>
-                                  <input type="email" defaultValue="admin@serveiq.com" placeholder="Enter Email Address" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
-                                </div>
-                                <div>
-                                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Username <span style={{ color: '#ef4444' }}>*</span></label>
-                                  <input type="text" defaultValue="superadmin" placeholder="Enter Username" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
-                                </div>
-                                <div>
-                                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Mobile Number <span style={{ color: '#ef4444' }}>*</span></label>
-                                  <input type="text" defaultValue="+91 9876543210" placeholder="Enter Phone Number" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }} />
-                                </div>
-                                <div style={{ gridColumn: '1 / -1' }}>
-                                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Designation</label>
-                                  <input type="text" value="Super Admin" readOnly style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', backgroundColor: 'var(--bg-app)', color: 'var(--text-muted)', fontWeight: '600', outline: 'none' }} />
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                  <div style={{ gridColumn: '1 / -1' }}>
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Current Password</label>
+                                    <input type="password" placeholder="Enter current password" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none', background: 'var(--bg-app)', color: 'var(--text-main)' }} />
+                                  </div>
+                                  <div>
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>New Password</label>
+                                    <input type="password" placeholder="Enter new password" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none', background: 'var(--bg-app)', color: 'var(--text-main)' }} />
+                                  </div>
+                                  <div>
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Confirm Password</label>
+                                    <input type="password" placeholder="Confirm new password" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none', background: 'var(--bg-app)', color: 'var(--text-main)' }} />
+                                  </div>
                                 </div>
                               </div>
+
                             </div>
                           </div>
 
-                          {/* Login & Security Card */}
-                          <div className="glass-card" style={{ padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-card)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
-                              <Lock style={{ width: '20px', height: '20px', color: 'var(--primary)' }} />
-                              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>Login & Security</h3>
-                            </div>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                              <div style={{ gridColumn: '1 / -1' }}>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Current Password</label>
-                                <input type="password" placeholder="Enter current password" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none', background: 'var(--bg-app)', color: 'var(--text-main)' }} />
-                              </div>
-                              <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>New Password</label>
-                                <input type="password" placeholder="Enter new password" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none', background: 'var(--bg-app)', color: 'var(--text-main)' }} />
-                              </div>
-                              <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Confirm Password</label>
-                                <input type="password" placeholder="Confirm new password" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none', background: 'var(--bg-app)', color: 'var(--text-main)' }} />
-                              </div>
-
-                            </div>
+                          {/* Action Buttons */}
+                          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px', paddingTop: '24px', borderTop: '1px solid var(--border-color)' }}>
+                            <button type="button" className="btn-outline">
+                              Reset Defaults
+                            </button>
+                            <button type="button" className="btn-black" onClick={() => showToast('success', 'Profile settings updated successfully!')}>
+                              Save Settings
+                            </button>
                           </div>
+                        </>
+                      ) : (
+                        // PLATFORM CONFIGURATION SETTINGS FOR SUPER ADMIN
+                        (() => {
+                          // Inline helper inputs
+                          const renderInput = (label, type, fieldKey, placeholder, isPasswordKey = null) => {
+                            const isPass = type === 'password';
+                            const show = isPasswordKey ? showPassFields[isPasswordKey] : false;
+                            
+                            return (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                <label style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-main)' }}>{label}</label>
+                                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                  <input
+                                    type={isPass ? (show ? 'text' : 'password') : type}
+                                    value={platformSettings[fieldKey]}
+                                    onChange={(e) => setPlatformSettings({ ...platformSettings, [fieldKey]: e.target.value })}
+                                    placeholder={placeholder}
+                                    style={{
+                                      width: '100%',
+                                      padding: '10px 14px',
+                                      paddingRight: isPasswordKey ? '40px' : '14px',
+                                      borderRadius: '8px',
+                                      border: '1px solid var(--border-color)',
+                                      fontSize: '0.85rem',
+                                      background: 'var(--bg-app)',
+                                      color: 'var(--text-main)',
+                                      outline: 'none',
+                                      boxSizing: 'border-box',
+                                      transition: 'border-color 0.15s'
+                                    }}
+                                  />
+                                  {isPasswordKey && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowPassFields({ ...showPassFields, [isPasswordKey]: !show })}
+                                      style={{
+                                        position: 'absolute',
+                                        right: '10px',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        color: 'var(--text-muted)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        padding: '4px'
+                                      }}
+                                    >
+                                      {show ? <EyeOff style={{ width: '16px', height: '16px' }} /> : <Eye style={{ width: '16px', height: '16px' }} />}
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          };
 
-                        </div>
+                          const renderToggle = (checked, onChange, label, subtext) => (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: '1px dashed var(--border-color)' }}>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <span style={{ fontSize: '0.82rem', fontWeight: '800', color: 'var(--text-main)' }}>{label}</span>
+                                {subtext && <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{subtext}</span>}
+                              </div>
+                              <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}>
+                                <div style={{ position: 'relative' }}>
+                                  <input type="checkbox" checked={checked} onChange={onChange} style={{ display: 'none' }} />
+                                  <div style={{ width: '42px', height: '22px', background: checked ? 'var(--primary)' : '#94a3b8', borderRadius: '11px', transition: 'background-color 0.2s' }}></div>
+                                  <div style={{ position: 'absolute', top: '2px', left: checked ? '22px' : '2px', width: '18px', height: '18px', background: '#fff', borderRadius: '50%', boxShadow: '0 1px 3px rgba(0,0,0,0.15)', transition: 'left 0.2s' }}></div>
+                                </div>
+                              </label>
+                            </div>
+                          );
 
+                          return (
+                            <div className="animate-fade-in">
+                              <div style={{ marginBottom: '30px', borderBottom: '1px solid var(--border-color)', paddingBottom: '20px' }}>
+                                <h2 style={{ margin: '0 0 6px 0', fontSize: '1.75rem', fontWeight: '900', color: 'var(--text-main)' }}>Platform Configuration</h2>
+                                <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: '500' }}>Configure company details, payment gateways, messaging tools, and password rules</p>
+                              </div>
 
+                              <div style={{ display: 'flex', gap: '30px', alignItems: 'flex-start', flexDirection: 'row' }}>
+                                {/* Left Sidebar Tabs */}
+                                <div style={{ width: '260px', display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}>
+                                  <button
+                                    onClick={() => setPlatformSettingsActiveSection('company')}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '12px',
+                                      padding: '14px 16px',
+                                      borderRadius: '10px',
+                                      background: platformSettingsActiveSection === 'company' ? 'rgba(59, 130, 246, 0.08)' : 'transparent',
+                                      border: '1px solid',
+                                      borderColor: platformSettingsActiveSection === 'company' ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+                                      color: platformSettingsActiveSection === 'company' ? 'var(--primary)' : 'var(--text-main)',
+                                      textAlign: 'left',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.15s',
+                                      outline: 'none'
+                                    }}
+                                  >
+                                    <Globe style={{ width: '18px', height: '18px', color: platformSettingsActiveSection === 'company' ? 'var(--primary)' : 'var(--text-muted)' }} />
+                                    <div>
+                                      <span style={{ display: 'block', fontSize: '0.82rem', fontWeight: '800' }}>Company Profile</span>
+                                      <span style={{ display: 'block', fontSize: '0.68rem', opacity: 0.8, color: 'var(--text-muted)' }}>Configure branding & logo</span>
+                                    </div>
+                                  </button>
 
-                      </div>
+                                  <button
+                                    onClick={() => setPlatformSettingsActiveSection('payment')}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '12px',
+                                      padding: '14px 16px',
+                                      borderRadius: '10px',
+                                      background: platformSettingsActiveSection === 'payment' ? 'rgba(59, 130, 246, 0.08)' : 'transparent',
+                                      border: '1px solid',
+                                      borderColor: platformSettingsActiveSection === 'payment' ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+                                      color: platformSettingsActiveSection === 'payment' ? 'var(--primary)' : 'var(--text-main)',
+                                      textAlign: 'left',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.15s',
+                                      outline: 'none'
+                                    }}
+                                  >
+                                    <CreditCard style={{ width: '18px', height: '18px', color: platformSettingsActiveSection === 'payment' ? 'var(--primary)' : 'var(--text-muted)' }} />
+                                    <div>
+                                      <span style={{ display: 'block', fontSize: '0.82rem', fontWeight: '800' }}>Payment Gateways</span>
+                                      <span style={{ display: 'block', fontSize: '0.68rem', opacity: 0.8, color: 'var(--text-muted)' }}>Razorpay & Stripe APIs</span>
+                                    </div>
+                                  </button>
 
-                      {/* Action Buttons */}
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px', paddingTop: '24px', borderTop: '1px solid var(--border-color)' }}>
-                        <button type="button" className="btn-outline">
-                          Reset Defaults
-                        </button>
-                        <button type="button" className="btn-black" onClick={() => showToast('success', 'Restaurant settings saved successfully!')}>
-                          Save Settings
-                        </button>
-                      </div>
+                                  <button
+                                    onClick={() => setPlatformSettingsActiveSection('communication')}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '12px',
+                                      padding: '14px 16px',
+                                      borderRadius: '10px',
+                                      background: platformSettingsActiveSection === 'communication' ? 'rgba(59, 130, 246, 0.08)' : 'transparent',
+                                      border: '1px solid',
+                                      borderColor: platformSettingsActiveSection === 'communication' ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+                                      color: platformSettingsActiveSection === 'communication' ? 'var(--primary)' : 'var(--text-main)',
+                                      textAlign: 'left',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.15s',
+                                      outline: 'none'
+                                    }}
+                                  >
+                                    <MessageSquare style={{ width: '18px', height: '18px', color: platformSettingsActiveSection === 'communication' ? 'var(--primary)' : 'var(--text-muted)' }} />
+                                    <div>
+                                      <span style={{ display: 'block', fontSize: '0.82rem', fontWeight: '800' }}>Communication Channels</span>
+                                      <span style={{ display: 'block', fontSize: '0.68rem', opacity: 0.8, color: 'var(--text-muted)' }}>SMTP, SMS & WhatsApp API</span>
+                                    </div>
+                                  </button>
+
+                                  <button
+                                    onClick={() => setPlatformSettingsActiveSection('security')}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '12px',
+                                      padding: '14px 16px',
+                                      borderRadius: '10px',
+                                      background: platformSettingsActiveSection === 'security' ? 'rgba(59, 130, 246, 0.08)' : 'transparent',
+                                      border: '1px solid',
+                                      borderColor: platformSettingsActiveSection === 'security' ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+                                      color: platformSettingsActiveSection === 'security' ? 'var(--primary)' : 'var(--text-main)',
+                                      textAlign: 'left',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.15s',
+                                      outline: 'none'
+                                    }}
+                                  >
+                                    <Shield style={{ width: '18px', height: '18px', color: platformSettingsActiveSection === 'security' ? 'var(--primary)' : 'var(--text-muted)' }} />
+                                    <div>
+                                      <span style={{ display: 'block', fontSize: '0.82rem', fontWeight: '800' }}>Security Policies</span>
+                                      <span style={{ display: 'block', fontSize: '0.68rem', opacity: 0.8, color: 'var(--text-muted)' }}>Password rules & timeouts</span>
+                                    </div>
+                                  </button>
+                                </div>
+
+                                {/* Right Content Panel */}
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  
+                                  {/* 1. COMPANY SETTINGS SECTION */}
+                                  {platformSettingsActiveSection === 'company' && (
+                                    <div className="glass-card animate-fade-in" style={{ padding: '28px', borderRadius: '16px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                                      <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '14px' }}>
+                                        <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-main)' }}>Company Profile</h3>
+                                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Configure platform branding, metadata and contact information</span>
+                                      </div>
+
+                                      <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                                        {/* Logo area */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', minWidth: '160px' }}>
+                                          <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)', width: '100%', textAlign: 'center' }}>Company Logo</label>
+                                          <div style={{ position: 'relative', width: '130px', height: '130px', border: '2px dashed var(--border-color)', borderRadius: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', backgroundColor: 'rgba(255, 255, 255, 0.02)' }}>
+                                            {platformSettings.logo ? (
+                                              <img src={platformSettings.logo} alt="Company Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '10px' }} />
+                                            ) : (
+                                              <Building style={{ width: '32px', height: '32px', color: 'var(--text-muted)' }} />
+                                            )}
+                                          </div>
+                                          <button
+                                            type="button"
+                                            onClick={() => setLogoPresetsModalOpen(true)}
+                                            style={{
+                                              width: '130px',
+                                              padding: '8px 14px',
+                                              border: '1.5px solid var(--primary)',
+                                              color: 'var(--primary)',
+                                              background: 'transparent',
+                                              borderRadius: '8px',
+                                              fontWeight: '700',
+                                              cursor: 'pointer',
+                                              fontSize: '0.8rem',
+                                              transition: 'all 0.15s'
+                                            }}
+                                            onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(59, 130, 246, 0.05)' }}
+                                            onMouseOut={(e) => { e.currentTarget.style.background = 'transparent' }}
+                                          >
+                                            Choose Logo
+                                          </button>
+                                        </div>
+
+                                        {/* Company Fields */}
+                                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px', minWidth: '280px' }}>
+                                          {renderInput("Company Name", "text", "companyName", "Enter Company Name")}
+                                          
+                                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                            {renderInput("Contact Phone", "text", "contactPhone", "e.g. +91 98765 43210")}
+                                            {renderInput("Contact Email", "email", "contactEmail", "e.g. support@serveiq.com")}
+                                          </div>
+
+                                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                            <label style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-main)' }}>Company Address</label>
+                                            <textarea
+                                              value={platformSettings.companyAddress}
+                                              onChange={(e) => setPlatformSettings({ ...platformSettings, companyAddress: e.target.value })}
+                                              placeholder="Enter company registered office address"
+                                              rows="3"
+                                              style={{
+                                                width: '100%',
+                                                padding: '10px 14px',
+                                                borderRadius: '8px',
+                                                border: '1px solid var(--border-color)',
+                                                fontSize: '0.85rem',
+                                                background: 'var(--bg-app)',
+                                                color: 'var(--text-main)',
+                                                outline: 'none',
+                                                boxSizing: 'border-box',
+                                                resize: 'none',
+                                                fontFamily: 'inherit',
+                                                lineHeight: '1.4'
+                                              }}
+                                            />
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 2. PAYMENT SETTINGS SECTION */}
+                                  {platformSettingsActiveSection === 'payment' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                                      {/* Razorpay gateway card */}
+                                      <div className="glass-card animate-fade-in" style={{ padding: '28px', borderRadius: '16px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+                                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <div style={{ background: '#3b82f6', width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                                              <CreditCard style={{ width: '18px', height: '18px' }} />
+                                            </div>
+                                            <div>
+                                              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-main)' }}>Razorpay Gateway</h3>
+                                              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Configure Razorpay API details for checkout</span>
+                                            </div>
+                                          </div>
+                                          <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}>
+                                            <div style={{ position: 'relative' }}>
+                                              <input
+                                                type="checkbox"
+                                                checked={platformSettings.razorpayEnabled}
+                                                onChange={(e) => setPlatformSettings({ ...platformSettings, razorpayEnabled: e.target.checked })}
+                                                style={{ display: 'none' }}
+                                              />
+                                              <div style={{ width: '42px', height: '22px', background: platformSettings.razorpayEnabled ? '#10b981' : '#94a3b8', borderRadius: '11px', transition: 'background-color 0.2s' }}></div>
+                                              <div style={{ position: 'absolute', top: '2px', left: platformSettings.razorpayEnabled ? '22px' : '2px', width: '18px', height: '18px', background: '#fff', borderRadius: '50%', boxShadow: '0 1px 3px rgba(0,0,0,0.15)', transition: 'left 0.2s' }}></div>
+                                            </div>
+                                          </label>
+                                        </div>
+
+                                        {platformSettings.razorpayEnabled && (
+                                          <div className="animate-fade-in" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                            {renderInput("Key ID", "text", "razorpayKeyId", "rzp_live_...")}
+                                            {renderInput("Key Secret", "password", "razorpayKeySecret", "Razorpay secret token", "razorpaySecret")}
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {/* Stripe gateway card */}
+                                      <div className="glass-card animate-fade-in" style={{ padding: '28px', borderRadius: '16px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+                                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <div style={{ background: '#6366f1', width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                                              <CreditCard style={{ width: '18px', height: '18px' }} />
+                                            </div>
+                                            <div>
+                                              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-main)' }}>Stripe Gateway</h3>
+                                              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Configure Stripe API details for global payments</span>
+                                            </div>
+                                          </div>
+                                          <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}>
+                                            <div style={{ position: 'relative' }}>
+                                              <input
+                                                type="checkbox"
+                                                checked={platformSettings.stripeEnabled}
+                                                onChange={(e) => setPlatformSettings({ ...platformSettings, stripeEnabled: e.target.checked })}
+                                                style={{ display: 'none' }}
+                                              />
+                                              <div style={{ width: '42px', height: '22px', background: platformSettings.stripeEnabled ? '#10b981' : '#94a3b8', borderRadius: '11px', transition: 'background-color 0.2s' }}></div>
+                                              <div style={{ position: 'absolute', top: '2px', left: platformSettings.stripeEnabled ? '22px' : '2px', width: '18px', height: '18px', background: '#fff', borderRadius: '50%', boxShadow: '0 1px 3px rgba(0,0,0,0.15)', transition: 'left 0.2s' }}></div>
+                                            </div>
+                                          </label>
+                                        </div>
+
+                                        {platformSettings.stripeEnabled && (
+                                          <div className="animate-fade-in" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                            {renderInput("Publishable Key", "text", "stripePublishableKey", "pk_live_...")}
+                                            {renderInput("Secret Key", "password", "stripeSecretKey", "Stripe secret token", "stripeSecret")}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 3. COMMUNICATION SETTINGS SECTION */}
+                                  {platformSettingsActiveSection === 'communication' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                                      {/* SMTP Credentials card */}
+                                      <div className="glass-card animate-fade-in" style={{ padding: '28px', borderRadius: '16px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                        <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                          <div style={{ background: '#ec4899', width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                                            <Server style={{ width: '18px', height: '18px' }} />
+                                          </div>
+                                          <div>
+                                            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-main)' }}>SMTP Email Server</h3>
+                                            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Configure mail servers for notifications and invoice mailers</span>
+                                          </div>
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr', gap: '16px' }}>
+                                          {renderInput("SMTP Host", "text", "smtpHost", "smtp.yourserver.com")}
+                                          {renderInput("SMTP Port", "number", "smtpPort", "587")}
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                          {renderInput("Username", "text", "smtpUser", "mailer@domain.com")}
+                                          {renderInput("Password", "password", "smtpPassword", "SMTP login password", "smtpPass")}
+                                        </div>
+                                      </div>
+
+                                      {/* SMS API Integration card */}
+                                      <div className="glass-card animate-fade-in" style={{ padding: '28px', borderRadius: '16px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+                                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <div style={{ background: '#06b6d4', width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                                              <Smartphone style={{ width: '18px', height: '18px' }} />
+                                            </div>
+                                            <div>
+                                              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-main)' }}>SMS Gateway Provider</h3>
+                                              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Configure SMS API endpoints for customer checkout alerts</span>
+                                            </div>
+                                          </div>
+                                          <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}>
+                                            <div style={{ position: 'relative' }}>
+                                              <input
+                                                type="checkbox"
+                                                checked={platformSettings.smsEnabled}
+                                                onChange={(e) => setPlatformSettings({ ...platformSettings, smsEnabled: e.target.checked })}
+                                                style={{ display: 'none' }}
+                                              />
+                                              <div style={{ width: '42px', height: '22px', background: platformSettings.smsEnabled ? '#10b981' : '#94a3b8', borderRadius: '11px', transition: 'background-color 0.2s' }}></div>
+                                              <div style={{ position: 'absolute', top: '2px', left: platformSettings.smsEnabled ? '22px' : '2px', width: '18px', height: '18px', background: '#fff', borderRadius: '50%', boxShadow: '0 1px 3px rgba(0,0,0,0.15)', transition: 'left 0.2s' }}></div>
+                                            </div>
+                                          </label>
+                                        </div>
+
+                                        {platformSettings.smsEnabled && (
+                                          <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '16px' }}>
+                                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-main)' }}>SMS Gateway Provider</label>
+                                                <select
+                                                  value={platformSettings.smsProvider}
+                                                  onChange={(e) => setPlatformSettings({ ...platformSettings, smsProvider: e.target.value })}
+                                                  style={{
+                                                    width: '100%',
+                                                    padding: '10px 14px',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid var(--border-color)',
+                                                    fontSize: '0.85rem',
+                                                    background: 'var(--bg-app)',
+                                                    color: 'var(--text-main)',
+                                                    outline: 'none',
+                                                    boxSizing: 'border-box',
+                                                    cursor: 'pointer'
+                                                  }}
+                                                >
+                                                  <option value="Twilio">Twilio</option>
+                                                  <option value="Msg91">Msg91 (India)</option>
+                                                  <option value="Plivo">Plivo</option>
+                                                </select>
+                                              </div>
+                                              {renderInput("Sender ID / Header", "text", "smsSenderId", "e.g. SRVIQ")}
+                                            </div>
+                                            {renderInput("API Key / Auth Token", "password", "smsApiKey", "Enter auth credential Key", "smsApiKey")}
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {/* WhatsApp Provider card */}
+                                      <div className="glass-card animate-fade-in" style={{ padding: '28px', borderRadius: '16px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+                                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <div style={{ background: '#10b981', width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                                              <MessageSquare style={{ width: '18px', height: '18px' }} />
+                                            </div>
+                                            <div>
+                                              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-main)' }}>WhatsApp Business API</h3>
+                                              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Configure WhatsApp channels for billing updates & alerts</span>
+                                            </div>
+                                          </div>
+                                          <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}>
+                                            <div style={{ position: 'relative' }}>
+                                              <input
+                                                type="checkbox"
+                                                checked={platformSettings.whatsappEnabled}
+                                                onChange={(e) => setPlatformSettings({ ...platformSettings, whatsappEnabled: e.target.checked })}
+                                                style={{ display: 'none' }}
+                                              />
+                                              <div style={{ width: '42px', height: '22px', background: platformSettings.whatsappEnabled ? '#10b981' : '#94a3b8', borderRadius: '11px', transition: 'background-color 0.2s' }}></div>
+                                              <div style={{ position: 'absolute', top: '2px', left: platformSettings.whatsappEnabled ? '22px' : '2px', width: '18px', height: '18px', background: '#fff', borderRadius: '50%', boxShadow: '0 1px 3px rgba(0,0,0,0.15)', transition: 'left 0.2s' }}></div>
+                                            </div>
+                                          </label>
+                                        </div>
+
+                                        {platformSettings.whatsappEnabled && (
+                                          <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '16px' }}>
+                                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-main)' }}>WhatsApp Provider</label>
+                                                <select
+                                                  value={platformSettings.whatsappProvider}
+                                                  onChange={(e) => setPlatformSettings({ ...platformSettings, whatsappProvider: e.target.value })}
+                                                  style={{
+                                                    width: '100%',
+                                                    padding: '10px 14px',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid var(--border-color)',
+                                                    fontSize: '0.85rem',
+                                                    background: 'var(--bg-app)',
+                                                    color: 'var(--text-main)',
+                                                    outline: 'none',
+                                                    boxSizing: 'border-box',
+                                                    cursor: 'pointer'
+                                                  }}
+                                                >
+                                                  <option value="Meta Cloud API">Meta Cloud API (Official)</option>
+                                                  <option value="Twilio WhatsApp">Twilio WhatsApp</option>
+                                                  <option value="Gupshup">Gupshup Provider</option>
+                                                </select>
+                                              </div>
+                                              {renderInput("Phone Number ID", "text", "whatsappPhoneId", "e.g. 109283746")}
+                                            </div>
+                                            {renderInput("Permanent Access Token", "password", "whatsappToken", "EAAGx...", "whatsappToken")}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 4. SECURITY SETTINGS SECTION */}
+                                  {platformSettingsActiveSection === 'security' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                                      {/* Password Strength Policy card */}
+                                      <div className="glass-card animate-fade-in" style={{ padding: '28px', borderRadius: '16px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                        <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                          <div style={{ background: '#f59e0b', width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                                            <Key style={{ width: '18px', height: '18px' }} />
+                                          </div>
+                                          <div>
+                                            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-main)' }}>Password Policy</h3>
+                                            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Configure required complexity rules for administrative user logins</span>
+                                          </div>
+                                        </div>
+
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxWidth: '280px', marginBottom: '8px' }}>
+                                            <label style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-main)' }}>Minimum Password Length</label>
+                                            <select
+                                              value={platformSettings.minPasswordLength}
+                                              onChange={(e) => setPlatformSettings({ ...platformSettings, minPasswordLength: parseInt(e.target.value) })}
+                                              style={{
+                                                width: '100%',
+                                                padding: '10px 14px',
+                                                borderRadius: '8px',
+                                                border: '1px solid var(--border-color)',
+                                                fontSize: '0.85rem',
+                                                background: 'var(--bg-app)',
+                                                color: 'var(--text-main)',
+                                                outline: 'none',
+                                                boxSizing: 'border-box',
+                                                cursor: 'pointer'
+                                              }}
+                                            >
+                                              <option value={8}>8 Characters (Recommended)</option>
+                                              <option value={10}>10 Characters</option>
+                                              <option value={12}>12 Characters</option>
+                                              <option value={14}>14 Characters</option>
+                                              <option value={16}>16 Characters</option>
+                                            </select>
+                                          </div>
+
+                                          {renderToggle(platformSettings.requireUppercase, (e) => setPlatformSettings({ ...platformSettings, requireUppercase: e.target.checked }), "Require Uppercase Letter", "Must contain at least one uppercase A-Z character")}
+                                          {renderToggle(platformSettings.requireNumbers, (e) => setPlatformSettings({ ...platformSettings, requireNumbers: e.target.checked }), "Require Numbers", "Must contain at least one numerical digit (0-9)")}
+                                          {renderToggle(platformSettings.requireSpecialChars, (e) => setPlatformSettings({ ...platformSettings, requireSpecialChars: e.target.checked }), "Require Special Characters", "Must contain at least one special character e.g. @, $, !, %, *")}
+                                        </div>
+                                      </div>
+
+                                      {/* Session Timeout Settings card */}
+                                      <div className="glass-card animate-fade-in" style={{ padding: '28px', borderRadius: '16px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                        <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                          <div style={{ background: '#3b82f6', width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                                            <Clock style={{ width: '18px', height: '18px' }} />
+                                          </div>
+                                          <div>
+                                            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-main)' }}>Session Timeout</h3>
+                                            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Configure idle limits for automatic session termination</span>
+                                          </div>
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                            <label style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-main)' }}>Inactivity Timeout (Minutes)</label>
+                                            <input
+                                              type="number"
+                                              value={platformSettings.sessionTimeout}
+                                              onChange={(e) => setPlatformSettings({ ...platformSettings, sessionTimeout: Math.max(1, parseInt(e.target.value) || 0) })}
+                                              style={{
+                                                width: '100%',
+                                                padding: '10px 14px',
+                                                borderRadius: '8px',
+                                                border: '1px solid var(--border-color)',
+                                                fontSize: '0.85rem',
+                                                background: 'var(--bg-app)',
+                                                color: 'var(--text-main)',
+                                                outline: 'none',
+                                                boxSizing: 'border-box'
+                                              }}
+                                            />
+                                          </div>
+
+                                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                            <label style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-main)' }}>Automatic Action on Timeout</label>
+                                            <select
+                                              value={platformSettings.timeoutAction}
+                                              onChange={(e) => setPlatformSettings({ ...platformSettings, timeoutAction: e.target.value })}
+                                              style={{
+                                                width: '100%',
+                                                padding: '10px 14px',
+                                                borderRadius: '8px',
+                                                border: '1px solid var(--border-color)',
+                                                fontSize: '0.85rem',
+                                                background: 'var(--bg-app)',
+                                                color: 'var(--text-main)',
+                                                outline: 'none',
+                                                boxSizing: 'border-box',
+                                                cursor: 'pointer'
+                                              }}
+                                            >
+                                              <option value="logout">Log Out User Session</option>
+                                              <option value="lock">Lock Terminal Screen</option>
+                                            </select>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Save & Reset Action Buttons */}
+                              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '36px', paddingTop: '24px', borderTop: '1px solid var(--border-color)' }}>
+                                <button
+                                  type="button"
+                                  className="btn-outline"
+                                  onClick={() => {
+                                    showConfirm(
+                                      "Reset Platform Defaults",
+                                      "Are you sure you want to reset all platform configuration settings to system default parameters? All customized API credentials and company logo details will be restored to preset factory values.",
+                                      () => {
+                                        setPlatformSettings({ ...DEFAULT_PLATFORM_SETTINGS });
+                                        showToast('info', 'Platform settings restored to defaults.');
+                                      }
+                                    );
+                                  }}
+                                >
+                                  Reset Defaults
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn-black"
+                                  onClick={() => {
+                                    showToast('success', 'Platform configurations saved successfully!');
+                                    
+                                    // Add to system notifications
+                                    setNotifications([`Platform configuration modified at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`, ...notifications]);
+                                  }}
+                                >
+                                  Save Settings
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })()
+                      )}
                     </div>
                   )}
                 </div>
@@ -1447,6 +2306,112 @@ export default function App() {
                     onClick={confirmModal.onConfirm}
                   >
                     Confirm Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Custom Logo Presets Modal overlay */}
+          {logoPresetsModalOpen && (
+            <div style={{
+              position: 'fixed',
+              top: 0, left: 0, right: 0, bottom: 0,
+              background: 'rgba(15, 23, 42, 0.6)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 99998,
+              backdropFilter: 'blur(6px)'
+            }}>
+              <div className="glass-card animate-fade-in" style={{
+                background: 'var(--bg-card)',
+                padding: '28px',
+                maxWidth: '480px',
+                width: '90%',
+                borderRadius: '16px',
+                boxShadow: 'var(--shadow-premium)',
+                border: '1px solid var(--border-color)'
+              }}>
+                <h4 style={{ fontSize: '1.2rem', fontWeight: '900', color: 'var(--text-main)', margin: '0 0 16px 0', textAlign: 'center' }}>
+                  Select Company Logo Preset
+                </h4>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px' }}>
+                  {[
+                    { name: 'Classic Bistro', url: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=120&auto=format&fit=crop&q=60' },
+                    { name: 'Modern Cafe', url: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=120&auto=format&fit=crop&q=60' },
+                    { name: 'Neon Lounge', url: 'https://images.unsplash.com/photo-1574096079513-d8259312b785?w=120&auto=format&fit=crop&q=60' }
+                  ].map((preset, idx) => (
+                    <div
+                      key={preset.name}
+                      onClick={() => {
+                        setPlatformSettings({ ...platformSettings, logo: preset.url });
+                        setLogoPresetsModalOpen(false);
+                        showToast('success', `Selected ${preset.name} Logo!`);
+                      }}
+                      style={{
+                        border: '1.5px solid var(--border-color)',
+                        borderRadius: '12px',
+                        padding: '12px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '8px',
+                        background: platformSettings.logo === preset.url ? 'rgba(59, 130, 246, 0.05)' : 'transparent',
+                        borderColor: platformSettings.logo === preset.url ? 'var(--primary)' : 'var(--border-color)',
+                        transition: 'all 0.15s'
+                      }}
+                      onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--primary)' }}
+                      onMouseOut={(e) => { if (platformSettings.logo !== preset.url) e.currentTarget.style.borderColor = 'var(--border-color)' }}
+                    >
+                      <div style={{ width: '60px', height: '60px', borderRadius: '8px', overflow: 'hidden' }}>
+                        <img src={preset.url} alt={preset.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                      <span style={{ fontSize: '0.68rem', fontWeight: '700', color: 'var(--text-main)', textAlign: 'center' }}>{preset.name}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
+                  <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)' }}>Or Input Custom Logo Image URL</label>
+                  <input
+                    type="text"
+                    value={platformSettings.logo}
+                    onChange={(e) => setPlatformSettings({ ...platformSettings, logo: e.target.value })}
+                    placeholder="https://example.com/logo.png"
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-color)',
+                      fontSize: '0.82rem',
+                      background: 'var(--bg-app)',
+                      color: 'var(--text-main)',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    className="btn-outline"
+                    style={{ flex: 1, padding: '10px' }}
+                    onClick={() => setLogoPresetsModalOpen(false)}
+                  >
+                    Close
+                  </button>
+                  <button
+                    className="welcome-btn"
+                    style={{ flex: 1, padding: '10px', background: 'var(--primary)', color: '#fff' }}
+                    onClick={() => {
+                      setLogoPresetsModalOpen(false);
+                      showToast('success', 'Custom logo URL applied successfully!');
+                    }}
+                  >
+                    Apply URL
                   </button>
                 </div>
               </div>
