@@ -89,11 +89,7 @@ const CORE_FEATURES = [
   'Table Management',
   'Order Management',
   'Waiter Management',
-  'Kitchen Management',
-  'Advanced Billing System',
-  'Live Analytics Deck',
-  'Multi-Branch Super Deck',
-  '24/7 Dedicated Support'
+  'Kitchen Management'
 ]
 
 export default function PlansManagement({ plans, setPlans, showToast }) {

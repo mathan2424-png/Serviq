@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   LifeBuoy,
   Plus,
@@ -185,7 +186,15 @@ export default function SupportTicketManagement({ restaurants = [], showToast })
   }
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%', boxSizing: 'border-box' }}>
+    <div className="animate-fade-in" style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '24px',
+      width: '100%',
+      boxSizing: 'border-box',
+      position: (showCreateModal || selectedTicket || assignTicketId) ? 'relative' : 'static',
+      zIndex: (showCreateModal || selectedTicket || assignTicketId) ? 100000 : 'auto'
+    }}>
       
       {/* Overview Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
@@ -235,6 +244,31 @@ export default function SupportTicketManagement({ restaurants = [], showToast })
         gap: '20px'
       }}>
         
+        {/* Header Row */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', marginBottom: '4px' }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900', color: 'var(--text-main)' }}>Support Ticket Management</h3>
+          </div>
+          <button
+            onClick={() => {
+              setErrors({})
+              setNewTicket({
+                restaurantName: restaurants[0]?.name || '',
+                subject: '',
+                category: 'QR Scanning',
+                priority: 'Medium',
+                assignedUser: 'Unassigned',
+                description: ''
+              })
+              setShowCreateModal(true)
+            }}
+            className="btn-black"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}
+          >
+            <Plus style={{ width: '16px', height: '16px' }} /> Create Ticket
+          </button>
+        </div>
+
         {/* Controls Bar */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           
@@ -291,33 +325,6 @@ export default function SupportTicketManagement({ restaurants = [], showToast })
               </select>
             </div>
           </div>
-
-          {/* Actions */}
-          <button
-            className="welcome-btn"
-            onClick={() => {
-              if (restaurants.length > 0) {
-                setNewTicket(prev => ({ ...prev, restaurantName: restaurants[0].name }))
-              }
-              setShowCreateModal(true)
-            }}
-            style={{
-              padding: '10px 18px',
-              background: 'linear-gradient(135deg, hsl(var(--primary-hue), 95%, 52%), hsl(var(--primary-hue), 95%, 45%))',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '10px',
-              fontWeight: '700',
-              fontSize: '0.82rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.25)'
-            }}
-          >
-            <Plus style={{ width: '16px', height: '16px' }} /> File Support Ticket
-          </button>
         </div>
 
         {/* Tickets Table Grid */}
@@ -337,115 +344,83 @@ export default function SupportTicketManagement({ restaurants = [], showToast })
             </thead>
             <tbody>
               {filteredTickets.length > 0 ? (
-                filteredTickets.map((t) => {
-                  const priStyle = getPriorityStyle(t.priority)
-                  const statStyle = getStatusStyle(t.status)
+                filteredTickets.map(ticket => {
+                  const priorityStyle = getPriorityStyle(ticket.priority)
+                  const statusStyle = getStatusStyle(ticket.status)
+
                   return (
-                    <tr key={t.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.01)'} onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}>
-                      <td style={{ padding: '14px 18px', fontSize: '0.8rem', color: 'var(--text-main)', fontWeight: '800' }}>
-                        {t.id}
+                    <tr key={ticket.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background-color 0.2s' }}>
+                      <td style={{ padding: '14px 18px', fontSize: '0.8rem', color: 'var(--text-main)', fontWeight: '800', fontFamily: 'monospace', verticalAlign: 'middle' }}>
+                        {ticket.id}
                       </td>
-                      <td style={{ padding: '14px 18px', fontSize: '0.82rem', color: 'var(--text-main)', fontWeight: '700' }}>
-                        {t.restaurantName}
-                      </td>
-                      <td style={{ padding: '14px 18px', maxWidth: '300px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                          <span style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-main)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={t.subject}>{t.subject}</span>
-                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Created on {t.createdDate}</span>
+                      <td style={{ padding: '14px 18px', verticalAlign: 'middle' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-main)' }}>{ticket.restaurantName}</span>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>ID: {restaurants.find(r => r.name === ticket.restaurantName)?.id || 'N/A'}</span>
                         </div>
                       </td>
-                      <td style={{ padding: '14px 18px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <Tag style={{ width: '11px', height: '11px' }} />
-                          {t.category}
-                        </div>
+                      <td style={{ padding: '14px 18px', fontSize: '0.82rem', color: 'var(--text-main)', fontWeight: '500', verticalAlign: 'middle', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {ticket.subject}
                       </td>
-                      <td style={{ padding: '14px 18px', textAlign: 'center' }}>
+                      <td style={{ padding: '14px 18px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', verticalAlign: 'middle' }}>
+                        {ticket.category}
+                      </td>
+                      <td style={{ padding: '14px 18px', verticalAlign: 'middle', textAlign: 'center' }}>
                         <span style={{
-                          fontSize: '0.65rem',
-                          fontWeight: '800',
                           padding: '3px 8px',
                           borderRadius: '6px',
-                          background: priStyle.bg,
-                          color: priStyle.text,
-                          textTransform: 'uppercase',
-                          display: 'inline-block'
-                        }}>{t.priority}</span>
+                          fontSize: '0.7rem',
+                          fontWeight: '700',
+                          background: priorityStyle.bg,
+                          color: priorityStyle.text
+                        }}>{ticket.priority}</span>
                       </td>
-                      <td style={{ padding: '14px 18px' }}>
-                        <button
-                          onClick={() => {
-                            setAssignTicketId(t.id)
-                            setAssignUser(t.assignedUser !== 'Unassigned' ? t.assignedUser : '')
-                          }}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: t.assignedUser === 'Unassigned' ? 'var(--text-muted)' : 'var(--text-main)',
-                            fontSize: '0.8rem',
-                            fontWeight: '600',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            cursor: 'pointer',
-                            padding: '4px 8px',
-                            borderRadius: '6px',
-                            transition: 'background 0.2s'
-                          }}
-                          onMouseOver={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
-                          onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
-                          title="Click to Assign"
-                        >
-                          <UserPlus style={{ width: '13px', height: '13px' }} /> {t.assignedUser}
-                        </button>
-                      </td>
-                      <td style={{ padding: '14px 18px', textAlign: 'center' }}>
-                        <div style={{ position: 'relative', display: 'inline-block' }}>
-                          <select
-                            value={t.status}
-                            onChange={(e) => handleUpdateStatus(t.id, e.target.value)}
-                            style={{
-                              appearance: 'none',
-                              WebkitAppearance: 'none',
-                              padding: '4px 22px 4px 8px',
-                              borderRadius: '6px',
-                              border: 'none',
-                              background: statStyle.bg,
-                              color: statStyle.text,
-                              fontSize: '0.72rem',
-                              fontWeight: '800',
-                              cursor: 'pointer',
-                              outline: 'none',
-                              textAlign: 'left'
-                            }}
-                          >
-                            {statuses.map(s => <option key={s} value={s} style={{ background: 'var(--bg-card)', color: 'var(--text-main)' }}>{s}</option>)}
-                          </select>
-                          <ChevronDown style={{ position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)', width: '11px', height: '11px', color: statStyle.text, pointerEvents: 'none' }} />
+                      <td style={{ padding: '14px 18px', fontSize: '0.8rem', color: 'var(--text-main)', verticalAlign: 'middle' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <User style={{ width: '12px', height: '12px', color: 'var(--text-muted)' }} />
+                          <span>{ticket.assignedUser}</span>
                         </div>
                       </td>
-                      <td style={{ padding: '14px 18px', textAlign: 'right' }}>
-                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                      <td style={{ padding: '14px 18px', verticalAlign: 'middle', textAlign: 'center' }}>
+                        <div style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          padding: '4px 8px',
+                          borderRadius: '6px',
+                          fontSize: '0.72rem',
+                          fontWeight: '800',
+                          background: statusStyle.bg,
+                          color: statusStyle.text
+                        }}>
+                          {statusStyle.icon}
+                          <span>{statusStyle.text}</span>
+                        </div>
+                      </td>
+                      <td style={{ padding: '14px 18px', verticalAlign: 'middle', textAlign: 'right', width: '180px' }}>
+                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
                           <button
-                            onClick={() => setSelectedTicket(t)}
+                            onClick={() => setSelectedTicket(ticket)}
                             className="btn-outline"
-                            style={{ padding: '6px 10px', fontSize: '0.75rem', borderRadius: '6px', fontWeight: '700', cursor: 'pointer' }}
+                            style={{ padding: '5px 10px', fontSize: '0.7rem', borderRadius: '6px', cursor: 'pointer' }}
                           >
-                            Details
+                            View
                           </button>
-                          {t.status !== 'Resolved' && t.status !== 'Closed' && (
+                          <button
+                            onClick={() => {
+                              setAssignTicketId(ticket.id)
+                              setAssignUser(ticket.assignedUser === 'Unassigned' ? '' : ticket.assignedUser)
+                            }}
+                            className="btn-outline"
+                            style={{ padding: '5px 10px', fontSize: '0.7rem', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+                          >
+                            <UserPlus style={{ width: '11px', height: '11px' }} /> Assign
+                          </button>
+                          {ticket.status !== 'Resolved' && ticket.status !== 'Closed' && (
                             <button
-                              onClick={() => handleQuickResolve(t.id)}
-                              style={{
-                                padding: '6px 12px',
-                                fontSize: '0.75rem',
-                                borderRadius: '6px',
-                                fontWeight: '700',
-                                cursor: 'pointer',
-                                background: 'rgba(16, 185, 129, 0.12)',
-                                color: '#10b981',
-                                border: '1px solid rgba(16, 185, 129, 0.2)'
-                              }}
+                              onClick={() => handleQuickResolve(ticket.id)}
+                              className="btn-black"
+                              style={{ padding: '5px 10px', fontSize: '0.7rem', borderRadius: '6px', cursor: 'pointer', background: '#10b981', border: 'none', color: '#ffffff' }}
                             >
                               Resolve
                             </button>
@@ -469,7 +444,7 @@ export default function SupportTicketManagement({ restaurants = [], showToast })
       </div>
 
       {/* CREATE TICKET MODAL OVERLAY */}
-      {showCreateModal && (
+      {showCreateModal && createPortal(
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
@@ -508,7 +483,7 @@ export default function SupportTicketManagement({ restaurants = [], showToast })
                     setNewTicket({ ...newTicket, restaurantName: e.target.value })
                     if (errors.restaurantName) setErrors({ ...errors, restaurantName: '' })
                   }}
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', color: 'var(--text-main)', fontSize: '0.82rem', outline: 'none' }}
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: `1.5px solid ${errors.restaurantName ? '#ef4444' : 'var(--border-color)'}`, background: errors.restaurantName ? 'rgba(239,68,68,0.04)' : 'var(--bg-app)', color: 'var(--text-main)', fontSize: '0.82rem', outline: 'none', transition: 'border-color 0.15s' }}
                 >
                   <option value="">Select Restaurant</option>
                   {restaurants.map(r => <option key={r.id} value={r.name}>{r.name}</option>)}
@@ -527,7 +502,7 @@ export default function SupportTicketManagement({ restaurants = [], showToast })
                     if (errors.subject) setErrors({ ...errors, subject: '' })
                   }}
                   placeholder="e.g. Menu display issue"
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', color: 'var(--text-main)', fontSize: '0.82rem', outline: 'none' }}
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: `1.5px solid ${errors.subject ? '#ef4444' : 'var(--border-color)'}`, background: errors.subject ? 'rgba(239,68,68,0.04)' : 'var(--bg-app)', color: 'var(--text-main)', fontSize: '0.82rem', outline: 'none', transition: 'border-color 0.15s' }}
                 />
                 {errors.subject && <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: '600' }}>{errors.subject}</span>}
               </div>
@@ -581,7 +556,7 @@ export default function SupportTicketManagement({ restaurants = [], showToast })
                     if (errors.description) setErrors({ ...errors, description: '' })
                   }}
                   placeholder="Describe the issue in detail..."
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-app)', color: 'var(--text-main)', fontSize: '0.82rem', outline: 'none', resize: 'vertical' }}
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: `1.5px solid ${errors.description ? '#ef4444' : 'var(--border-color)'}`, background: errors.description ? 'rgba(239,68,68,0.04)' : 'var(--bg-app)', color: 'var(--text-main)', fontSize: '0.82rem', outline: 'none', resize: 'vertical', transition: 'border-color 0.15s' }}
                 />
                 {errors.description && <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: '600' }}>{errors.description}</span>}
               </div>
@@ -593,11 +568,12 @@ export default function SupportTicketManagement({ restaurants = [], showToast })
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ASSIGN USER MODAL OVERLAY */}
-      {assignTicketId && (
+      {assignTicketId && createPortal(
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
@@ -645,11 +621,12 @@ export default function SupportTicketManagement({ restaurants = [], showToast })
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* VIEW TICKET DETAILS MODAL OVERLAY */}
-      {selectedTicket && (
+      {selectedTicket && createPortal(
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
@@ -756,7 +733,8 @@ export default function SupportTicketManagement({ restaurants = [], showToast })
 
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>
